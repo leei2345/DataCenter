@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -211,6 +212,50 @@ public class MysqlDao {
 		List<ProxyCheckResEntity> res = new ArrayList<ProxyCheckResEntity>();
 		try {
 			String sql = "select host,port from tb_proxy_avail where target_id=" + targetId + " order by u_time limit 500";
+			conn = spiderSource.getConnection();
+			st = conn.prepareStatement(sql);
+			rs = st.executeQuery();
+			while (rs.next()) {
+				String host = rs.getString("host");
+				int port = rs.getInt("port");
+				ProxyCheckResEntity proxy = new ProxyCheckResEntity().setHost(host).setPort(port).setTargetId(targetId);
+				res.add(proxy);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			if (st != null) {
+				try {
+					st.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return res;
+	}
+	
+	public LinkedBlockingDeque<ProxyCheckResEntity> getProxyQueue (int targetId) {
+		DruidPooledConnection conn = null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		LinkedBlockingDeque<ProxyCheckResEntity> res = new LinkedBlockingDeque<ProxyCheckResEntity>();
+		try {
+			String sql = "select host,port from tb_proxy_avail where target_id=" + targetId + " and enable=1 order by u_time desc limit 1000";
 			conn = spiderSource.getConnection();
 			st = conn.prepareStatement(sql);
 			rs = st.executeQuery();

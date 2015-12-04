@@ -86,6 +86,10 @@ public class ProxyCheckTask implements Runnable, ApplicationContextAware{
 		}
 	}
 	
+	public void setApplicationContext(ApplicationContext paramApplicationContext) throws BeansException {
+		this.context = (ApplicationContext)paramApplicationContext;    		
+	}
+
 	public static void main(String[] args) {
 		@SuppressWarnings("resource")
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
@@ -94,8 +98,5 @@ public class ProxyCheckTask implements Runnable, ApplicationContextAware{
 		a.run();
 	}
 
-	public void setApplicationContext(ApplicationContext paramApplicationContext) throws BeansException {
-		this.context = (ApplicationContext)paramApplicationContext;    		
-	}
 	
 }

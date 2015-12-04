@@ -332,9 +332,9 @@ public class HttpMethod {
 		return GetHtml(url, body, httpRequsetConfig, null);
 	}
 
-	private String GetHtml(String url, String body, HttpRequestConfig httpRequsetConfig, HttpResponseConfig httpResponseConfig) {
+	public String GetHtml(String url, String body, HttpRequestConfig httpRequestConfig, HttpResponseConfig httpResponseConfig) {
 		boolean getLocation = false;
-		boolean useStringEntity = httpRequsetConfig.isYesOrNo();
+		boolean useStringEntity = httpRequestConfig.isYesOrNo();
 		boolean responseStream = false;
 		if (httpResponseConfig == null) {
 			getLocation = true;

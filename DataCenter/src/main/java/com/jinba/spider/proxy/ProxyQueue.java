@@ -4,8 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingDeque;
 
-import javax.annotation.Resource;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.jinba.dao.MysqlDao;
@@ -15,8 +14,13 @@ import com.jinba.pojo.ProxyCheckResEntity;
 public class ProxyQueue {
 
 	private static Map<Integer, LinkedBlockingDeque<ProxyCheckResEntity>> proxyCenter = new HashMap<Integer, LinkedBlockingDeque<ProxyCheckResEntity>>();
-	@Resource
+	
 	private static MysqlDao dao;
+	
+	@Autowired
+	public void setDao (MysqlDao dao) {
+		ProxyQueue.dao = dao;
+	}
 	
 	/**
 	 * 从代理中心获取目标代理

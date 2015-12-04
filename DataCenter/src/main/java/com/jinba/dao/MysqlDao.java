@@ -19,6 +19,8 @@ import com.alibaba.druid.pool.DruidPooledConnection;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import com.jinba.pojo.ProxyCheckResEntity;
+import com.jinba.pojo.SyntaxEntity;
+import com.jinba.pojo.SyntaxEntity.SyntaxType;
 import com.jinba.pojo.TargetEntity;
 
 @Component
@@ -292,5 +294,115 @@ public class MysqlDao {
 		}
 		return res;
 	}
+	
+	public Map<Integer, Map<String, List<SyntaxEntity>>> initAnalysisSyntax () {
+		DruidPooledConnection conn = null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		Map<Integer, Map<String, List<SyntaxEntity>>> res = new HashMap<Integer, Map<String,List<SyntaxEntity>>>();
+		try {
+			String sql = "select target_id,`type`,step,param_name,`syntax` from tb_analysis_syntax where target_id in (select id from tb_target where switch=1)";
+			conn = spiderSource.getConnection();
+			st = conn.prepareStatement(sql);
+			rs = st.executeQuery();
+			while (rs.next()) {
+				int targetId = rs.getInt("target_id");
+				Map<String, List<SyntaxEntity>> syntaxMap = res.get(targetId);
+				if (syntaxMap == null) {
+					syntaxMap = new HashMap<String, List<SyntaxEntity>>();
+				}
+				String param_name= rs.getString("param_name");
+				List<SyntaxEntity> syntaxList = syntaxMap.get(param_name);
+				if (syntaxList == null) {
+					syntaxList = new ArrayList<SyntaxEntity>();
+				}
+				int step = rs.getInt("step");
+				String type = rs.getString("type");
+				SyntaxType syntaxType = Enum.valueOf(SyntaxType.class, type);
+				String syntax = rs.getString("syntax");
+				SyntaxEntity syntaxEntity = new SyntaxEntity();
+				syntaxEntity.setType(syntaxType);
+				syntaxEntity.setSyntax(syntax);
+				syntaxList.add(step, syntaxEntity);
+				syntaxMap.put(param_name, syntaxList);
+				res.put(targetId, syntaxMap);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			if (st != null) {
+				try {
+					st.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return res;
+	}
+	
+	public List<String> getAreaList () {
+		DruidPooledConnection conn = null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		List<String> res = new ArrayList<String>();
+		try {
+			String sql = "select areacode,areaname,postcode from t_area where `level` IN (2,3) AND areaname NOT LIKE '%辖区'";
+			conn = spiderSource.getConnection();
+			st = conn.prepareStatement(sql);
+			rs = st.executeQuery();
+			while (rs.next()) {
+				String areaCode = rs.getString("areacode");
+				String areaName = rs.getString("areaname");
+				String postCode = rs.getString("postcode");
+				if (StringUtils.equals("N/A", postCode)) {
+					postCode = "";
+				}
+				String line = areaName + "_" + areaCode + "_" + postCode;
+				res.add(line);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			if (st != null) {
+				try {
+					st.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return res;
+	
+	}
+	
 	
 }

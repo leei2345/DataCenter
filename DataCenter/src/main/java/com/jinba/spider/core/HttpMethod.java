@@ -190,7 +190,9 @@ public class HttpMethod {
 		HttpHost proxy = null;
 		String locationHeader = "";
 		for (int retryIndex = 1; retryIndex <= retryCount; retryIndex++) {
-			this.get = new HttpGet();
+			if (this.get == null) {
+				this.get = new HttpGet();
+			}
 			this.get.setConfig(config.build());
 			if (retryIndex >= retryCount) {
 				this.get.abort();

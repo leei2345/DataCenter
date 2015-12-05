@@ -2,7 +2,7 @@ package com.jinba.spider.proxy;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,7 +13,7 @@ import com.jinba.pojo.ProxyCheckResEntity;
 @Component
 public class ProxyQueue {
 
-	private static Map<Integer, LinkedBlockingDeque<ProxyCheckResEntity>> proxyCenter = new HashMap<Integer, LinkedBlockingDeque<ProxyCheckResEntity>>();
+	private static Map<Integer, ConcurrentLinkedQueue<ProxyCheckResEntity>> proxyCenter = new HashMap<Integer, ConcurrentLinkedQueue<ProxyCheckResEntity>>();
 	
 	private static MysqlDao dao;
 	
@@ -28,9 +28,10 @@ public class ProxyQueue {
 	 * @return
 	 */
 	public static ProxyCheckResEntity getProxy (int targetId) {
-		LinkedBlockingDeque<ProxyCheckResEntity> proxyList = proxyCenter.get(targetId);
+		ConcurrentLinkedQueue<ProxyCheckResEntity> proxyList = proxyCenter.get(targetId);
 		if (proxyList == null || proxyList.size() == 0) {
 			refreshProxy(targetId);
+			proxyList = proxyCenter.get(targetId);
 		}
 		return proxyList.poll();
 	}
@@ -40,7 +41,7 @@ public class ProxyQueue {
 	 * @param targetId
 	 */
 	public static void refreshProxy (int targetId) {
-		LinkedBlockingDeque<ProxyCheckResEntity> proxyQueue = dao.getProxyQueue(targetId);
+		ConcurrentLinkedQueue<ProxyCheckResEntity> proxyQueue = dao.getProxyQueue(targetId);
 		proxyCenter.put(targetId, proxyQueue);
 	}
 	

@@ -11,34 +11,27 @@ public class BaseEntity implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = -3607603058575907237L;
-	
+	/** 信息来源URL */
 	private String fromurl;
+	/** 信息来源主键 */
 	private String formkey;
-	private int status = 0;
-	private String comments;
+	/** 信息来源主机 */
+	private String fromhost;
 	
+	public String getFromhost() {
+		return fromhost;
+	}
+
+	public void setFromhost(String fromhost) {
+		this.fromhost = fromhost;
+	}
+
 	public String getFormkey() {
 		return formkey;
 	}
 
 	public void setFormkey(String formkey) {
 		this.formkey = formkey;
-	}
-
-	public int getStatus() {
-		return status;
-	}
-
-	public void setStatus(int status) {
-		this.status = status;
-	}
-
-	public String getComments() {
-		return comments;
-	}
-
-	public void setComments(String comments) {
-		this.comments = comments;
 	}
 
 	public String getFromurl() {

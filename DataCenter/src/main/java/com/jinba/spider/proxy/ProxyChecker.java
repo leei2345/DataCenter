@@ -60,10 +60,10 @@ public class ProxyChecker implements Runnable {
 	
 	public static void main(String[] args) {
 		TargetEntity t = new TargetEntity();
-		t.setCheckUrl("http://weixin.sogou.com/docs/terms.htm?v=1");
-		t.setAnchor("免责声明");
-		t.setCharset("GBK");
-		ProxyCheckResEntity p = new ProxyCheckResEntity().setHost("101.66.253.22").setPort(8080);
+		t.setCheckUrl("http://www.dianping.com/aboutus/zhishichanquan.html");
+		t.setAnchor("大众点评网");
+		t.setCharset("UTF-8");
+		ProxyCheckResEntity p = new ProxyCheckResEntity().setHost("106.38.251.62").setPort(8088);
 		new Thread(new ProxyChecker().setTarget(t).setProxy(p)).start();
 	}
 

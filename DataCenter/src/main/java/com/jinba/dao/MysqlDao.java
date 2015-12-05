@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -251,11 +251,11 @@ public class MysqlDao {
 		return res;
 	}
 	
-	public LinkedBlockingDeque<ProxyCheckResEntity> getProxyQueue (int targetId) {
+	public ConcurrentLinkedQueue<ProxyCheckResEntity> getProxyQueue (int targetId) {
 		DruidPooledConnection conn = null;
 		PreparedStatement st = null;
 		ResultSet rs = null;
-		LinkedBlockingDeque<ProxyCheckResEntity> res = new LinkedBlockingDeque<ProxyCheckResEntity>();
+		ConcurrentLinkedQueue<ProxyCheckResEntity> res = new ConcurrentLinkedQueue<ProxyCheckResEntity>();
 		try {
 			String sql = "select host,port from tb_proxy_avail where target_id=" + targetId + " and enable=1 order by u_time desc limit 1000";
 			conn = spiderSource.getConnection();

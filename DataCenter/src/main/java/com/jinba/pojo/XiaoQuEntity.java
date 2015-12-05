@@ -8,18 +8,25 @@ public class XiaoQuEntity extends BaseEntity {
 	 * 
 	 */
 	private static final long serialVersionUID = -5059521541735702529L;
-	
+	/** 区域code */
 	private String areacode;
+	/** 小区名称 */
 	private String xiaoquname;
+	/** 小区类别 */
 	private int xiaoquType;
+	/** 小区地址 */
 	private String address;
-	private String postCode;
+	/** 小区经度 */
 	private BigDecimal longItude = new BigDecimal("0");
+	/** 小区经度 */
 	private BigDecimal latitude = new BigDecimal("0");
+	/** 小区主页方图（近吧聊天群组头像） */
 	private String heading;
+	/** 小区介绍 */
 	private String intro;
+	/** 创建时间 */
 	private String createtime = "1970-01-01";
-	private String fromhost;
+	/** */
 	private String phone;
 	
 	public String getPhone() {
@@ -52,12 +59,6 @@ public class XiaoQuEntity extends BaseEntity {
 	public void setAddress(String address) {
 		this.address = address;
 	}
-	public String getPostCode() {
-		return postCode;
-	}
-	public void setPostCode(String postCode) {
-		this.postCode = postCode;
-	}
 	public BigDecimal getLongItude() {
 		return longItude;
 	}
@@ -87,12 +88,6 @@ public class XiaoQuEntity extends BaseEntity {
 	}
 	public void setCreatetime(String createtime) {
 		this.createtime = createtime;
-	}
-	public String getFromhost() {
-		return fromhost;
-	}
-	public void setFromhost(String fromhost) {
-		this.fromhost = fromhost;
 	}
 
 }

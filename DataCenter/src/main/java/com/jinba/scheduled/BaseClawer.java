@@ -21,12 +21,21 @@ public abstract class BaseClawer {
 	protected Map<Params, String> paramsMap = new HashMap<Params, String>();
 	private static final String DEFAULTCHARSET = "UTF-8";
 	protected HttpMethod http = null;
+	protected static final int INITSUCC = 0;
+	protected static final int INITFAIL = 1;
 	
 	public BaseClawer (int targetId) {
 		this.targetId = targetId;
 		http =  new HttpMethod(this.targetId);
 	}
 	
+	/**
+	 * 初始化传入参数，list抓取传入城市名称，和模板url
+	 * @param paramsMap
+	 * @return
+	 */
+	protected abstract int initParams ();
+
 	@Autowired
 	public void setDao(MysqlDao dao) {
 		BaseClawer.dao = dao;

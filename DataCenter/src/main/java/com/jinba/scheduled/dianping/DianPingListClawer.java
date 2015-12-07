@@ -85,7 +85,7 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 	}
 
 	public void run() {
-		this.claw();
+		this.listAction();
 	}
 	
 	public static void main(String[] args) {

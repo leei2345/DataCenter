@@ -19,16 +19,6 @@ public abstract class BaseListClawer<T extends BaseEntity> extends BaseClawer {
 		super(targetId);
 	}
 	
-	protected static final int INITSUCC = 0;
-	protected static final int INITFAIL = 1;
-	
-	/**
-	 * 初始化传入参数，list抓取传入城市名称，和模板url
-	 * @param paramsMap
-	 * @return
-	 */
-	protected abstract int initParams ();
-	
 	/**
 	 * 转载结果集的容器
 	 */
@@ -45,7 +35,7 @@ public abstract class BaseListClawer<T extends BaseEntity> extends BaseClawer {
 	 * 整个list抓取解析的实现
 	 * @return
 	 */
-	public List<T> claw () {
+	public List<T> listAction () {
 		try {
 			int initRes = initParams();
 			if (initRes == INITSUCC) {

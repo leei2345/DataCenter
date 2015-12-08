@@ -1,16 +1,30 @@
 package com.jinba.scheduled;
 
-import com.jinba.pojo.BaseEntity;
+import java.util.List;
+import java.util.Map;
+
 
 public interface DBHandle {
 	
 	/**
-	 * 操作数据库
-	 * @param entity 要存储的实体
-	 * @param fileds 要存储的字段
-	 * @param keys 检验是否更新要更新索要参考的主键
-	 * @return
+	 * 首先查询
+	 * @param sql
+	 * @return true 存在 false 不存在
 	 */
-	public boolean execut (BaseEntity entity, String[] fileds, String[] keys);
+	public List<Map<String, Object>> select (String sql);
 
+	/**
+	 * 不存在insert
+	 * @param sql
+	 * @return true 成功 false 失败
+	 */
+	public boolean insert (String sql);
+	
+	/**
+	 * 存在就update
+	 * @param sql
+	 * @return true 成功 false 失败
+	 */
+	public boolean update (String sql);
+	
 }

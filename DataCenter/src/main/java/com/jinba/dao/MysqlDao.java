@@ -2,6 +2,7 @@ package com.jinba.dao;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -401,7 +402,81 @@ public class MysqlDao {
 			}
 		}
 		return res;
+	}
 	
+	public List<Map<String, Object>> select (String sql) {
+		List<Map<String, Object>> resList = new ArrayList<Map<String, Object>>();
+		DruidPooledConnection conn = null;
+		Statement statement = null;
+		ResultSet rs = null;
+		try {
+			conn = spiderSource.getConnection();
+			statement = conn.createStatement();
+			rs = statement.executeQuery(sql);
+			while (rs.next()) {
+				ResultSetMetaData rsmd = rs.getMetaData();
+				int count = rsmd.getColumnCount();
+				Map<String, Object> map = new HashMap<String, Object>();
+				for (int index = 1; index <= count; index++) {
+					String key = rsmd.getColumnLabel(index);
+					Object value = rs.getObject(index);
+					map.put(key, value);
+				}
+				resList.add(map);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) 
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+	        if (statement != null)
+	        	try {
+	        		statement.close();
+	        	} catch (SQLException e) {
+	        		e.printStackTrace();
+	        	}
+	        if (conn != null)
+	        	try {
+	        		conn.close();
+	        	} catch (SQLException e) {
+	        		e.printStackTrace();
+	        	}
+		}
+		return resList;
+	}
+	
+	public boolean execut (String sql) {
+		boolean res = false;
+		DruidPooledConnection conn = null;
+		Statement sm = null;
+		try {
+			conn = spiderSource.getConnection();
+			sm = conn.createStatement();
+			int count = sm.executeUpdate(sql);
+			if (count > 0) {
+				res = true;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (sm != null)
+				try {
+					sm.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			if (conn != null)
+	        	try {
+	        		conn.close();
+	        	} catch (SQLException e) {
+	        		e.printStackTrace();
+	        	}
+		}
+		return res;
 	}
 	
 	

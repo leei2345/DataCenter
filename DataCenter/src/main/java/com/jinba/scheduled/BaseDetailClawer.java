@@ -1,9 +1,14 @@
 package com.jinba.scheduled;
 
 import java.util.List;
+import java.util.Map;
 
-import com.alibaba.fastjson.JSON;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.StopWatch;
+import org.springframework.stereotype.Component;
+
 import com.jinba.pojo.BaseEntity;
+import com.jinba.utils.CountDownLatchUtils;
 import com.jinba.utils.LoggerUtil;
 
 /**
@@ -13,49 +18,81 @@ import com.jinba.utils.LoggerUtil;
  *
  * @param <T>
  */
-public abstract class BaseDetailClawer<T extends BaseEntity> extends BaseClawer {
+@Component
+public abstract class BaseDetailClawer<T extends BaseEntity> extends BaseClawer implements Runnable {
 
 	protected T detailEntity;
-
-	public BaseDetailClawer(int targetId, T detailEntity) {
+	protected CountDownLatchUtils cdl;
+	
+	public BaseDetailClawer(int targetId, T detailEntity, CountDownLatchUtils cdl) {
 		super(targetId);
 		this.detailEntity = detailEntity;
+		this.cdl = cdl;
 	}
-	
 	
 	protected abstract String getDetailHtml ();
 	
-	protected abstract T analysistDetail (String html, DBHandle dbHandle);
+	protected abstract void analysistDetail (String html, DBHandle dbHandle);
 	
 	/**
 	 * 整个list抓取解析的实现
 	 * @return
 	 */
 	public void detailAction () {
+		StopWatch watch = new StopWatch();
+		watch.start();
+		StringBuilder logBuilder = new StringBuilder();
 		try {
 			int initRes = initParams();
+			watch.split();
+			long initParamsTime = watch.getSplitTime();
 			if (initRes == INITSUCC) {
-				LoggerUtil.ClawerInfoLog("[Clawer][" + targetId + "][InitParams][Done][" + JSON.toJSONString(paramsMap) + "]");
+				logBuilder.append("[InitParam Succ][" + initParamsTime + "]");
 			} else {
-				LoggerUtil.ClawerInfoLog("[Clawer][" + targetId + "][InitParams][Fail][" + JSON.toJSONString(paramsMap) + "]");
+				logBuilder.append("[InitParam Fail][" + initParamsTime + "]");
 				return;
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			LoggerUtil.ClawerInfoLog("[Clawer][" + targetId + "][InitParams][Error][" + JSON.toJSONString(paramsMap) + "][" + e.getMessage() + "]");
-		}
-		try {
-			 T t = analysistDetail(getDetailHtml(), new DBHandle() {
-				public boolean execut(BaseEntity entity, String[] fileds, String[] keys) {
-					return false;
+			watch.reset();
+			watch.start();
+			String html = getDetailHtml();
+			watch.split();
+			long getHtmlTime = watch.getSplitTime();
+			if (!StringUtils.isBlank(html)) {
+				logBuilder.append("[GetHtml Done][" + getHtmlTime + "]");
+			} else {
+				logBuilder.append("[GetHtml Fail][" + getHtmlTime + "]");
+				return;
+			}
+			watch.reset();
+			watch.start();
+			analysistDetail(html, new DBHandle() {
+				 public  List<Map<String, Object>> select(String sql) {
+					 return dao.select(sql);
+				 }
+				
+				 public boolean insert(String sql) {
+					 return dao.execut(sql);
+				 }
+
+				 public boolean update(String sql) {
+					return dao.execut(sql);
 				}
+				
 			});
-			LoggerUtil.ClawerInfoLog("[Clawer][" + targetId + "][Claw][Done][" + JSON.toJSONString(paramsMap) + "][" + box.size() + "]");
+			watch.split();
+			long analysisTime = watch.getSplitTime();
+			logBuilder.append("[Analysis Done][" + analysisTime + "]");
 		} catch (Exception e) {
 			e.printStackTrace();
-			LoggerUtil.ClawerInfoLog("[Clawer][" + targetId + "][Claw][Error][" + JSON.toJSONString(paramsMap) + "][" + e.getMessage() + "]");
+			logBuilder.append("[Claw Error][" + e.getMessage() + "]");
+		} finally {
+			cdl.countDown();
+			LoggerUtil.ClawerInfoLog("[Clawer][" + targetId + "][" + cdl.getCount() + "/" + cdl.getAmount() + "][Done]" + logBuilder.toString());
 		}
-		return box;
+	}
+
+	public void run() {
+		this.detailAction();
 	}
 	
 	

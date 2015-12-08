@@ -2060,7 +2060,7 @@ public class DianPingCityMap {
 		cityMap.put("诸暨市", "zhuji_11_19_330681");
 		cityMap.put("浦北县", "pubei_28_51_450722");
 		cityMap.put("桦川县", "huachuan_6_43_230826");
-		cityMap.put("金平苗族瑶族傣族自治��", "jinpingxian_19_123_532530");
+		cityMap.put("金平苗族瑶族傣族自治", "jinpingxian_19_123_532530");
 		cityMap.put("安宁市", "anning_19_19_530181");
 		cityMap.put("潞城市", "lucheng_4_29_140481");
 		cityMap.put("温州市", "wenzhou_11_4_3303");
@@ -2428,6 +2428,7 @@ public class DianPingCityMap {
 		areaMap.put("怀柔区", "110116");
 		areaMap.put("平谷区", "110117");
 		
+		
 	}
 	
 	public static String getCityCode (String cityName) {
@@ -2470,7 +2471,6 @@ public class DianPingCityMap {
 				System.out.println("areaMap.put(\"" + name + "\", \"" + code + "\");");
 			}
 		}
-		
 		
 //		for (Entry<String, String> entry : cityMap.entrySet()) {
 //			String[] valueArr = entry.getValue().split("_");

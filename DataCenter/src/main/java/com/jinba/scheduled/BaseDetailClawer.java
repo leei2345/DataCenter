@@ -11,6 +11,7 @@ import com.jinba.pojo.BaseEntity;
 import com.jinba.utils.CountDownLatchUtils;
 import com.jinba.utils.LoggerUtil;
 
+
 /**
  * 详情页数据抓取
  * 
@@ -32,7 +33,7 @@ public abstract class BaseDetailClawer<T extends BaseEntity> extends BaseClawer 
 	
 	protected abstract String getDetailHtml ();
 	
-	protected abstract void analysistDetail (String html, DBHandle dbHandle);
+	protected abstract ActionRes analysistDetail (String html, DBHandle dbHandle);
 	
 	/**
 	 * 整个list抓取解析的实现
@@ -43,10 +44,10 @@ public abstract class BaseDetailClawer<T extends BaseEntity> extends BaseClawer 
 		watch.start();
 		StringBuilder logBuilder = new StringBuilder();
 		try {
-			int initRes = initParams();
+			ActionRes initRes = initParams();
 			watch.split();
 			long initParamsTime = watch.getSplitTime();
-			if (initRes == INITSUCC) {
+			if (initRes.equals(ActionRes.INITSUCC)) {
 				logBuilder.append("[InitParam Succ][" + initParamsTime + "]");
 			} else {
 				logBuilder.append("[InitParam Fail][" + initParamsTime + "]");
@@ -65,7 +66,7 @@ public abstract class BaseDetailClawer<T extends BaseEntity> extends BaseClawer 
 			}
 			watch.reset();
 			watch.start();
-			analysistDetail(html, new DBHandle() {
+			ActionRes analysisRes = analysistDetail(html, new DBHandle() {
 				 public  List<Map<String, Object>> select(String sql) {
 					 return dao.select(sql);
 				 }
@@ -81,7 +82,11 @@ public abstract class BaseDetailClawer<T extends BaseEntity> extends BaseClawer 
 			});
 			watch.split();
 			long analysisTime = watch.getSplitTime();
-			logBuilder.append("[Analysis Done][" + analysisTime + "]");
+			if (ActionRes.ANALYSIS_SUCC.equals(analysisRes)) {
+				logBuilder.append("[Analysis Succ][" + analysisTime + "]");
+			} else {
+				logBuilder.append("[Analysis Fail][" + analysisTime + "]");
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			logBuilder.append("[Claw Error][" + e.getMessage() + "]");

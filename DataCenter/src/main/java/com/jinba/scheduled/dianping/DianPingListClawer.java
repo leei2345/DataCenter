@@ -33,11 +33,11 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 	}
 	
 	@Override
-	protected int initParams() {
+	protected ActionRes initParams() {
 		String city = paramsMap.get(Params.area);
 		String cityCode = DianPingCityMap.getCityCode(city);
 		if (StringUtils.isBlank(cityCode)) {
-			return INITFAIL;
+			return ActionRes.ANALYSIS_FAIL;
 		}
 		String tempUrl = paramsMap.get(Params.tempurl);
 		eachPageUrl = tempUrl.replace("##", cityCode);
@@ -51,7 +51,7 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 		} catch (Exception e) {
 		}
 		xiaoquType = Integer.parseInt(paramsMap.get(Params.xiaoquType));
-		return INITSUCC;
+		return ActionRes.INITSUCC;
 	}
 
 	@Override

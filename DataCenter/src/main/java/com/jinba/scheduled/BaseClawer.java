@@ -21,8 +21,15 @@ public abstract class BaseClawer {
 	protected Map<Params, String> paramsMap = new HashMap<Params, String>();
 	private static final String DEFAULTCHARSET = "UTF-8";
 	protected HttpMethod http = null;
-	protected static final int INITSUCC = 0;
-	protected static final int INITFAIL = 1;
+	
+	public enum ActionRes {
+		
+		INITSUCC,
+		INITFAIL,
+		ANALYSIS_SUCC,
+		ANALYSIS_FAIL,
+		;
+	}
 	
 	public BaseClawer (int targetId) {
 		this.targetId = targetId;
@@ -34,7 +41,7 @@ public abstract class BaseClawer {
 	 * @param paramsMap
 	 * @return
 	 */
-	protected abstract int initParams ();
+	protected abstract ActionRes initParams ();
 
 	@Autowired
 	public void setDao(MysqlDao dao) {

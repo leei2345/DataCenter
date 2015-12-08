@@ -37,8 +37,8 @@ public abstract class BaseListClawer<T extends BaseEntity> extends BaseClawer {
 	 */
 	public List<T> listAction () {
 		try {
-			int initRes = initParams();
-			if (initRes == INITSUCC) {
+			ActionRes initRes = initParams();
+			if (initRes.equals(ActionRes.ANALYSIS_SUCC)) {
 				LoggerUtil.ClawerInfoLog("[Clawer][" + targetId + "][InitParams][Done][" + JSON.toJSONString(paramsMap) + "]");
 			} else {
 				LoggerUtil.ClawerInfoLog("[Clawer][" + targetId + "][InitParams][Fail][" + JSON.toJSONString(paramsMap) + "]");

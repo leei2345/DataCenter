@@ -2,8 +2,10 @@ package com.jinba.scheduled;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +23,7 @@ public abstract class BaseClawer {
 	protected Map<Params, String> paramsMap = new HashMap<Params, String>();
 	private static final String DEFAULTCHARSET = "UTF-8";
 	protected HttpMethod http = null;
+	private static Pattern sqlp = Pattern.compile("update.*? set\\s+(.*)\\s+where.*");
 	
 	public enum ActionRes {
 		
@@ -28,6 +31,7 @@ public abstract class BaseClawer {
 		INITFAIL,
 		ANALYSIS_SUCC,
 		ANALYSIS_FAIL,
+		DBHAND_FAIL,
 		;
 	}
 	
@@ -68,6 +72,30 @@ public abstract class BaseClawer {
 	protected String httpPost (String url, String body, String charset) {
 		String html = http.GetHtml(url, body, HttpRequestConfig.RequestBodyAsString, HttpResponseConfig.ResponseAsString);
 		return html;
+	}
+	
+	protected String checkUpdateSql (String usql) {
+		try {
+			Matcher matcher = sqlp.matcher(usql);
+			if (matcher.find()) {
+				String params = matcher.group(1);
+				String[] kvs = params.split(",");
+				for (int index = 0; index < kvs.length; index++) {
+					String kv = kvs[index];
+					String[] kvArr = kv.trim().split("=");
+					if (StringUtils.isBlank(kvArr[1])) {
+						if (index != (kvs.length - 1)) {
+							usql = usql.replaceAll(kv + "\\s?,", "");
+						} else {
+							usql = usql.replace(kv, "");
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return usql;
 	}
 	
 	

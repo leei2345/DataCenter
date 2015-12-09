@@ -26,6 +26,7 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 	private String eachPageUrl;
 	private int pageCount = 1;
 	private int xiaoquType;
+	private static final String IDENTIDY = "dp_";
 	
 	public DianPingListClawer (Map<Params, String> paramsMap) {
 		super(TARGETID);
@@ -66,7 +67,7 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 				x.setXiaoquType(xiaoquType);
 				String headPhotoUrl = node.select("div.pic > a > img").attr("data-src").trim();
 				if (!StringUtils.isBlank(headPhotoUrl)) {
-					x.setHeading(headPhotoUrl);
+					x.setHeadimg(headPhotoUrl);
 				}		
 				String xiaoquName = node.select("div.tit > a > h4").text().trim();
 				if (StringUtils.isBlank(xiaoquName)) {
@@ -78,7 +79,7 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 					continue;
 				}
 				x.setFromurl(sourceUrl);
-				x.setFormkey(sourceUrl.replaceAll("\\D+", ""));
+				x.setFormkey(IDENTIDY + sourceUrl.replaceAll("\\D+", ""));
 				box.add(x);
 			}
 		}

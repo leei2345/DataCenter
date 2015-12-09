@@ -1,6 +1,8 @@
 package com.jinba.pojo;
 
 import java.io.Serializable;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import com.alibaba.fastjson.serializer.SerializerFeature;
 
@@ -14,24 +16,27 @@ public class BaseEntity implements Serializable {
 	/** 信息来源URL */
 	private String fromurl;
 	/** 信息来源主键 */
-	private String formkey;
+	private String fromkey;
 	/** 信息来源主机 */
 	private String fromhost;
 	
 	public String getFromhost() {
+		InetAddress ia;
+		try {
+			ia = InetAddress.getLocalHost();
+			fromhost = ia.getHostAddress();
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
 		return fromhost;
 	}
 
-	public void setFromhost(String fromhost) {
-		this.fromhost = fromhost;
+	public String getFromkey() {
+		return fromkey;
 	}
 
-	public String getFormkey() {
-		return formkey;
-	}
-
-	public void setFormkey(String formkey) {
-		this.formkey = formkey;
+	public void setFormkey(String fromkey) {
+		this.fromkey = fromkey;
 	}
 
 	public String getFromurl() {

@@ -85,7 +85,7 @@ public abstract class BaseDetailClawer<T extends BaseEntity> extends BaseClawer 
 			if (ActionRes.ANALYSIS_SUCC.equals(analysisRes)) {
 				logBuilder.append("[Analysis Succ][" + analysisTime + "]");
 			} else {
-				logBuilder.append("[Analysis Fail][" + analysisTime + "]");
+				logBuilder.append("[Analysis " + analysisRes + "][" + analysisTime + "]");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

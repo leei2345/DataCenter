@@ -21,7 +21,7 @@ public class XiaoQuEntity extends BaseEntity {
 	/** 小区经度 */
 	private BigDecimal latitude = new BigDecimal("0");
 	/** 小区主页方图（近吧聊天群组头像） */
-	private String heading;
+	private String headimg;
 	/** 小区介绍 */
 	private String intro;
 	/** 创建时间 */
@@ -71,11 +71,11 @@ public class XiaoQuEntity extends BaseEntity {
 	public void setLatitude(BigDecimal latitude) {
 		this.latitude = latitude;
 	}
-	public String getHeading() {
-		return heading;
+	public String getHeadimg() {
+		return headimg;
 	}
-	public void setHeading(String heading) {
-		this.heading = heading;
+	public void setHeadimg(String headimg) {
+		this.headimg = headimg;
 	}
 	public String getIntro() {
 		return intro;

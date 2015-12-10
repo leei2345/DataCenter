@@ -1,4 +1,4 @@
-package com.jinba.scheduled;
+package com.jinba.core;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,7 +1,9 @@
-package com.jinba.scheduled;
+package com.jinba.core;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.commons.lang3.time.StopWatch;
 
 import com.alibaba.fastjson.JSON;
 import com.jinba.pojo.BaseEntity;
@@ -36,24 +38,30 @@ public abstract class BaseListClawer<T extends BaseEntity> extends BaseClawer {
 	 * @return
 	 */
 	public List<T> listAction () {
+		StopWatch watch = new StopWatch();
+		watch.start();
+		StringBuilder logBuilder = new StringBuilder("[ListClaw][" + targetId + "][" + JSON.toJSONString(paramsMap) + "]");
 		try {
 			ActionRes initRes = initParams();
+			watch.split();
+			long initParamsTime = watch.getSplitTime();
 			if (initRes.equals(ActionRes.ANALYSIS_SUCC)) {
-				LoggerUtil.ClawerInfoLog("[Clawer][" + targetId + "][InitParams][Done][" + JSON.toJSONString(paramsMap) + "]");
+				logBuilder.append("[InitParam Succ][" + initParamsTime + "]");
 			} else {
-				LoggerUtil.ClawerInfoLog("[Clawer][" + targetId + "][InitParams][Fail][" + JSON.toJSONString(paramsMap) + "]");
+				logBuilder.append("[InitParam Fail][" + initParamsTime + "]");
 				return box;
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			LoggerUtil.ClawerInfoLog("[Clawer][" + targetId + "][InitParams][Error][" + JSON.toJSONString(paramsMap) + "][" + e.getMessage() + "]");
-		}
-		try {
+			watch.reset();
+			watch.start();
 			analysisAction(box);
-			LoggerUtil.ClawerInfoLog("[Clawer][" + targetId + "][Claw][Done][" + JSON.toJSONString(paramsMap) + "][" + box.size() + "]");
+			watch.split();
+			long analysisTime = watch.getSplitTime();
+			logBuilder.append("[Analysis Done][" + analysisTime + "]");
 		} catch (Exception e) {
 			e.printStackTrace();
-			LoggerUtil.ClawerInfoLog("[Clawer][" + targetId + "][Claw][Error][" + JSON.toJSONString(paramsMap) + "][" + e.getMessage() + "]");
+			logBuilder.append("[List Error][" + e.getMessage() + "]");
+		} finally {
+			LoggerUtil.ClawerInfoLog(logBuilder.toString());
 		}
 		return box;
 	}

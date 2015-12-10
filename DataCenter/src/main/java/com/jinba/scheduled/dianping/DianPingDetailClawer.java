@@ -9,9 +9,9 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import com.alibaba.fastjson.JSONObject;
+import com.jinba.core.BaseDetailClawer;
+import com.jinba.core.DBHandle;
 import com.jinba.pojo.XiaoQuEntity;
-import com.jinba.scheduled.BaseDetailClawer;
-import com.jinba.scheduled.DBHandle;
 import com.jinba.utils.CountDownLatchUtils;
 
 /**

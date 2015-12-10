@@ -1,4 +1,4 @@
-package com.jinba.scheduled;
+package com.jinba.core;
 
 import java.util.List;
 import java.util.Map;
@@ -42,7 +42,7 @@ public abstract class BaseDetailClawer<T extends BaseEntity> extends BaseClawer 
 	public void detailAction () {
 		StopWatch watch = new StopWatch();
 		watch.start();
-		StringBuilder logBuilder = new StringBuilder();
+		StringBuilder logBuilder = new StringBuilder("[DetailClaw][" + targetId + "][" + detailEntity.getFromkey() + "]");
 		try {
 			ActionRes initRes = initParams();
 			watch.split();
@@ -89,10 +89,10 @@ public abstract class BaseDetailClawer<T extends BaseEntity> extends BaseClawer 
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			logBuilder.append("[Claw Error][" + e.getMessage() + "]");
+			logBuilder.append("[Detail Error][" + e.getMessage() + "]");
 		} finally {
 			cdl.countDown();
-			LoggerUtil.ClawerInfoLog("[Clawer][" + targetId + "][" + cdl.getCount() + "/" + cdl.getAmount() + "][Done]" + logBuilder.toString());
+			LoggerUtil.ClawerInfoLog(logBuilder.toString() + "[" + cdl.getCount() + "/" + cdl.getAmount() + "][Done]");
 		}
 	}
 

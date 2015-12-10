@@ -11,8 +11,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.jinba.core.BaseListClawer;
 import com.jinba.pojo.XiaoQuEntity;
-import com.jinba.scheduled.BaseListClawer;
 import com.jinba.spider.core.Params;
 
 /**

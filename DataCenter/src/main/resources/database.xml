@@ -32,6 +32,7 @@
     </bean>
 	<context:component-scan base-package="com.jinba.dao" />
 	<context:component-scan base-package="com.jinba.scheduled" />
+	<context:component-scan base-package="com.jinba.core" />
 	<context:component-scan base-package="com.jinba.spider.proxy" />
 	
     <bean id="druid-stat-interceptor"
@@ -92,9 +93,6 @@
 		<property name="maxPoolPreparedStatementPerConnectionSize"
 			value="20" />
 	</bean>
-	
-	<bean id="proxyChecker" class="com.jinba.spider.proxy.ProxyChecker" scope="prototype">
-	
-	</bean>
+
 	
 </beans>

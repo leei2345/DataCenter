@@ -5,13 +5,17 @@ import org.slf4j.LoggerFactory;
 
 public class LoggerUtil {
 	
-	private static Logger clawerLogger = LoggerFactory.getLogger("ClawerLogger");
-	private static Logger httpLogger = LoggerFactory.getLogger("HttpLogger");
+	private static Logger clawerLogger = LoggerFactory.getLogger("clawerLogger");
+	private static Logger httpLogger = LoggerFactory.getLogger("httpLogger");
 	private static Logger proxyLogger = LoggerFactory.getLogger("proxyLogger");
-
+	private static Logger taskLogger = LoggerFactory.getLogger("taskLogger");
 
 	public static void ClawerInfoLog (String log) {
 		clawerLogger.info(log);
+	}
+	
+	public static void TaskInfoLog (String log) {
+		taskLogger.info(log);
 	}
 	
 	public static void ProxyLog (String log) {

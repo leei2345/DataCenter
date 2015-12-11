@@ -20,6 +20,7 @@ import com.jinba.scheduled.dianping.DianPingDetailClawer;
 import com.jinba.scheduled.dianping.DianPingListClawer;
 import com.jinba.spider.core.Params;
 import com.jinba.utils.CountDownLatchUtils;
+import com.jinba.utils.LoggerUtil;
 
 @Component
 public class DianPingTask implements Runnable {
@@ -39,6 +40,7 @@ public class DianPingTask implements Runnable {
 	
 	public void run() {
 		List<String> cityList = dao.getAreaList();
+		LoggerUtil.TaskInfoLog("[" + this.getClass().getSimpleName() + "][Start][CitySize " + cityList.size() + "]");
 		List<XiaoQuEntity> detailList = new ArrayList<XiaoQuEntity>();
 		for (String eachCity : cityList) {
 			String[] cityInfo = eachCity.split("_");
@@ -65,6 +67,7 @@ public class DianPingTask implements Runnable {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		LoggerUtil.TaskInfoLog("[" + this.getClass().getSimpleName() + "][Done][DetailSize " + xiaoquSize + "]");
 		threadPool.shutdownNow();
 		threadPool = null;
 	}

@@ -38,6 +38,9 @@ public class DianPingTask implements Runnable {
 		this.xiaoquType = xiaoquType;
 	}
 	
+	public DianPingTask () {
+	}
+	
 	public void run() {
 		List<String> cityList = dao.getAreaList();
 		LoggerUtil.TaskInfoLog("[" + this.getClass().getSimpleName() + "][Start][CitySize " + cityList.size() + "]");

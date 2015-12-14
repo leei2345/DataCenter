@@ -1,5 +1,6 @@
 package com.jinba.scheduled;
 
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Component;
 
 /**
@@ -17,5 +18,11 @@ public class DianPing_JD_ZRFG_Task extends DianPingTask {
 		super(tempUrl, xiaoquType);
 	}
 	
-	
+	public static void main(String[] args) {
+		@SuppressWarnings("resource")
+		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
+		application.start();
+		DianPingTask d = (DianPingTask) application.getBean("dianPing_JD_ZRFG_Task");
+		d.run();
+	}
 }

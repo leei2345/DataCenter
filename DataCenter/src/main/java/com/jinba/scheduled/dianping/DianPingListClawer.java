@@ -36,12 +36,16 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 	@Override
 	protected ActionRes initParams() {
 		String city = paramsMap.get(Params.area);
-		String cityCode = DianPingCityMap.getCityCode(city);
-		if (StringUtils.isBlank(cityCode)) {
+		String cityNumCode = DianPingCityMap.getCityNumCode(city);
+		String cityEnCode = DianPingCityMap.getCityEnCode(city);
+		if (StringUtils.isBlank(cityNumCode) ||  StringUtils.isBlank(cityEnCode)) {
 			return ActionRes.ANALYSIS_FAIL;
 		}
 		String tempUrl = paramsMap.get(Params.tempurl);
-		eachPageUrl = tempUrl.replace("##", cityCode);
+		Map<ParamMark, String> paramMap = new HashMap<ParamMark, String>();
+		paramMap.put(ParamMark.CityNumCode, cityNumCode);
+		paramMap.put(ParamMark.CityEnCode, cityEnCode);
+		eachPageUrl = arrangeUrl(tempUrl, paramMap);
 		String page1Url = eachPageUrl.replace("$$", "1");
 		String page1Html = httpGet(page1Url);
 		Document doc = Jsoup.parse(page1Html);
@@ -61,7 +65,7 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 			String url = eachPageUrl.replace("$$", String.valueOf(pageIndex));
 			String html = httpGet(url);
 			Document doc = Jsoup.parse(html, url);
-			Elements nodes = doc.select("div#shop-all-list > ul > li");
+			Elements nodes = doc.select("div.content ul > li");
 			for (Element node : nodes) {
 				XiaoQuEntity x = new XiaoQuEntity();
 				x.setXiaoquType(xiaoquType);

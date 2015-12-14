@@ -32,7 +32,7 @@ import com.jinba.utils.LoggerUtil;
 public class ProxyCheckTask implements Runnable, ApplicationContextAware{
 	
 	@Value("${check.thread.pool}")
-	private int threadPoolSize = 3;
+	private int threadPoolSize = 30;
 	private static ExecutorService threadPool;
 	@Resource
 	private MysqlDao dao;

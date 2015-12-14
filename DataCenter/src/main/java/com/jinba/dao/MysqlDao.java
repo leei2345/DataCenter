@@ -362,7 +362,7 @@ public class MysqlDao {
 		ResultSet rs = null;
 		List<String> res = new ArrayList<String>();
 		try {
-			String sql = "select areacode,areaname,postcode from t_area where `level` IN (2,3) AND areaname NOT LIKE '%辖区'";
+			String sql = "select areacode,areaname,postcode from t_area where `level` IN (2,3) AND switch=1";
 			conn = spiderSource.getConnection();
 			st = conn.prepareStatement(sql);
 			rs = st.executeQuery();

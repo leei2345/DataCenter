@@ -3,6 +3,7 @@ package com.jinba.spider.proxy;
 
 import javax.annotation.Resource;
 
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.jinba.dao.MysqlDao;
@@ -12,6 +13,7 @@ import com.jinba.utils.CountDownLatchUtils;
 import com.jinba.utils.LoggerUtil;
 
 @Component
+@Scope("prototype")
 public class ProxyChecker implements Runnable {
 
 	private TargetEntity target;

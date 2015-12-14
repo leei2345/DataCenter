@@ -2431,13 +2431,22 @@ public class DianPingCityMap {
 		
 	}
 	
-	public static String getCityCode (String cityName) {
+	public static String getCityEnCode (String cityName) {
+		return getCityCode(cityName, 0);
+	}
+	
+	public static String getCityNumCode (String cityName) {
+		return getCityCode(cityName, 2);
+
+	}
+	
+	public static String getCityCode (String cityName, int index) {
 		String cityInfo = cityMap.get(cityName);
 		if (StringUtils.isBlank(cityInfo)) {
 			return "";
 		}
 		String[] cityInfoArr = cityInfo.split("_");
-		return cityInfoArr[2];
+		return cityInfoArr[index];
 	}
 	
 	public static String getAreaCode (String cityName) {

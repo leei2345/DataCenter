@@ -2,11 +2,14 @@ package com.jinba.core;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang3.time.StopWatch;
 
 import com.alibaba.fastjson.JSON;
 import com.jinba.pojo.BaseEntity;
+import com.jinba.scheduled.dianping.ParamMark;
 import com.jinba.utils.LoggerUtil;
 
 /**
@@ -45,7 +48,7 @@ public abstract class BaseListClawer<T extends BaseEntity> extends BaseClawer {
 			ActionRes initRes = initParams();
 			watch.split();
 			long initParamsTime = watch.getSplitTime();
-			if (initRes.equals(ActionRes.ANALYSIS_SUCC)) {
+			if (initRes.equals(ActionRes.INITSUCC)) {
 				logBuilder.append("[InitParam Succ][" + initParamsTime + "]");
 			} else {
 				logBuilder.append("[InitParam Fail][" + initParamsTime + "]");
@@ -64,6 +67,14 @@ public abstract class BaseListClawer<T extends BaseEntity> extends BaseClawer {
 			LoggerUtil.ClawerInfoLog(logBuilder.toString());
 		}
 		return box;
+	}
+	
+	protected String arrangeUrl (String url, Map<ParamMark, String> paramMap) {
+		String res = "";
+		for (Entry<ParamMark, String> entry : paramMap.entrySet()) {
+			res = url.replace(entry.getKey().mark, entry.getValue());
+		}
+		return res;
 	}
 	
 }

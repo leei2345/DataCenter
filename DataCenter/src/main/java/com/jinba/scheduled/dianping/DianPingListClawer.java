@@ -42,10 +42,7 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 			return ActionRes.ANALYSIS_FAIL;
 		}
 		String tempUrl = paramsMap.get(Params.tempurl);
-		Map<ParamMark, String> paramMap = new HashMap<ParamMark, String>();
-		paramMap.put(ParamMark.CityNumCode, cityNumCode);
-		paramMap.put(ParamMark.CityEnCode, cityEnCode);
-		eachPageUrl = arrangeUrl(tempUrl, paramMap);
+		eachPageUrl = tempUrl.replace("@@", cityEnCode).replace("##", cityNumCode);
 		String page1Url = eachPageUrl.replace("$$", "1");
 		String page1Html = httpGet(page1Url);
 		Document doc = Jsoup.parse(page1Html);
@@ -61,8 +58,12 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 
 	@Override
 	protected void analysisAction(List<XiaoQuEntity> box) {
+		boolean isHotel = false;
 		for (int pageIndex = 1; pageIndex <= pageCount; pageIndex++) {
 			String url = eachPageUrl.replace("$$", String.valueOf(pageIndex));
+			if (url.contains("hotel")) {
+				isHotel = true;
+			}
 			String html = httpGet(url);
 			Document doc = Jsoup.parse(html, url);
 			Elements nodes = doc.select("div.content ul > li");
@@ -70,15 +71,28 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 				XiaoQuEntity x = new XiaoQuEntity();
 				x.setXiaoquType(xiaoquType);
 				String headPhotoUrl = node.select("div.pic > a > img").attr("data-src").trim();
+				if (isHotel) {
+					try {
+						Element photoNode = node.select("div.hotel-pics > ul > li").first();
+						headPhotoUrl = photoNode.select("a > img").attr("abs:src").trim();
+					} catch (Exception e) {
+					}
+				}
 				if (!StringUtils.isBlank(headPhotoUrl)) {
 					x.setHeadimg(headPhotoUrl);
 				}		
 				String xiaoquName = node.select("div.tit > a > h4").text().trim();
+				if (isHotel) {
+					xiaoquName = node.select("div.hotel-info-main > h2 > a.hotel-name-link").text().trim();
+				}
 				if (StringUtils.isBlank(xiaoquName)) {
 					continue;
 				}
 				x.setXiaoquname(xiaoquName);
 				String sourceUrl = node.select("div.pic > a").attr("abs:href").trim();
+				if (isHotel) {
+					sourceUrl = node.select("div.hotel-info-main > h2 > a.hotel-name-link").attr("abs:href").trim();
+				}
 				if (StringUtils.isBlank(sourceUrl)) {
 					continue;
 				}

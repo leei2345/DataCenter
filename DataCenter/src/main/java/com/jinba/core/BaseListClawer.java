@@ -2,14 +2,11 @@ package com.jinba.core;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.commons.lang3.time.StopWatch;
 
 import com.alibaba.fastjson.JSON;
 import com.jinba.pojo.BaseEntity;
-import com.jinba.scheduled.dianping.ParamMark;
 import com.jinba.utils.LoggerUtil;
 
 /**
@@ -69,12 +66,5 @@ public abstract class BaseListClawer<T extends BaseEntity> extends BaseClawer {
 		return box;
 	}
 	
-	protected String arrangeUrl (String url, Map<ParamMark, String> paramMap) {
-		String res = "";
-		for (Entry<ParamMark, String> entry : paramMap.entrySet()) {
-			res = url.replace(entry.getKey().mark, entry.getValue());
-		}
-		return res;
-	}
 	
 }

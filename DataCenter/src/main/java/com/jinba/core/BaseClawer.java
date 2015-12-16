@@ -6,14 +6,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
 
 import com.jinba.spider.core.HttpMethod;
 import com.jinba.spider.core.HttpRequestConfig;
 import com.jinba.spider.core.HttpResponseConfig;
 import com.jinba.spider.core.Params;
 
-@Component
 public abstract class BaseClawer {
 
 	protected int targetId;

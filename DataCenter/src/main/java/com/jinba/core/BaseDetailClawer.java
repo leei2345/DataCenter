@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
-import org.springframework.stereotype.Component;
 
 import com.jinba.dao.MysqlDao;
 import com.jinba.pojo.BaseEntity;
@@ -20,7 +19,6 @@ import com.jinba.utils.LoggerUtil;
  *
  * @param <T>
  */
-@Component
 public abstract class BaseDetailClawer<T extends BaseEntity> extends BaseClawer implements Runnable {
 
 	protected T detailEntity;

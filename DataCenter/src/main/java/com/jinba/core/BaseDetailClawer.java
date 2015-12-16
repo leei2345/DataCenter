@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.springframework.stereotype.Component;
 
+import com.jinba.dao.MysqlDao;
 import com.jinba.pojo.BaseEntity;
 import com.jinba.utils.CountDownLatchUtils;
 import com.jinba.utils.LoggerUtil;
@@ -68,15 +69,15 @@ public abstract class BaseDetailClawer<T extends BaseEntity> extends BaseClawer 
 			watch.start();
 			ActionRes analysisRes = analysistDetail(html, new DBHandle() {
 				 public  List<Map<String, Object>> select(String sql) {
-					 return dao.select(sql);
+					 return MysqlDao.getInstance().select(sql);
 				 }
 				
 				 public boolean insert(String sql) {
-					 return dao.execut(sql);
+					 return MysqlDao.getInstance().execut(sql);
 				 }
 
 				 public boolean update(String sql) {
-					return dao.execut(sql);
+					return MysqlDao.getInstance().execut(sql);
 				}
 				
 			});

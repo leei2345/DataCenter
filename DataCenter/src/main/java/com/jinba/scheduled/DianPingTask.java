@@ -30,7 +30,7 @@ public class DianPingTask implements Runnable {
 	@Resource
 	private MysqlDao dao;
 	@Value("${dpclaw.thread.pool}")
-	private int threadPoolSize = 3;
+	private int threadPoolSize = 40;
 	private static ExecutorService threadPool;
 	
 	public DianPingTask (String tempUrl, int xiaoquType) {

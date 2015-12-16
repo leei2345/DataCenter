@@ -30,10 +30,6 @@
             </list>
         </property>
     </bean>
-	<context:component-scan base-package="com.jinba.dao" />
-	<context:component-scan base-package="com.jinba.scheduled" />
-	<context:component-scan base-package="com.jinba.core" />
-	<context:component-scan base-package="com.jinba.spider.proxy" />
 	
     <bean id="druid-stat-interceptor"
           class="com.alibaba.druid.support.spring.stat.DruidStatInterceptor">
@@ -94,5 +90,9 @@
 			value="20" />
 	</bean>
 
+	<context:component-scan base-package="com.jinba.dao" />
+	<context:component-scan base-package="com.jinba.scheduled" />
+	<context:component-scan base-package="com.jinba.core" />
+	<context:component-scan base-package="com.jinba.spider.proxy" />
 	
 </beans>

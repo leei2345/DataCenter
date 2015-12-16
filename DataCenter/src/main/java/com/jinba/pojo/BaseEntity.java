@@ -35,7 +35,7 @@ public class BaseEntity implements Serializable {
 		return fromkey;
 	}
 
-	public void setFormkey(String fromkey) {
+	public void setFromkey(String fromkey) {
 		this.fromkey = fromkey;
 	}
 

@@ -7,7 +7,9 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.jinba.core.BaseDetailClawer;
 import com.jinba.core.DBHandle;
@@ -98,7 +100,7 @@ public class DianPingDetailClawer extends BaseDetailClawer<XiaoQuEntity>{
 			String updateSql = this.checkUpdateSql(iubuilder.toString());
 			iuRes = dbHandle.update(updateSql);
 		} else {
-			iubuilder.append("insert into t_xiaoqu areacode (areacode,xiaoquname,xiaoqutype,address,longitude,latitude,phone,headimg,fromhost,fromurl,fromkey,updatetime,createtime) values (");
+			iubuilder.append("insert into t_xiaoqu (areacode,xiaoquname,xiaoqutype,address,longitude,latitude,phone,headimg,fromhost,fromurl,fromkey,updatetime,createtime) values (");
 			iubuilder.append("'" + detailEntity.getAreacode() + "',");
 			iubuilder.append("'" + detailEntity.getXiaoquname() + "',");
 			iubuilder.append("'" + detailEntity.getXiaoquType() + "',");
@@ -119,6 +121,16 @@ public class DianPingDetailClawer extends BaseDetailClawer<XiaoQuEntity>{
 			res = ActionRes.DBHAND_FAIL;
 		}
 		return res;
+	}
+	
+	public static void main(String[] args) {
+		@SuppressWarnings("resource")
+		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
+		application.start();
+		String json = "{\"address\":null,\"areacode\":null,\"createtime\":\"1970-01-01\",\"fromhost\":\"192.168.31.125\",\"fromkey\":\"dp_1768267\",\"fromurl\":\"http://www.dianping.com/shop/1768267\",\"headimg\":\"http://i1.s2.dpfile.com/pc/df9f6f962f08ccbc2fa9c7e9c55825f1(249x249)/thumb.jpg\",\"intro\":null,\"latitude\":0,\"longItude\":0,\"phone\":null,\"xiaoquType\":4,\"xiaoquname\":\"香山公园\"}";
+		XiaoQuEntity x = JSON.parseObject(json, XiaoQuEntity.class);
+		BaseDetailClawer<XiaoQuEntity> b = new DianPingDetailClawer(x, new CountDownLatchUtils(1));
+		b.detailAction();
 	}
 
 

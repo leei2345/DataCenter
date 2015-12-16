@@ -66,7 +66,10 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 			}
 			String html = httpGet(url);
 			Document doc = Jsoup.parse(html, url);
-			Elements nodes = doc.select("div.content ul > li");
+			Elements nodes = doc.select("div.content > div#shop-all-list > ul > li");
+			if (isHotel) {
+				nodes = doc.select("div.content > ul.hotelshop-list > li");
+			}
 			for (Element node : nodes) {
 				XiaoQuEntity x = new XiaoQuEntity();
 				x.setXiaoquType(xiaoquType);
@@ -97,7 +100,7 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 					continue;
 				}
 				x.setFromurl(sourceUrl);
-				x.setFormkey(IDENTIDY + sourceUrl.replaceAll("\\D+", ""));
+				x.setFromkey(IDENTIDY + sourceUrl.replaceAll("\\D+", ""));
 				box.add(x);
 			}
 		}

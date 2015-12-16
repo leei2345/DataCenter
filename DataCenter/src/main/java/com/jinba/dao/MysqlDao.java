@@ -25,11 +25,21 @@ import com.jinba.pojo.SyntaxEntity.SyntaxType;
 import com.jinba.pojo.TargetEntity;
 
 @Component
-public class MysqlDao {
+public class MysqlDao  {
 	
 	@Autowired
 	private DruidDataSource spiderSource;
-
+	
+	private static MysqlDao instance;
+	
+	public MysqlDao () {
+		instance = this;
+	}
+	
+	public static MysqlDao getInstance () {
+		return instance;
+	}
+	
 	/**
 	 * 更新代理检测结果
 	 * @return true  成功 false 失败

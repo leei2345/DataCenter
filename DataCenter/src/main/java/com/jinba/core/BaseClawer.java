@@ -6,10 +6,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.jinba.dao.MysqlDao;
 import com.jinba.spider.core.HttpMethod;
 import com.jinba.spider.core.HttpRequestConfig;
 import com.jinba.spider.core.HttpResponseConfig;
@@ -19,14 +17,12 @@ import com.jinba.spider.core.Params;
 public abstract class BaseClawer {
 
 	protected int targetId;
-	protected static MysqlDao dao;
 	protected Map<Params, String> paramsMap = new HashMap<Params, String>();
 	private static final String DEFAULTCHARSET = "UTF-8";
 	protected HttpMethod http = null;
 	private static Pattern sqlp = Pattern.compile("update.*? set\\s+(.*)\\s+where.*");
 	
 	public enum ActionRes {
-		
 		INITSUCC,
 		INITFAIL,
 		ANALYSIS_SUCC,
@@ -40,6 +36,10 @@ public abstract class BaseClawer {
 		http =  new HttpMethod(this.targetId);
 	}
 	
+	public BaseClawer () {
+		super();
+	}
+
 	/**
 	 * 初始化传入参数，list抓取传入城市名称，和模板url
 	 * @param paramsMap
@@ -47,11 +47,6 @@ public abstract class BaseClawer {
 	 */
 	protected abstract ActionRes initParams ();
 
-	@Autowired
-	public void setDao(MysqlDao dao) {
-		BaseClawer.dao = dao;
-	}
-	
 	public void setParamsMap (Map<Params, String> paramsMap) {
 		this.paramsMap = paramsMap;
 	}
@@ -83,7 +78,7 @@ public abstract class BaseClawer {
 				for (int index = 0; index < kvs.length; index++) {
 					String kv = kvs[index];
 					String[] kvArr = kv.trim().split("=");
-					if (StringUtils.isBlank(kvArr[1])) {
+					if (StringUtils.isBlank(kvArr[1].replace("'", ""))) {
 						if (index != (kvs.length - 1)) {
 							usql = usql.replaceAll(kv + "\\s?,", "");
 						} else {

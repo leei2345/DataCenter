@@ -3,6 +3,8 @@ package com.jinba.scheduled.dianping;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
@@ -26,6 +28,7 @@ public class DianPingDetailClawer extends BaseDetailClawer<XiaoQuEntity>{
 	private static final int TARGETID = 1;
 	private String sourceKey;
 	private static final String IDENTIDY = "dp_";
+	private static Pattern phonePattern = Pattern.compile("电话\\s?(:|：){1}\\s?(\\d+-?\\d+)\\s*");
 	
 	public DianPingDetailClawer(XiaoQuEntity detailEntity, CountDownLatchUtils cdl) {
 		super(TARGETID, detailEntity, cdl);
@@ -53,18 +56,36 @@ public class DianPingDetailClawer extends BaseDetailClawer<XiaoQuEntity>{
 			return ActionRes.ANALYSIS_FAIL;
 		}
 		Document doc = Jsoup.parse(html);
-		String phone = doc.select("div.basic-info > p[class=expand-info tel] > span.item").text().trim();
-		this.detailEntity.setPhone(phone);
+		boolean isHotel = detailEntity.isHotel();
+		String phone = null;
+		if (isHotel) {
+			String phoneStr = doc.select("div#hotel-intro > div.hotel-facilities > p >span").text().trim();
+			Matcher matcher = phonePattern.matcher(phoneStr);
+			if (matcher.find()) {
+				phone = matcher.group(2);
+			}
+		} else {
+			phone = doc.select("div.basic-info > p[class=expand-info tel] > span.item").text().trim();
+		}
 		JSONObject infoObject = JSONObject.parseObject(info);
 		JSONObject shopInfoObject = infoObject.getJSONObject("msg").getJSONObject("shopInfo");
 		int cityCode = shopInfoObject.getIntValue("cityId");
 		String cityName = DianPingCityCode.getCityName(cityCode);
+		if (StringUtils.isBlank(phone)) {
+			phone = shopInfoObject.getString("phoneNo");
+		}
+		this.detailEntity.setPhone(phone);
 		float glat = shopInfoObject.getFloat("glat");
 		float glng = shopInfoObject.getFloatValue("glng");
 		String address = shopInfoObject.getString("address");
 		this.detailEntity.setLongItude(new BigDecimal(String.valueOf(glng)));
 		this.detailEntity.setLatitude(new BigDecimal(String.valueOf(glat)));
-		String areaName = doc.select("div[class=expand-info address] > a[rel=nofollow] > span").text().trim();
+		String areaName = null;
+		if (isHotel) {
+			areaName = doc.select("div[class=breadcrumb] > a:eq(1)").text().trim();
+		} else {
+			areaName = doc.select("div[class=expand-info address] > a[rel=nofollow] > span").text().trim();
+		}
 		areaName = areaName.replace("其他", "");
 		String areaCode = DianPingCityMap.getAreaCodePro(areaName);
 		boolean isQu = true;
@@ -127,7 +148,10 @@ public class DianPingDetailClawer extends BaseDetailClawer<XiaoQuEntity>{
 		@SuppressWarnings("resource")
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
-		String json = "{\"address\":null,\"areacode\":null,\"createtime\":\"1970-01-01\",\"fromhost\":\"192.168.31.125\",\"fromkey\":\"dp_1768267\",\"fromurl\":\"http://www.dianping.com/shop/1768267\",\"headimg\":\"http://i1.s2.dpfile.com/pc/df9f6f962f08ccbc2fa9c7e9c55825f1(249x249)/thumb.jpg\",\"intro\":null,\"latitude\":0,\"longItude\":0,\"phone\":null,\"xiaoquType\":4,\"xiaoquname\":\"香山公园\"}";
+		/** 非酒店 */
+//		String json = "{\"address\":null,\"areacode\":null,\"createtime\":\"1970-01-01\",\"fromhost\":\"192.168.31.125\",\"fromkey\":\"dp_1768267\",\"fromurl\":\"http://www.dianping.com/shop/1768267\",\"headimg\":\"http://i1.s2.dpfile.com/pc/df9f6f962f08ccbc2fa9c7e9c55825f1(249x249)/thumb.jpg\",\"intro\":null,\"latitude\":0,\"longItude\":0,\"phone\":null,\"xiaoquType\":4,\"xiaoquname\":\"香山公园\"}";
+		/** 酒店 */
+		String json = "{\"address\":null,\"areacode\":null,\"createtime\":\"1970-01-01\",\"fromhost\":\"192.168.31.125\",\"fromkey\":\"dp_2802772\",\"fromurl\":\"http://www.dianping.com/shop/2802772\",\"headimg\":\"http://i3.s2.dpfile.com/pc/9479d8318516cb5693d7cfdc5cd6a61a(240c180)/thumb.jpg\",\"hotel\":true,\"intro\":null,\"latitude\":0,\"longItude\":0,\"phone\":null,\"xiaoquType\":3,\"xiaoquname\":\"王府井希尔顿酒店\"}";
 		XiaoQuEntity x = JSON.parseObject(json, XiaoQuEntity.class);
 		BaseDetailClawer<XiaoQuEntity> b = new DianPingDetailClawer(x, new CountDownLatchUtils(1));
 		b.detailAction();

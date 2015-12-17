@@ -10,15 +10,46 @@
         http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.1.xsd">
 
 	<bean id="proxyCheckTask" class="com.jinba.scheduled.ProxyCheckTask"></bean>
-	<bean id="dianPing_JD_ZRFG_Task" class="com.jinba.scheduled.DianPing_JD_ZRFG_Task"></bean>
+	<bean id="dianPing_GW_ZHSC_Task" class="com.jinba.scheduled.DianPing_GW_ZHSC_Task"></bean>
+	<bean id="dianPing_JD_CSGG_Task" class="com.jinba.scheduled.DianPing_JD_CSGG_Task"></bean>
+	<bean id="dianPing_JD_DZWY_Task" class="com.jinba.scheduled.DianPing_JD_DZWY_Task"></bean>
+	<bean id="dianPing_JD_GZ_Task" class="com.jinba.scheduled.DianPing_JD_GZ_Task"></bean>
 	<bean id="dianPing_JD_MSGJ_Task" class="com.jinba.scheduled.DianPing_JD_MSGJ_Task"></bean>
+	<bean id="dianPing_JD_YLY_Task" class="com.jinba.scheduled.DianPing_JD_YLY_Task"></bean>
+	<bean id="dianPing_JD_ZGZL_Task" class="com.jinba.scheduled.DianPing_JD_ZGZL_Task"></bean>
+	<bean id="dianPing_JD_ZRFG_Task" class="com.jinba.scheduled.DianPing_JD_ZRFG_Task"></bean>
+	<bean id="dianPing_JIUD_3XJJD_Task" class="com.jinba.scheduled.DianPing_JIUD_3XJJD_Task"></bean>
+	<bean id="dianPing_JIUD_DJC_Task" class="com.jinba.scheduled.DianPing_JIUD_DJC_Task"></bean>
+	<bean id="dianPing_JIUD_JJXJD_Task" class="com.jinba.scheduled.DianPing_JIUD_JJXJD_Task"></bean>
+	<bean id="dianPing_JIUD_SXJJD_Task" class="com.jinba.scheduled.DianPing_JIUD_SXJJD_Task"></bean>
+	<bean id="dianPing_JIUD_WXJJD_Task" class="com.jinba.scheduled.DianPing_JIUD_WXJJD_Task"></bean>
+	<bean id="dianPing_JYPX_JYYX_Task" class="com.jinba.scheduled.DianPing_JYPX_JYYX_Task"></bean>
+	<bean id="dianPing_SHFW_SWL_Task" class="com.jinba.scheduled.DianPing_SHFW_SWL_Task"></bean>
+	<bean id="dianPing_SHFW_XQ_SWL_Task" class="com.jinba.scheduled.DianPing_SHFW_XQ_SWL_Task"></bean>
+	<bean id="dianPing_SHFW_YY_Task" class="com.jinba.scheduled.DianPing_SHFW_YY_Task"></bean>
 
 
 	<task:scheduled-tasks>
 
 		<task:scheduled ref="proxyCheckTask" method="run" cron="0 0,30 * * * ?" />
-		<task:scheduled ref="dianPing_JD_ZRFG_Task" method="run" cron="0 30 1 17 * ?" />
-		<task:scheduled ref="dianPing_JD_MSGJ_Task" method="run" cron="0 30 2 16 * ?" />
+		<task:scheduled ref="dianPing_GW_ZHSC_Task" method="run" cron="0 20 0 19 * ?" />
+		<task:scheduled ref="dianPing_JD_CSGG_Task" method="run" cron="0 20 1 19 * ?" />
+		<task:scheduled ref="dianPing_JD_DZWY_Task" method="run" cron="0 20 2 19 * ?" />
+		<task:scheduled ref="dianPing_JD_GZ_Task" method="run" cron="0 20 3 19 * ?" />
+		<task:scheduled ref="dianPing_JD_MSGJ_Task" method="run" cron="0 20 4 19 * ?" />
+		<task:scheduled ref="dianPing_JD_YLY_Task" method="run" cron="0 20 5 19 * ?" />
+		<task:scheduled ref="dianPing_JD_ZGZL_Task" method="run" cron="0 20 6 19 * ?" />
+		<task:scheduled ref="dianPing_JD_ZRFG_Task" method="run" cron="0 20 7 19 * ?" />
+		<task:scheduled ref="dianPing_JIUD_3XJJD_Task" method="run" cron="0 20 8 19 * ?" />
+		<task:scheduled ref="dianPing_JIUD_DJC_Task" method="run" cron="0 20 9 19 * ?" />
+		<task:scheduled ref="dianPing_JIUD_JJXJD_Task" method="run" cron="0 40 0 19 * ?" />
+		<task:scheduled ref="dianPing_JIUD_SXJJD_Task" method="run" cron="0 40 1 19 * ?" />
+		<task:scheduled ref="dianPing_JIUD_WXJJD_Task" method="run" cron="0 40 2 19 * ?" />
+		<task:scheduled ref="dianPing_JYPX_JYYX_Task" method="run" cron="0 40 3 19 * ?" />
+		<task:scheduled ref="dianPing_SHFW_SWL_Task" method="run" cron="0 40 4 19 * ?" />
+		<task:scheduled ref="dianPing_SHFW_XQ_SWL_Task" method="run" cron="0 40 5 19 * ?" />
+		<task:scheduled ref="dianPing_SHFW_YY_Task" method="run" cron="0 40 6 19 * ?" />
+
 
 
 	</task:scheduled-tasks>

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class DianPing_JYPX_JYYX_Task extends DianPingTask {
 
-	private static final String tempUrl = "http://www.dianping.com/search/category/##/75/g260/p$$";
+	private static final String tempUrl = "http://www.dianping.com/search/category/##/75/g260p$$";
 	private static final int xiaoquType = 4;
 	
 	public DianPing_JYPX_JYYX_Task () {

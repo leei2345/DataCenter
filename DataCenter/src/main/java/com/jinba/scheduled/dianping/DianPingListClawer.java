@@ -73,11 +73,12 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 			for (Element node : nodes) {
 				XiaoQuEntity x = new XiaoQuEntity();
 				x.setXiaoquType(xiaoquType);
+				x.setHotel(isHotel);
 				String headPhotoUrl = node.select("div.pic > a > img").attr("data-src").trim();
 				if (isHotel) {
 					try {
 						Element photoNode = node.select("div.hotel-pics > ul > li").first();
-						headPhotoUrl = photoNode.select("a > img").attr("abs:src").trim();
+						headPhotoUrl = photoNode.select("a > img").attr("data-lazyload").trim();
 					} catch (Exception e) {
 					}
 				}

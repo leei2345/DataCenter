@@ -26,9 +26,16 @@ public class XiaoQuEntity extends BaseEntity {
 	private String intro;
 	/** 创建时间 */
 	private String createtime = "1970-01-01";
-	/** */
+	/** 电话 */
 	private String phone;
+	private boolean isHotel = false;
 	
+	public boolean isHotel() {
+		return isHotel;
+	}
+	public void setHotel(boolean isHotel) {
+		this.isHotel = isHotel;
+	}
 	public String getPhone() {
 		return phone;
 	}

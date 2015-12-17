@@ -100,7 +100,10 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 					continue;
 				}
 				x.setFromurl(sourceUrl);
-				x.setFromkey(IDENTIDY + sourceUrl.replaceAll("\\D+", ""));
+				String fromKey = IDENTIDY + sourceUrl.replaceAll("\\D+", "");
+				x.setFromkey(fromKey);
+				ImageClawer imageClawer = new ImageClawer(headPhotoUrl, TARGETID, fromKey);
+				ImageClawer.ExecutorClaw(imageClawer);
 				box.add(x);
 			}
 		}

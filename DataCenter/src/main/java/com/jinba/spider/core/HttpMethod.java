@@ -762,8 +762,10 @@ public class HttpMethod {
 		builderInner.setSocketTimeout(20000);
 		String imageType = "txt";
 		for (int retryIndex = 1; retryIndex <= retryCount; retryIndex++) {
-			this.get = new HttpGet();
-			this.get.setConfig(builderInner.build());
+			if (this.get == null) {
+				this.get = new HttpGet();
+			}
+			this.get.setConfig(config.build());
 			if (retryIndex >= retryCount) {
 				this.get.abort();
 				this.get.releaseConnection();
@@ -791,7 +793,15 @@ public class HttpMethod {
 				if (header != null) {
 					String value = header.getValue();
 					if ((value.contains("image")) || (value.contains("Image"))) {
-						imageType = value.replaceAll(".", "").replace(";", "");
+						if (value.toLowerCase().contains("jpeg")) {
+							imageType = "jpg";
+						} else if (value.toLowerCase().contains("jpg")) {
+							imageType = "jpg";
+						} else if (value.toLowerCase().contains("png")) {
+							imageType = "png";
+						} else if (value.toLowerCase().contains("gif")) {
+							imageType = "gif";
+						}
 					}
 				}
 				imageTypeArr = imageType.getBytes();

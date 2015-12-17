@@ -9,9 +9,14 @@ public class LoggerUtil {
 	private static Logger httpLogger = LoggerFactory.getLogger("httpLogger");
 	private static Logger proxyLogger = LoggerFactory.getLogger("proxyLogger");
 	private static Logger taskLogger = LoggerFactory.getLogger("taskLogger");
+	private static Logger imageLogger = LoggerFactory.getLogger("imageLogger");
 
 	public static void ClawerInfoLog (String log) {
 		clawerLogger.info(log);
+	}
+	
+	public static void ImageInfoLog (String log) {
+		imageLogger.info(log);
 	}
 	
 	public static void TaskInfoLog (String log) {

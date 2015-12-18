@@ -90,7 +90,7 @@ public class DianPingDetailClawer extends BaseDetailClawer<XiaoQuEntity>{
 		String areaCode = DianPingCityMap.getAreaCodePro(areaName);
 		boolean isQu = true;
 		if (StringUtils.isBlank(areaCode)) {
-			areaCode = DianPingCityMap.getAreaCode(cityName);
+			areaCode = DianPingCityMap.getAreaCode(areaName);
 			isQu = false;
 		}
 		this.detailEntity.setAreacode(areaCode);
@@ -149,9 +149,9 @@ public class DianPingDetailClawer extends BaseDetailClawer<XiaoQuEntity>{
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
 		/** 非酒店 */
-//		String json = "{\"address\":null,\"areacode\":null,\"createtime\":\"1970-01-01\",\"fromhost\":\"192.168.31.125\",\"fromkey\":\"dp_1768267\",\"fromurl\":\"http://www.dianping.com/shop/1768267\",\"headimg\":\"http://i1.s2.dpfile.com/pc/df9f6f962f08ccbc2fa9c7e9c55825f1(249x249)/thumb.jpg\",\"intro\":null,\"latitude\":0,\"longItude\":0,\"phone\":null,\"xiaoquType\":4,\"xiaoquname\":\"香山公园\"}";
+		String json = "{\"address\":null,\"areacode\":null,\"createtime\":\"1970-01-01\",\"fromhost\":\"192.168.31.125\",\"fromkey\":\"dp_1769485\",\"fromurl\":\"http://www.dianping.com/shop/1768267\",\"headimg\":\"http://i1.s2.dpfile.com/pc/df9f6f962f08ccbc2fa9c7e9c55825f1(249x249)/thumb.jpg\",\"intro\":null,\"latitude\":0,\"longItude\":0,\"phone\":null,\"xiaoquType\":4,\"xiaoquname\":\"香山公园\"}";
 		/** 酒店 */
-		String json = "{\"address\":null,\"areacode\":null,\"createtime\":\"1970-01-01\",\"fromhost\":\"192.168.31.125\",\"fromkey\":\"dp_2802772\",\"fromurl\":\"http://www.dianping.com/shop/2802772\",\"headimg\":\"http://i3.s2.dpfile.com/pc/9479d8318516cb5693d7cfdc5cd6a61a(240c180)/thumb.jpg\",\"hotel\":true,\"intro\":null,\"latitude\":0,\"longItude\":0,\"phone\":null,\"xiaoquType\":3,\"xiaoquname\":\"王府井希尔顿酒店\"}";
+//		String json = "{\"address\":null,\"areacode\":null,\"createtime\":\"1970-01-01\",\"fromhost\":\"192.168.31.125\",\"fromkey\":\"dp_1769485\",\"fromurl\":\"http://www.dianping.com/shop/2802772\",\"headimg\":\"http://i3.s2.dpfile.com/pc/9479d8318516cb5693d7cfdc5cd6a61a(240c180)/thumb.jpg\",\"hotel\":true,\"intro\":null,\"latitude\":0,\"longItude\":0,\"phone\":null,\"xiaoquType\":3,\"xiaoquname\":\"王府井希尔顿酒店\"}";
 		XiaoQuEntity x = JSON.parseObject(json, XiaoQuEntity.class);
 		BaseDetailClawer<XiaoQuEntity> b = new DianPingDetailClawer(x, new CountDownLatchUtils(1));
 		b.detailAction();

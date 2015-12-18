@@ -26,7 +26,10 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 	private String eachPageUrl;
 	private int pageCount = 1;
 	private int xiaoquType;
+	private DianPingAnalysisType analysisType;
+	private Map<Params, String> cityInfo = new HashMap<Params, String>();
 	private static final String IDENTIDY = "dp_";
+	private static Map<String, V>
 	
 	public DianPingListClawer (Map<Params, String> paramsMap) {
 		super(TARGETID);
@@ -38,9 +41,14 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 		String city = paramsMap.get(Params.area);
 		String cityNumCode = DianPingCityMap.getCityNumCode(city);
 		String cityEnCode = DianPingCityMap.getCityEnCode(city);
+		String ownCityCode = DianPingCityMap.getAreaCode(city);
 		if (StringUtils.isBlank(cityNumCode) ||  StringUtils.isBlank(cityEnCode)) {
 			return ActionRes.ANALYSIS_FAIL;
 		}
+		cityInfo.put(Params.cityname, city);
+		cityInfo.put(Params.citycode, ownCityCode);
+		analysisType = DianPingAnalysisType.valueOf(paramsMap.get(Params.analysistype));
+		
 		String tempUrl = paramsMap.get(Params.tempurl);
 		eachPageUrl = tempUrl.replace("@@", cityEnCode).replace("##", cityNumCode);
 		String page1Url = eachPageUrl.replace("$$", "1");
@@ -73,7 +81,9 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 			for (Element node : nodes) {
 				XiaoQuEntity x = new XiaoQuEntity();
 				x.setXiaoquType(xiaoquType);
-				x.setHotel(isHotel);
+				x.setListAnalysisType(DianPingAnalysisType.general_list);
+				x.setList(DianPingAnalysisType.general_list);
+				x.setCityInfo(cityInfo);
 				String headPhotoUrl = node.select("div.pic > a > img").attr("data-src").trim();
 				if (isHotel) {
 					try {

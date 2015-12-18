@@ -16,6 +16,7 @@ import com.jinba.core.BaseDetailClawer;
 import com.jinba.core.BaseListClawer;
 import com.jinba.dao.MysqlDao;
 import com.jinba.pojo.XiaoQuEntity;
+import com.jinba.scheduled.dianping.DianPingAnalysisType;
 import com.jinba.scheduled.dianping.DianPingDetailClawer;
 import com.jinba.scheduled.dianping.DianPingListClawer;
 import com.jinba.spider.core.Params;
@@ -27,15 +28,17 @@ public class DianPingTask implements Runnable {
 
 	private String tempUrl;
 	private int xiaoquType;
+	private DianPingAnalysisType analysisType;
 	@Resource
 	private MysqlDao dao;
 	@Value("${dpclaw.thread.pool}")
 	private int threadPoolSize = 40;
 	private static ExecutorService threadPool;
 	
-	public DianPingTask (String tempUrl, int xiaoquType) {
+	public DianPingTask (String tempUrl, int xiaoquType, DianPingAnalysisType analysisType) {
 		this.tempUrl = tempUrl;
 		this.xiaoquType = xiaoquType;
+		this.analysisType = analysisType;
 	}
 	
 	public DianPingTask () {
@@ -52,6 +55,7 @@ public class DianPingTask implements Runnable {
 			paramsMap.put(Params.area, cityName);
 			paramsMap.put(Params.tempurl, tempUrl);
 			paramsMap.put(Params.xiaoquType, String.valueOf(xiaoquType));
+			paramsMap.put(Params.analysistype, analysisType.toString());
 			BaseListClawer<XiaoQuEntity> listClawer = new DianPingListClawer(paramsMap);
 			List<XiaoQuEntity> eachCityXiaoqu = listClawer.listAction();
 			if (eachCityXiaoqu != null) {

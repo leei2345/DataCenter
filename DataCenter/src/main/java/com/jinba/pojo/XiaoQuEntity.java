@@ -1,6 +1,11 @@
 package com.jinba.pojo;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.jinba.scheduled.dianping.DianPingAnalysisType;
+import com.jinba.spider.core.Params;
 
 public class XiaoQuEntity extends BaseEntity {
 
@@ -28,13 +33,28 @@ public class XiaoQuEntity extends BaseEntity {
 	private String createtime = "1970-01-01";
 	/** 电话 */
 	private String phone;
-	private boolean isHotel = false;
-	
-	public boolean isHotel() {
-		return isHotel;
+	/** 类型0大众类型 1酒店类 2教育类 */
+	private DianPingAnalysisType listAnalysisType = DianPingAnalysisType.general_list;
+	private DianPingAnalysisType detailAnalysisType = DianPingAnalysisType.general_detail;
+	private Map<Params, String> cityInfo = new HashMap<Params, String>();
+
+	public DianPingAnalysisType getListAnalysisType() {
+		return listAnalysisType;
 	}
-	public void setHotel(boolean isHotel) {
-		this.isHotel = isHotel;
+	public void setListAnalysisType(DianPingAnalysisType listAnalysisType) {
+		this.listAnalysisType = listAnalysisType;
+	}
+	public DianPingAnalysisType getDetailAnalysisType() {
+		return detailAnalysisType;
+	}
+	public void setDetailAnalysisType(DianPingAnalysisType detailAnalysisType) {
+		this.detailAnalysisType = detailAnalysisType;
+	}
+	public Map<Params, String> getCityInfo() {
+		return cityInfo;
+	}
+	public void setCityInfo(Map<Params, String> cityInfo) {
+		this.cityInfo = cityInfo;
 	}
 	public String getPhone() {
 		return phone;

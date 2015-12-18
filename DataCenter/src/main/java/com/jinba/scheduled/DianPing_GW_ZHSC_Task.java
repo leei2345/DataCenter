@@ -12,6 +12,7 @@ public class DianPing_GW_ZHSC_Task extends DianPingTask {
 
 	private static final String tempUrl = "http://www.dianping.com/search/category/##/20/g119p$$";
 	private static final int xiaoquType = 3;
+	private static final int analysisType = 3;
 	
 	public DianPing_GW_ZHSC_Task () {
 		super(tempUrl, xiaoquType);

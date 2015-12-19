@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.jinba.scheduled.dianping.DianPingAnalysisType;
 import com.jinba.spider.core.Params;
 
 public class XiaoQuEntity extends BaseEntity {
@@ -34,21 +33,14 @@ public class XiaoQuEntity extends BaseEntity {
 	/** 电话 */
 	private String phone;
 	/** 类型0大众类型 1酒店类 2教育类 */
-	private DianPingAnalysisType listAnalysisType = DianPingAnalysisType.general_list;
-	private DianPingAnalysisType detailAnalysisType = DianPingAnalysisType.general_detail;
+	private AnalysisType analysisType = AnalysisType.dp_general;
 	private Map<Params, String> cityInfo = new HashMap<Params, String>();
-
-	public DianPingAnalysisType getListAnalysisType() {
-		return listAnalysisType;
+	
+	public AnalysisType getAnalysisType() {
+		return analysisType;
 	}
-	public void setListAnalysisType(DianPingAnalysisType listAnalysisType) {
-		this.listAnalysisType = listAnalysisType;
-	}
-	public DianPingAnalysisType getDetailAnalysisType() {
-		return detailAnalysisType;
-	}
-	public void setDetailAnalysisType(DianPingAnalysisType detailAnalysisType) {
-		this.detailAnalysisType = detailAnalysisType;
+	public void setAnalysisType(AnalysisType analysisType) {
+		this.analysisType = analysisType;
 	}
 	public Map<Params, String> getCityInfo() {
 		return cityInfo;

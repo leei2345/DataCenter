@@ -15,8 +15,8 @@ import org.springframework.stereotype.Component;
 import com.jinba.core.BaseDetailClawer;
 import com.jinba.core.BaseListClawer;
 import com.jinba.dao.MysqlDao;
+import com.jinba.pojo.AnalysisType;
 import com.jinba.pojo.XiaoQuEntity;
-import com.jinba.scheduled.dianping.DianPingAnalysisType;
 import com.jinba.scheduled.dianping.DianPingDetailClawer;
 import com.jinba.scheduled.dianping.DianPingListClawer;
 import com.jinba.spider.core.Params;
@@ -28,14 +28,14 @@ public class DianPingTask implements Runnable {
 
 	private String tempUrl;
 	private int xiaoquType;
-	private DianPingAnalysisType analysisType;
+	private AnalysisType analysisType;
 	@Resource
 	private MysqlDao dao;
 	@Value("${dpclaw.thread.pool}")
 	private int threadPoolSize = 40;
 	private static ExecutorService threadPool;
 	
-	public DianPingTask (String tempUrl, int xiaoquType, DianPingAnalysisType analysisType) {
+	public DianPingTask (String tempUrl, int xiaoquType, AnalysisType analysisType) {
 		this.tempUrl = tempUrl;
 		this.xiaoquType = xiaoquType;
 		this.analysisType = analysisType;

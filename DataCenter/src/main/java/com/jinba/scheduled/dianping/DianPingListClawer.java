@@ -12,6 +12,7 @@ import org.jsoup.select.Elements;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.jinba.core.BaseListClawer;
+import com.jinba.pojo.AnalysisType;
 import com.jinba.pojo.XiaoQuEntity;
 import com.jinba.spider.core.Params;
 
@@ -26,10 +27,9 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 	private String eachPageUrl;
 	private int pageCount = 1;
 	private int xiaoquType;
-	private DianPingAnalysisType analysisType;
+	private AnalysisType analysisType;
 	private Map<Params, String> cityInfo = new HashMap<Params, String>();
 	private static final String IDENTIDY = "dp_";
-	private static Map<String, V>
 	
 	public DianPingListClawer (Map<Params, String> paramsMap) {
 		super(TARGETID);
@@ -47,7 +47,7 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 		}
 		cityInfo.put(Params.cityname, city);
 		cityInfo.put(Params.citycode, ownCityCode);
-		analysisType = DianPingAnalysisType.valueOf(paramsMap.get(Params.analysistype));
+		analysisType = AnalysisType.valueOf(paramsMap.get(Params.analysistype));
 		
 		String tempUrl = paramsMap.get(Params.tempurl);
 		eachPageUrl = tempUrl.replace("@@", cityEnCode).replace("##", cityNumCode);
@@ -66,26 +66,21 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 
 	@Override
 	protected void analysisAction(List<XiaoQuEntity> box) {
-		boolean isHotel = false;
 		for (int pageIndex = 1; pageIndex <= pageCount; pageIndex++) {
 			String url = eachPageUrl.replace("$$", String.valueOf(pageIndex));
-			if (url.contains("hotel")) {
-				isHotel = true;
-			}
 			String html = httpGet(url);
 			Document doc = Jsoup.parse(html, url);
 			Elements nodes = doc.select("div.content > div#shop-all-list > ul > li");
-			if (isHotel) {
+			if (AnalysisType.dp_hotel.equals(analysisType)) {
 				nodes = doc.select("div.content > ul.hotelshop-list > li");
 			}
 			for (Element node : nodes) {
 				XiaoQuEntity x = new XiaoQuEntity();
 				x.setXiaoquType(xiaoquType);
-				x.setListAnalysisType(DianPingAnalysisType.general_list);
-				x.setList(DianPingAnalysisType.general_list);
+				x.setAnalysisType(analysisType);
 				x.setCityInfo(cityInfo);
 				String headPhotoUrl = node.select("div.pic > a > img").attr("data-src").trim();
-				if (isHotel) {
+				if (AnalysisType.dp_hotel.equals(analysisType)) {
 					try {
 						Element photoNode = node.select("div.hotel-pics > ul > li").first();
 						headPhotoUrl = photoNode.select("a > img").attr("data-lazyload").trim();
@@ -96,7 +91,7 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 					x.setHeadimg(headPhotoUrl);
 				}		
 				String xiaoquName = node.select("div.tit > a > h4").text().trim();
-				if (isHotel) {
+				if (AnalysisType.dp_hotel.equals(analysisType)) {
 					xiaoquName = node.select("div.hotel-info-main > h2 > a.hotel-name-link").text().trim();
 				}
 				if (StringUtils.isBlank(xiaoquName)) {
@@ -104,7 +99,7 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 				}
 				x.setXiaoquname(xiaoquName);
 				String sourceUrl = node.select("div.pic > a").attr("abs:href").trim();
-				if (isHotel) {
+				if (AnalysisType.dp_hotel.equals(analysisType)) {
 					sourceUrl = node.select("div.hotel-info-main > h2 > a.hotel-name-link").attr("abs:href").trim();
 				}
 				if (StringUtils.isBlank(sourceUrl)) {

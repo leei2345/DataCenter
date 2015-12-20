@@ -45,7 +45,7 @@ public class DianPingDetailClawer extends BaseDetailClawer<XiaoQuEntity>{
 
 	@Override
 	protected String getDetailHtml() {
-		sourceKey = detailEntity.getFromkey().replace(IDENTIDY, "");;
+		sourceKey = detailEntity.getFromkey().replace(IDENTIDY, "");
 		String url = "http://www.dianping.com/shop/" + sourceKey;
 		String html = httpGet(url);
 		return html;

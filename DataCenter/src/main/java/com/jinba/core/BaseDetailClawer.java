@@ -43,6 +43,9 @@ public abstract class BaseDetailClawer<T extends BaseEntity> extends BaseClawer 
 		watch.start();
 		StringBuilder logBuilder = new StringBuilder("[DetailClaw][" + targetId + "][" + detailEntity.getFromkey() + "]");
 		try {
+			/**
+			 * 初始化传入参数
+			 */
 			ActionRes initRes = initParams();
 			watch.split();
 			long initParamsTime = watch.getSplitTime();
@@ -54,6 +57,9 @@ public abstract class BaseDetailClawer<T extends BaseEntity> extends BaseClawer 
 			}
 			watch.reset();
 			watch.start();
+			/**
+			 * 详情页数据抓取
+			 */
 			String html = getDetailHtml();
 			watch.split();
 			long getHtmlTime = watch.getSplitTime();
@@ -65,6 +71,9 @@ public abstract class BaseDetailClawer<T extends BaseEntity> extends BaseClawer 
 			}
 			watch.reset();
 			watch.start();
+			/**
+			 * 解析详情页数据
+			 */
 			ActionRes analysisRes = analysistDetail(html, new DBHandle() {
 				 public  List<Map<String, Object>> select(String sql) {
 					 return MysqlDao.getInstance().select(sql);

@@ -420,7 +420,7 @@ public class MysqlDao  {
 		ResultSet rs = null;
 		Map<String, String> res = new HashMap<String, String>();
 		try {
-			String sql = "select areaname,areacode from t_area where areaname LIKE '%区'";
+			String sql = "select areaname,areacode from t_area where level=4";
 			conn = spiderSource.getConnection();
 			st = conn.prepareStatement(sql);
 			rs = st.executeQuery();

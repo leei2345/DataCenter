@@ -21,7 +21,7 @@ import com.jinba.utils.LoggerUtil;
  */
 public abstract class BaseDetailClawer<T extends BaseEntity> extends BaseClawer implements Runnable {
 
-	protected T detailEntity;
+	protected T detailEntity; 
 	protected CountDownLatchUtils cdl;
 	
 	public BaseDetailClawer(int targetId, T detailEntity, CountDownLatchUtils cdl) {

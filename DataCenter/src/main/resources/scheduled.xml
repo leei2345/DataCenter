@@ -33,10 +33,10 @@
 	<task:scheduled-tasks scheduler="scheduler">
 
 		<task:scheduled ref="proxyCheckTask" method="run" cron="0 0,30 * * * ?" />
-		<task:scheduled ref="dianPing_GW_ZHSC_Task" method="run" cron="0 0 16 22 * ?" />
-		<task:scheduled ref="dianPing_JD_CSGG_Task" method="run" cron="0 15 16 22 * ?" />
-		<task:scheduled ref="dianPing_JD_DZWY_Task" method="run" cron="0 30 16 22 * ?" />
-		<task:scheduled ref="dianPing_JD_GZ_Task" method="run" cron="0 45 16 22 * ?" />
+		<task:scheduled ref="dianPing_GW_ZHSC_Task" method="run" cron="0 15 20 22 * ?" />
+		<task:scheduled ref="dianPing_JD_CSGG_Task" method="run" cron="0 30 20 22 * ?" />
+		<task:scheduled ref="dianPing_JD_DZWY_Task" method="run" cron="0 45 20 22 * ?" />
+		<task:scheduled ref="dianPing_JD_GZ_Task" method="run" cron="0 0 21 22 * ?" />
 		<task:scheduled ref="dianPing_JD_MSGJ_Task" method="run" cron="0 0 17 22 * ?" />
 		<task:scheduled ref="dianPing_JD_YLY_Task" method="run" cron="0 15 17 22 * ?" />
 		<task:scheduled ref="dianPing_JD_ZGZL_Task" method="run" cron="0 30 17 22 * ?" />

@@ -61,6 +61,9 @@ public class ImageClawer implements Runnable {
 		}
 		
 		byte[][] imageClawRes = http.GetImageByteArr(imageUrl);
+		if (imageClawRes == null || imageClawRes[0] ==null || imageClawRes[1] == null) {
+			return;
+		}
 		String fileType = new String(imageClawRes[1]);
 		if (StringUtils.equals(fileType, "txt") || StringUtils.isBlank(fileType)) {
 			LoggerUtil.ImageInfoLog("[ImageClaw][" + targetId + "][" + identidy + "][" + imageUrl + "][Fail]");

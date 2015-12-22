@@ -81,7 +81,18 @@ public class DianPingDetailClawer extends BaseDetailClawer<XiaoQuEntity>{
 			phone = doc.select("div.basic-info > p[class=expand-info tel] > span.item").text().trim();
 			areaNameNodes = doc.select("div.breadcrumb > a");
 		}
-		JSONObject infoObject = JSONObject.parseObject(info);
+		JSONObject infoObject = null;
+		try {
+			infoObject = JSONObject.parseObject(info);
+		} catch (Exception e) {
+			info = httpGet(url);
+			try {
+				infoObject = JSONObject.parseObject(info);
+			} catch (Exception innere) {
+				innere.printStackTrace();
+				return ActionRes.ANALYSIS_FAIL;
+			}
+		}
 		JSONObject shopInfoObject = infoObject.getJSONObject("msg").getJSONObject("shopInfo");
 		if (StringUtils.isBlank(phone)) {
 			phone = shopInfoObject.getString("phoneNo");
@@ -98,7 +109,7 @@ public class DianPingDetailClawer extends BaseDetailClawer<XiaoQuEntity>{
 			Element node = areaNameNodes.get(index);
 			String areaName = node.text();
 			areaNameList.add(areaName);
-			areaName = areaName.replace("其他", "");
+			areaName = areaName.replace("其他", "").replace("景点", "").replace("酒店", "").replace("购物", "").replace("休闲娱乐", "");
 			String[] innerArr = areaName.split("/");
 			for (String inner : innerArr) {
 				if (StringUtils.isBlank(areaCode)) {
@@ -174,7 +185,7 @@ public class DianPingDetailClawer extends BaseDetailClawer<XiaoQuEntity>{
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
 		/** 非酒店 */
-		String json = "{\"address\":null,\"analysisType\":\"dp_general\",\"areacode\":null,\"cityInfo\":{\"citycode\":\"1101\",\"cityname\":\"北京市\"},\"createtime\":\"1970-01-01\",\"fromhost\":\"www.dianping.com\",\"fromkey\":\"14695025\",\"fromurl\":\"http://www.dianping.com/shop/14695025\",\"headimg\":\"http://i3.s2.dpfile.com/pc/9479d8318516cb5693d7cfdc5cd6a61a(240c180)/thumb.jpg\",\"intro\":null,\"latitude\":0,\"longItude\":0,\"phone\":null,\"xiaoquType\":3,\"xiaoquname\":\"新城滨河森林公园\"}";
+		String json = "{\"address\":null,\"analysisType\":\"dp_general\",\"areacode\":null,\"cityInfo\":{\"citycode\":\"1101\",\"cityname\":\"北京市\"},\"createtime\":\"1970-01-01\",\"fromhost\":\"www.dianping.com\",\"fromkey\":\"17006187\",\"fromurl\":\"http://www.dianping.com/shop/14695025\",\"headimg\":\"http://i3.s2.dpfile.com/pc/9479d8318516cb5693d7cfdc5cd6a61a(240c180)/thumb.jpg\",\"intro\":null,\"latitude\":0,\"longItude\":0,\"phone\":null,\"xiaoquType\":3,\"xiaoquname\":\"新城滨河森林公园\"}";
 		/** 酒店 */
 //		String json = "{\"address\":null,\"areacode\":null,\"createtime\":\"1970-01-01\",\"fromhost\":\"192.168.31.125\",\"fromkey\":\"dp_1769485\",\"fromurl\":\"http://www.dianping.com/shop/2802772\",\"headimg\":\"http://i3.s2.dpfile.com/pc/9479d8318516cb5693d7cfdc5cd6a61a(240c180)/thumb.jpg\",\"hotel\":true,\"intro\":null,\"latitude\":0,\"longItude\":0,\"phone\":null,\"xiaoquType\":3,\"xiaoquname\":\"王府井希尔顿酒店\"}";
 		/** 购物 */

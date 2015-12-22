@@ -23,7 +23,9 @@ public class ImageClawer implements Runnable {
 	protected HttpMethod http = null;
 	private String imageUrl;
 	private int targetId;
+	private String targetInfo;
 	private String identidy;
+	private String imageDirName;
 
 	static {
 		imgeFilePath = ConfigUtils.getValue(IMAGEPATHCONF);
@@ -31,11 +33,21 @@ public class ImageClawer implements Runnable {
 		threadPool = Executors.newFixedThreadPool(Integer.parseInt(threadPoolStr));
 	}
 	
-	public ImageClawer (String url, int targetId, String identidy) {
+	public ImageClawer (String url, int targetId, String targetInfo, String identidy) {
 		this.http = new HttpMethod(targetId);
 		this.imageUrl = url;
 		this.targetId = targetId;
 		this.identidy = identidy;
+		this.targetInfo = targetInfo;
+	}
+	
+	public ImageClawer (String url, int targetId, String targetInfo, String identidy, String imageDirName) {
+		this.http = new HttpMethod(targetId);
+		this.imageUrl = url;
+		this.targetId = targetId;
+		this.targetInfo = targetInfo;
+		this.identidy = identidy;
+		this.imageDirName = imageDirName;
 	}
 	
 	public static void ExecutorClaw (ImageClawer imageClawer) {
@@ -47,14 +59,22 @@ public class ImageClawer implements Runnable {
 			LoggerUtil.ImageInfoLog("[ImageClaw][" + targetId + "][" + identidy + "][" + imageUrl + "][Fail]");
 			return;
 		}
+		
 		byte[][] imageClawRes = http.GetImageByteArr(imageUrl);
 		String fileType = new String(imageClawRes[1]);
 		if (StringUtils.equals(fileType, "txt") || StringUtils.isBlank(fileType)) {
 			LoggerUtil.ImageInfoLog("[ImageClaw][" + targetId + "][" + identidy + "][" + imageUrl + "][Fail]");
 			return;
 		}
-		String filePath = imgeFilePath + targetId + "/" + identidy + "." + fileType;
-		File dir = new File(imgeFilePath + targetId + "/");
+		String filePath = "";
+		File dir = null;
+		if (!StringUtils.isBlank(imageDirName)) {
+			dir = new File(imgeFilePath + targetInfo + "/" + imageDirName + "/");
+			filePath = imgeFilePath + targetInfo + "/" + imageDirName + "/"+ identidy + "." + fileType;
+		} else {
+			filePath = imgeFilePath + targetInfo + "/" + identidy + "." + fileType;
+			dir = new File(imgeFilePath + targetInfo + "/");
+		}
 		if (!dir.exists()) {
 			dir.mkdirs();
 		}

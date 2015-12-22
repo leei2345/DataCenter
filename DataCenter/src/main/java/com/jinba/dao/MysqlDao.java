@@ -414,13 +414,56 @@ public class MysqlDao  {
 		return res;
 	}
 	
-	public Map<String, String> getAreaCodeMap () {
+	public Map<String, String> getShangQuanMap () {
 		DruidPooledConnection conn = null;
 		PreparedStatement st = null;
 		ResultSet rs = null;
 		Map<String, String> res = new HashMap<String, String>();
 		try {
 			String sql = "select areaname,areacode from t_area where level=4";
+			conn = spiderSource.getConnection();
+			st = conn.prepareStatement(sql);
+			rs = st.executeQuery();
+			while (rs.next()) {
+				String areaCode = rs.getString("areacode");
+				String areaName = rs.getString("areaname");
+				res.put(areaName, areaCode);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			if (st != null) {
+				try {
+					st.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return res;
+	}
+	
+	public Map<String, String> getChengquCode () {
+		DruidPooledConnection conn = null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		Map<String, String> res = new HashMap<String, String>();
+		try {
+			String sql = "select areaname,areacode from t_area where level=3";
 			conn = spiderSource.getConnection();
 			st = conn.prepareStatement(sql);
 			rs = st.executeQuery();

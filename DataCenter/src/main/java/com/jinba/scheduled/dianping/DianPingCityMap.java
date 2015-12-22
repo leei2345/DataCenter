@@ -14,7 +14,9 @@ import com.jinba.dao.MysqlDao;
 public class DianPingCityMap {
 	
 	private static Map<String, String> cityMap = new HashMap<String, String>();
-	private static Map<String, String> areaMap = new HashMap<String, String>();
+	private static Map<String, String> shangquanMap = new HashMap<String, String>();
+	private static Map<String, String> chengquMap = new HashMap<String, String>();
+
 	
 	static {
 		
@@ -2281,12 +2283,32 @@ public class DianPingCityMap {
 		return cityInfoArr[index];
 	}
 	
-	
-	public static String getAreaCodePro (String cityName) {
-		if (areaMap.size() == 0) {
-			areaMap = MysqlDao.getInstance().getAreaCodeMap();
+	/**
+	 * 商圈匹配
+	 * @param cityName
+	 * @return
+	 */
+	public static String getShangquanCode (String cityName) {
+		if (shangquanMap.size() == 0) {
+			shangquanMap = MysqlDao.getInstance().getShangQuanMap();
 		}
-		String cityInfo = areaMap.get(cityName);
+		String cityInfo = shangquanMap.get(cityName);
+		if (StringUtils.isBlank(cityInfo)) {
+			return "";
+		}
+		return cityInfo;
+	}
+	
+	/**
+	 * 商圈匹配
+	 * @param cityName
+	 * @return
+	 */
+	public static String getChengQuCode (String cityName) {
+		if (chengquMap.size() == 0) {
+			chengquMap = MysqlDao.getInstance().getChengquCode();
+		}
+		String cityInfo = chengquMap.get(cityName);
 		if (StringUtils.isBlank(cityInfo)) {
 			return "";
 		}

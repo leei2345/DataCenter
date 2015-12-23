@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -14,7 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.jinba.core.BaseDetailClawer;
-import com.jinba.core.BaseListClawer;
 import com.jinba.dao.MysqlDao;
 import com.jinba.pojo.AnalysisType;
 import com.jinba.pojo.XiaoQuEntity;
@@ -62,13 +62,43 @@ public class DianPingTask implements Runnable {
 			DianPingListClawer listClawer = new DianPingListClawer(paramsMap);
 			resultList.add(listThreadPool.submit(listClawer));
 		}
-		List<XiaoQuEntity> 
-		int xiaoquSize = detailList.size();
+		int xiaoquSize = 0;
+		for (Future<List<XiaoQuEntity>> future : resultList) {
+			List<XiaoQuEntity> cityXiaoquList;
+			try {
+				cityXiaoquList = future.get();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+				continue;
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+				continue;
+			}
+			if (cityXiaoquList != null) {
+				xiaoquSize += cityXiaoquList.size();
+			}
+		}
+		listThreadPool.shutdownNow();
+		listThreadPool = null;
 		detailThreadPool = Executors.newFixedThreadPool(threadPoolSize);
 		CountDownLatchUtils cdl = new CountDownLatchUtils(xiaoquSize);
-		for (Future<List<XiaoQuEntity>> xiaoQuEntity : detailList) {
-			BaseDetailClawer<XiaoQuEntity> detailClawer = new DianPingDetailClawer(xiaoQuEntity, cdl);
-			detailThreadPool.execute(detailClawer);
+		for (Future<List<XiaoQuEntity>> future : resultList) {
+			List<XiaoQuEntity> cityXiaoquList;
+			try {
+				cityXiaoquList = future.get();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+				continue;
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+				continue;
+			}
+			if (cityXiaoquList !=null) {
+				for (XiaoQuEntity inner : cityXiaoquList) {
+					BaseDetailClawer<XiaoQuEntity> detailClawer = new DianPingDetailClawer(inner, cdl);
+					detailThreadPool.execute(detailClawer);
+				}
+			}
 		}
 		try {
 			cdl.await();

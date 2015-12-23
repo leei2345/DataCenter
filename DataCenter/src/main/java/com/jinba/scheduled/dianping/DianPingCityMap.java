@@ -447,7 +447,7 @@ public class DianPingCityMap {
 		cityMap.put("肇东市", "231282_816_zhaodong");
 		cityMap.put("海伦市", "231283_817_hailun");
 		cityMap.put("望奎县", "231221_818_wangkui");
-		cityMap.put("兰���县", "231222_819_lanxixian");
+		cityMap.put("兰西县", "231222_819_lanxixian");
 		cityMap.put("青冈县", "231223_820_qinggang");
 		cityMap.put("庆安县", "231224_821_qingan");
 		cityMap.put("明水县", "231225_822_mingshui");

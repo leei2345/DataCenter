@@ -40,7 +40,7 @@ public abstract class BaseListClawer<T extends BaseEntity> extends BaseClawer {
 	public List<T> listAction () {
 		StopWatch watch = new StopWatch();
 		watch.start();
-		StringBuilder logBuilder = new StringBuilder("[ListClaw][" + targetId + "][" + JSON.toJSONString(paramsMap) + "]");
+		StringBuilder logBuilder = new StringBuilder("[ListClaw][" + targetId + "][" + this.getClass().getSimpleName() + "][" + JSON.toJSONString(paramsMap) + "]");
 		try {
 			ActionRes initRes = initParams();
 			watch.split();
@@ -56,7 +56,7 @@ public abstract class BaseListClawer<T extends BaseEntity> extends BaseClawer {
 			analysisAction(box);
 			watch.split();
 			long analysisTime = watch.getSplitTime();
-			logBuilder.append("[Analysis Done][" + analysisTime + "]");
+			logBuilder.append("[Analysis Done][" + analysisTime + "][Get Entity " + box.size() + "]");
 		} catch (Exception e) {
 			e.printStackTrace();
 			logBuilder.append("[List Error][" + e.getMessage() + "]");

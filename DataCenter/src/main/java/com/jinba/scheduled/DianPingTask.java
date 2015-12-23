@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javax.annotation.Resource;
 
@@ -33,7 +34,8 @@ public class DianPingTask implements Runnable {
 	private MysqlDao dao;
 	@Value("${dpclaw.thread.pool}")
 	private int threadPoolSize = 40;
-	private static ExecutorService threadPool;
+	private static ExecutorService detailThreadPool;
+	private static ExecutorService listThreadPool;
 	
 	public DianPingTask (String tempUrl, int xiaoquType, AnalysisType analysisType) {
 		this.tempUrl = tempUrl;
@@ -47,7 +49,8 @@ public class DianPingTask implements Runnable {
 	public void run() {
 		List<String> cityList = dao.getAreaList();
 		LoggerUtil.TaskInfoLog("[" + this.getClass().getSimpleName() + "][Start][CitySize " + cityList.size() + "]");
-		List<XiaoQuEntity> detailList = new ArrayList<XiaoQuEntity>();
+		List<Future<List<XiaoQuEntity>>> resultList = new ArrayList<Future<List<XiaoQuEntity>>>();
+		listThreadPool = Executors.newFixedThreadPool(threadPoolSize/10);
 		for (String eachCity : cityList) {
 			String[] cityInfo = eachCity.split("_");
 			String cityName = cityInfo[0];
@@ -56,18 +59,16 @@ public class DianPingTask implements Runnable {
 			paramsMap.put(Params.tempurl, tempUrl);
 			paramsMap.put(Params.xiaoquType, String.valueOf(xiaoquType));
 			paramsMap.put(Params.analysistype, analysisType.toString());
-			BaseListClawer<XiaoQuEntity> listClawer = new DianPingListClawer(paramsMap);
-			List<XiaoQuEntity> eachCityXiaoqu = listClawer.listAction();
-			if (eachCityXiaoqu != null) {
-				detailList.addAll(eachCityXiaoqu);
-			}
+			DianPingListClawer listClawer = new DianPingListClawer(paramsMap);
+			resultList.add(listThreadPool.submit(listClawer));
 		}
-		threadPool = Executors.newFixedThreadPool(threadPoolSize);
+		List<XiaoQuEntity> 
 		int xiaoquSize = detailList.size();
+		detailThreadPool = Executors.newFixedThreadPool(threadPoolSize);
 		CountDownLatchUtils cdl = new CountDownLatchUtils(xiaoquSize);
-		for (XiaoQuEntity xiaoQuEntity : detailList) {
+		for (Future<List<XiaoQuEntity>> xiaoQuEntity : detailList) {
 			BaseDetailClawer<XiaoQuEntity> detailClawer = new DianPingDetailClawer(xiaoQuEntity, cdl);
-			threadPool.execute(detailClawer);
+			detailThreadPool.execute(detailClawer);
 		}
 		try {
 			cdl.await();
@@ -75,8 +76,8 @@ public class DianPingTask implements Runnable {
 			e.printStackTrace();
 		}
 		LoggerUtil.TaskInfoLog("[" + this.getClass().getSimpleName() + "][Done][DetailSize " + xiaoquSize + "]");
-		threadPool.shutdownNow();
-		threadPool = null;
+		detailThreadPool.shutdownNow();
+		detailThreadPool = null;
 	}
 	
 	

@@ -3,6 +3,7 @@ package com.jinba.scheduled.dianping;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
@@ -21,7 +22,7 @@ import com.jinba.spider.core.Params;
  * @author leei
  *
  */
-public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements Runnable {
+public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements Callable<List<XiaoQuEntity>> {
 
 	private static final int TARGETID = 1;
 	private static final String TARGETINFO = "dianping";
@@ -116,10 +117,6 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 			}
 		}
 	}
-
-	public void run() {
-		this.listAction();
-	}
 	
 	public static void main(String[] args) {
 		@SuppressWarnings("resource")
@@ -130,7 +127,15 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 		paramsMap.put(Params.area, "北京市");
 		paramsMap.put(Params.xiaoquType, "4");
 		paramsMap.put(Params.analysistype, AnalysisType.dp_general.toString());
-		new Thread(new DianPingListClawer(paramsMap)).start();
+		try {
+			new DianPingListClawer(paramsMap).call();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public List<XiaoQuEntity> call() throws Exception {
+		return this.listAction();
 	}
 
 }

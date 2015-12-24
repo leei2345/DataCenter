@@ -59,19 +59,19 @@
     </appender>
 
 	<logger name="proxyLogger" level="INFO" additivity="false">
-		<appender-ref ref="PROXY_LOG" />
+		<appender-ref ref="STDOUT" />
 	</logger>
 	<logger name="clawerLogger" level="INFO" additivity="false">
-		<appender-ref ref="CLAWER_LOG" />
+		<appender-ref ref="STDOUT" />
 	</logger>
 	<logger name="httpLogger" level="INFO" additivity="false">
-		<appender-ref ref="HTTP_LOG" />
+		<appender-ref ref="STDOUT" />
 	</logger>
 	<logger name="taskLogger" level="INFO" additivity="false">
-		<appender-ref ref="TASK_LOG" />
+		<appender-ref ref="STDOUT" />
 	</logger>
 	<logger name="imageLogger" level="INFO" additivity="false">
-		<appender-ref ref="IMAGE_LOG" />
+		<appender-ref ref="STDOUT" />
 	</logger>
     
     <root level="INFO">

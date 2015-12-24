@@ -37,8 +37,8 @@ public class HttpHandler {
 	}
 	
 	public HttpHandler () {
-		hc.getHttpConnectionManager().getParams().setConnectionTimeout(10000);
-		hc.getHttpConnectionManager().getParams().setSoTimeout(5000);
+		hc.getHttpConnectionManager().getParams().setConnectionTimeout(15000);
+		hc.getHttpConnectionManager().getParams().setSoTimeout(10000);
 	}
 	
 	public void SetTimeOut (int timeOut) {

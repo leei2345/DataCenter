@@ -8,10 +8,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.impl.client.BasicCookieStore;
 
 import com.jinba.spider.core.HttpMethod;
 import com.jinba.spider.core.HttpRequestConfig;
 import com.jinba.spider.core.HttpResponseConfig;
+import com.jinba.spider.core.Method;
 import com.jinba.spider.core.Params;
 
 public abstract class BaseClawer {
@@ -51,9 +53,22 @@ public abstract class BaseClawer {
 		this.paramsMap = paramsMap;
 	}
 	
+	public void addGetHeader (String key, String value) {
+		http.AddHeader(Method.Get, key, value);
+	}
+	
+	public void addPostHeader (String key, String value) {
+		http.AddHeader(Method.Post, key, value);
+	}
+	
 	protected String httpGet (String url) {
 		String html = http.GetHtml(url, HttpResponseConfig.ResponseAsString);
 		return html;
+	}
+	
+	protected BasicCookieStore httpGetCookie (String url) {
+		http.GetHtml(url, HttpResponseConfig.ResponseAsString);
+		return http.getCookieStore();
 	}
 	
 	protected String httpGetLocalUrl (String url) {

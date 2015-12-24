@@ -20,6 +20,7 @@ import com.jinba.core.BaseDetailClawer;
 import com.jinba.core.DBHandle;
 import com.jinba.pojo.AnalysisType;
 import com.jinba.pojo.XiaoQuEntity;
+import com.jinba.scheduled.AreaInfoMap;
 import com.jinba.spider.core.Params;
 import com.jinba.utils.CountDownLatchUtils;
 
@@ -113,13 +114,7 @@ public class DianPingDetailClawer extends BaseDetailClawer<XiaoQuEntity>{
 			String[] innerArr = areaName.split("/");
 			for (String inner : innerArr) {
 				if (StringUtils.isBlank(areaCode)) {
-					areaCode = DianPingCityMap.getShangquanCode(inner);
-					if (StringUtils.isBlank(areaCode)) {
-						areaCode = DianPingCityMap.getChengQuCode(inner);
-						if (StringUtils.isBlank(areaCode)) {
-							areaCode = DianPingCityMap.getAreaCode(inner);
-						}
-					}
+					areaCode = AreaInfoMap.getAreaCode(inner);
 				} 
 			}
 		}

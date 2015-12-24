@@ -19,6 +19,7 @@ import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.pool.DruidPooledConnection;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
+import com.jinba.pojo.AreaType;
 import com.jinba.pojo.ProxyCheckResEntity;
 import com.jinba.pojo.SyntaxEntity;
 import com.jinba.pojo.SyntaxEntity.SyntaxType;
@@ -372,7 +373,7 @@ public class MysqlDao  {
 		ResultSet rs = null;
 		List<String> res = new ArrayList<String>();
 		try {
-			String sql = "select areacode,areaname,postcode from t_area where `level` IN (2,3) AND switch=1";
+			String sql = "select areacode,areaname,postcode from t_area where level!=1 and switch=1";
 			conn = spiderSource.getConnection();
 			st = conn.prepareStatement(sql);
 			rs = st.executeQuery();
@@ -414,12 +415,15 @@ public class MysqlDao  {
 		return res;
 	}
 	
-	public Map<String, String> getShangQuanMap () {
+	@SuppressWarnings("resource")
+	public Map<AreaType, Map<String, String>> getAreaMap () {
 		DruidPooledConnection conn = null;
 		PreparedStatement st = null;
 		ResultSet rs = null;
-		Map<String, String> res = new HashMap<String, String>();
+		Map<AreaType, Map<String, String>> res = new HashMap<AreaType, Map<String, String>>();
 		try {
+			/** 商圈 */
+			Map<String, String> districtMap = new HashMap<String, String>();
 			String sql = "select areaname,areacode from t_area where level=4";
 			conn = spiderSource.getConnection();
 			st = conn.prepareStatement(sql);
@@ -427,8 +431,31 @@ public class MysqlDao  {
 			while (rs.next()) {
 				String areaCode = rs.getString("areacode");
 				String areaName = rs.getString("areaname");
-				res.put(areaName, areaCode);
+				districtMap.put(areaName, areaCode);
 			}
+			res.put(AreaType.District, districtMap);
+			/** 区县 */
+			Map<String, String> districtCountyMap = new HashMap<String, String>();
+			sql = "select areaname,areacode from t_area where level=3";
+			st = conn.prepareStatement(sql);
+			rs = st.executeQuery();
+			while (rs.next()) {
+				String areaCode = rs.getString("areacode");
+				String areaName = rs.getString("areaname");
+				districtCountyMap.put(areaName, areaCode);
+			}
+			res.put(AreaType.DistrictCounty, districtCountyMap);
+			/** 区县 */
+			Map<String, String> nomalMap = new HashMap<String, String>();
+			sql = "select areaname,areacode from t_area where level!=1 and level!=3 and level!=4";
+			st = conn.prepareStatement(sql);
+			rs = st.executeQuery();
+			while (rs.next()) {
+				String areaCode = rs.getString("areacode");
+				String areaName = rs.getString("areaname");
+				nomalMap.put(areaName, areaCode);
+			}
+			res.put(AreaType.Nomal, nomalMap);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
@@ -457,7 +484,7 @@ public class MysqlDao  {
 		return res;
 	}
 	
-	public Map<String, String> getChengquCode () {
+	/*public Map<String, String> getChengquCode () {
 		DruidPooledConnection conn = null;
 		PreparedStatement st = null;
 		ResultSet rs = null;
@@ -498,7 +525,7 @@ public class MysqlDao  {
 			}
 		}
 		return res;
-	}
+	}*/
 	
 	public List<Map<String, Object>> select (String sql) {
 		List<Map<String, Object>> resList = new ArrayList<Map<String, Object>>();

@@ -8,15 +8,10 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.jinba.dao.MysqlDao;
-
 
 public class DianPingCityMap {
 	
 	private static Map<String, String> cityMap = new HashMap<String, String>();
-	private static Map<String, String> shangquanMap = new HashMap<String, String>();
-	private static Map<String, String> chengquMap = new HashMap<String, String>();
-
 	
 	static {
 		
@@ -2281,38 +2276,6 @@ public class DianPingCityMap {
 		}
 		String[] cityInfoArr = cityInfo.split("_");
 		return cityInfoArr[index];
-	}
-	
-	/**
-	 * 商圈匹配
-	 * @param cityName
-	 * @return
-	 */
-	public static String getShangquanCode (String cityName) {
-		if (shangquanMap.size() == 0) {
-			shangquanMap = MysqlDao.getInstance().getShangQuanMap();
-		}
-		String cityInfo = shangquanMap.get(cityName);
-		if (StringUtils.isBlank(cityInfo)) {
-			return "";
-		}
-		return cityInfo;
-	}
-	
-	/**
-	 * 商圈匹配
-	 * @param cityName
-	 * @return
-	 */
-	public static String getChengQuCode (String cityName) {
-		if (chengquMap.size() == 0) {
-			chengquMap = MysqlDao.getInstance().getChengquCode();
-		}
-		String cityInfo = chengquMap.get(cityName);
-		if (StringUtils.isBlank(cityInfo)) {
-			return "";
-		}
-		return cityInfo;
 	}
 	
 	public static void main(String[] args) throws IOException {

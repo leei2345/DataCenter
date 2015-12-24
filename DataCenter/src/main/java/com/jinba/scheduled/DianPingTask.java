@@ -48,6 +48,8 @@ public class DianPingTask implements Runnable {
 	
 	public void run() {
 		List<String> cityList = dao.getAreaList();
+		int listSize = cityList.size();
+		CountDownLatchUtils listCdl = new CountDownLatchUtils(listSize);
 		LoggerUtil.TaskInfoLog("[" + this.getClass().getSimpleName() + "][Start][CitySize " + cityList.size() + "]");
 		List<Future<List<XiaoQuEntity>>> resultList = new ArrayList<Future<List<XiaoQuEntity>>>();
 		listThreadPool = Executors.newFixedThreadPool(threadPoolSize/10);
@@ -59,7 +61,7 @@ public class DianPingTask implements Runnable {
 			paramsMap.put(Params.tempurl, tempUrl);
 			paramsMap.put(Params.xiaoquType, String.valueOf(xiaoquType));
 			paramsMap.put(Params.analysistype, analysisType.toString());
-			DianPingListClawer listClawer = new DianPingListClawer(paramsMap);
+			DianPingListClawer listClawer = new DianPingListClawer(paramsMap, listCdl);
 			resultList.add(listThreadPool.submit(listClawer));
 		}
 		int xiaoquSize = 0;

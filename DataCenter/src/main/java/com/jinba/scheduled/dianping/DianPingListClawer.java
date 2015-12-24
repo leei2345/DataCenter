@@ -16,6 +16,7 @@ import com.jinba.core.BaseListClawer;
 import com.jinba.pojo.AnalysisType;
 import com.jinba.pojo.XiaoQuEntity;
 import com.jinba.spider.core.Params;
+import com.jinba.utils.CountDownLatchUtils;
 
 /**
  * 
@@ -34,8 +35,8 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 	private static final String FROMHOST = "www.dianping.com";
 	private static final String IMAGEDIRNAME = "shop";
 	
-	public DianPingListClawer (Map<Params, String> paramsMap) {
-		super(TARGETID);
+	public DianPingListClawer (Map<Params, String> paramsMap, CountDownLatchUtils cdl) {
+		super(TARGETID, cdl);
 		this.paramsMap = paramsMap;
 	}
 	
@@ -128,7 +129,7 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 		paramsMap.put(Params.xiaoquType, "4");
 		paramsMap.put(Params.analysistype, AnalysisType.dp_general.toString());
 		try {
-			new DianPingListClawer(paramsMap).call();
+			new DianPingListClawer(paramsMap, new CountDownLatchUtils(1)).call();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

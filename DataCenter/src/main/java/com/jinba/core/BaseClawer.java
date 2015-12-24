@@ -18,7 +18,6 @@ public abstract class BaseClawer {
 
 	protected int targetId;
 	protected Map<Params, String> paramsMap = new HashMap<Params, String>();
-	private static final String DEFAULTCHARSET = "UTF-8";
 	protected HttpMethod http = null;
 	private static Pattern usqlp = Pattern.compile("update.*? set\\s+(.*)\\s+where.*");
 	private static Pattern isqlp = Pattern.compile("insert into\\s+(.*?)\\s+\\((.*?)\\)\\s+values\\s+\\((.*)\\)");
@@ -53,21 +52,22 @@ public abstract class BaseClawer {
 	}
 	
 	protected String httpGet (String url) {
-		return httpGet(url, DEFAULTCHARSET);
-	}
-	
-	protected String httpGet (String url, String charset) {
 		String html = http.GetHtml(url, HttpResponseConfig.ResponseAsString);
 		return html;
 	}
 	
-	protected String httpPost (String url, String body) {
-		return httpGet(url, DEFAULTCHARSET);
+	protected String httpGetLocalUrl (String url) {
+		String localUrl = http.GetLocationUrl(url);
+		return localUrl;
 	}
 	
-	protected String httpPost (String url, String body, String charset) {
-		String html = http.GetHtml(url, body, HttpRequestConfig.RequestBodyAsString, HttpResponseConfig.ResponseAsString);
-		return html;
+	protected String httpPost (String url, String body) {
+		return http.GetHtml(url, body, HttpRequestConfig.RequestBodyAsString, HttpResponseConfig.ResponseAsString);
+	}
+	
+	protected String httpPostLocalUrl (String url, String body) {
+		String localUrl = http.GetLocationUrl(url, body, HttpRequestConfig.RequestBodyAsString);
+		return localUrl;
 	}
 	
 	protected String checkUpdateSql (String usql) {

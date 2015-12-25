@@ -8,6 +8,8 @@ import java.util.Map;
 import org.apache.catalina.util.URLEncoder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
+import org.apache.http.cookie.Cookie;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -18,6 +20,9 @@ import com.jinba.core.BaseListClawer;
 import com.jinba.pojo.AnalysisType;
 import com.jinba.pojo.NewsEntity;
 import com.jinba.scheduled.dianping.DianPingListClawer;
+import com.jinba.spider.core.HttpMethod;
+import com.jinba.spider.core.HttpResponseConfig;
+import com.jinba.spider.core.HttpsMethod;
 import com.jinba.spider.core.Params;
 import com.jinba.utils.Convert;
 import com.jinba.utils.CountDownLatchUtils;
@@ -52,15 +57,12 @@ public class SogouListClawer extends BaseListClawer<NewsEntity>{
 		do {
 			next = false;
 			String url = tempUrl.replace("##", areaNameEn).replace("$$", String.valueOf(pageIndex));
-			String firstUrl = "http://weixin.sogou.com/pcindex/pc/web/web.js?t=" + System.currentTimeMillis();
-			this.addGetHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
-			this.addGetHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1736.2 Safari/537.36");
-			this.addGetHeader("Accept-Encoding", "gzip,deflate,sdch");
-			this.addGetHeader("Accept-Language", "zh-CN,zh;q=0.8");
-			this.addGetHeader("Cache-Control", "max-age=0");
-			this.addGetHeader("Connection", "keep-alive");
-			System.out.println(httpGetCookie(firstUrl));
-			String html = httpGet(url);
+
+			String firstUrl = "http://weixin.sogou.com";
+			HttpMethod m = new HttpMethod(TARGETID);
+			System.out.println(m.GetHtml(firstUrl, HttpResponseConfig.ResponseAsStream));
+			BasicCookieStore cookie = m.getCookieStore();
+			String html = httpGet(url, cookie);
 			if (StringUtils.isBlank(html)) {
 				break;
 			}

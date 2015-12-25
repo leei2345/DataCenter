@@ -62,6 +62,13 @@ public abstract class BaseClawer {
 	}
 	
 	protected String httpGet (String url) {
+		return httpGet(url, null);
+	}
+	
+	protected String httpGet (String url, BasicCookieStore cookie) {
+		if (cookie != null) {
+			http.setCookieStore(cookie);
+		}
 		String html = http.GetHtml(url, HttpResponseConfig.ResponseAsString);
 		return html;
 	}

@@ -21,6 +21,8 @@ import com.jinba.core.DBHandle;
 import com.jinba.pojo.AnalysisType;
 import com.jinba.pojo.XiaoQuEntity;
 import com.jinba.scheduled.AreaInfoMap;
+import com.jinba.spider.core.HttpMethod;
+import com.jinba.spider.core.HttpResponseConfig;
 import com.jinba.spider.core.Params;
 import com.jinba.utils.CountDownLatchUtils;
 
@@ -37,6 +39,10 @@ public class DianPingDetailClawer extends BaseDetailClawer<XiaoQuEntity>{
 	
 	public DianPingDetailClawer(XiaoQuEntity detailEntity, CountDownLatchUtils cdl) {
 		super(TARGETID, detailEntity, cdl);
+	}
+	
+	public DianPingDetailClawer(XiaoQuEntity detailEntity) {
+		super(TARGETID, detailEntity, new CountDownLatchUtils(1));
 	}
 
 	@Override
@@ -56,7 +62,8 @@ public class DianPingDetailClawer extends BaseDetailClawer<XiaoQuEntity>{
 	protected ActionRes analysistDetail(String html, DBHandle dbHandle) {
 		long timeStemp = System.currentTimeMillis();
 		String url = "http://www.dianping.com/ajax/json/shop/wizard/BasicHideInfoAjaxFP?_nr_force=" + timeStemp + "&shopId=" + sourceKey;
-		String info = httpGet(url);
+		HttpMethod method = new HttpMethod(TARGETID);
+		String info = method.GetHtml(url, HttpResponseConfig.ResponseAsStream);
 		if (StringUtils.isBlank(info)) {
 			return ActionRes.ANALYSIS_FAIL;
 		}
@@ -106,6 +113,7 @@ public class DianPingDetailClawer extends BaseDetailClawer<XiaoQuEntity>{
 		this.detailEntity.setLatitude(new BigDecimal(String.valueOf(glat)));
 		String areaCode = null;
 		List<String> areaNameList = new ArrayList<String>();
+		String cityName = this.detailEntity.getCityInfo().get(Params.cityname);
 		for (int index = areaNameNodes.size() - 1; index >=0; index--) {
 			Element node = areaNameNodes.get(index);
 			String areaName = node.text();
@@ -114,7 +122,7 @@ public class DianPingDetailClawer extends BaseDetailClawer<XiaoQuEntity>{
 			String[] innerArr = areaName.split("/");
 			for (String inner : innerArr) {
 				if (StringUtils.isBlank(areaCode)) {
-					areaCode = AreaInfoMap.getAreaCode(inner);
+					areaCode = AreaInfoMap.getAreaCode(inner, cityName);
 				} 
 			}
 		}
@@ -180,7 +188,7 @@ public class DianPingDetailClawer extends BaseDetailClawer<XiaoQuEntity>{
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
 		/** 非酒店 */
-		String json = "{\"address\":null,\"analysisType\":\"dp_general\",\"areacode\":null,\"cityInfo\":{\"citycode\":\"1101\",\"cityname\":\"北京市\"},\"createtime\":\"1970-01-01\",\"fromhost\":\"www.dianping.com\",\"fromkey\":\"17006187\",\"fromurl\":\"http://www.dianping.com/shop/14695025\",\"headimg\":\"http://i3.s2.dpfile.com/pc/9479d8318516cb5693d7cfdc5cd6a61a(240c180)/thumb.jpg\",\"intro\":null,\"latitude\":0,\"longItude\":0,\"phone\":null,\"xiaoquType\":3,\"xiaoquname\":\"新城滨河森林公园\"}";
+		String json = "{\"address\":null,\"analysisType\":\"dp_general\",\"areacode\":null,\"cityInfo\":{\"citycode\":\"1101\",\"cityname\":\"北京市\"},\"createtime\":\"1970-01-01\",\"fromhost\":\"www.dianping.com\",\"fromkey\":\"1768042\",\"fromurl\":\"http://www.dianping.com/shop/1768042\",\"headimg\":\"http://i3.s2.dpfile.com/pc/9479d8318516cb5693d7cfdc5cd6a61a(240c180)/thumb.jpg\",\"intro\":null,\"latitude\":0,\"longItude\":0,\"phone\":null,\"xiaoquType\":3,\"xiaoquname\":\"北海公园\"}";
 		/** 酒店 */
 //		String json = "{\"address\":null,\"areacode\":null,\"createtime\":\"1970-01-01\",\"fromhost\":\"192.168.31.125\",\"fromkey\":\"dp_1769485\",\"fromurl\":\"http://www.dianping.com/shop/2802772\",\"headimg\":\"http://i3.s2.dpfile.com/pc/9479d8318516cb5693d7cfdc5cd6a61a(240c180)/thumb.jpg\",\"hotel\":true,\"intro\":null,\"latitude\":0,\"longItude\":0,\"phone\":null,\"xiaoquType\":3,\"xiaoquname\":\"王府井希尔顿酒店\"}";
 		/** 购物 */

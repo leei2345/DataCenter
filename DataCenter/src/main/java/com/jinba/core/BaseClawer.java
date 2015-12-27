@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpHost;
 import org.apache.http.impl.client.BasicCookieStore;
 
 import com.jinba.spider.core.HttpMethod;
@@ -69,7 +70,18 @@ public abstract class BaseClawer {
 		if (cookie != null) {
 			http.setCookieStore(cookie);
 		}
-		String html = http.GetHtml(url, HttpResponseConfig.ResponseAsString);
+		String html = http.GetHtml(url, HttpResponseConfig.ResponseAsStream);
+		return html;
+	}
+	
+	protected String httpGet (String url, BasicCookieStore cookie, HttpHost proxy) {
+		if (cookie != null) {
+			http.setCookieStore(cookie);
+		}
+		if (proxy != null) {
+			http.setProxy(proxy);
+		}
+		String html = http.GetHtml(url, HttpResponseConfig.ResponseAsStream);
 		return html;
 	}
 	

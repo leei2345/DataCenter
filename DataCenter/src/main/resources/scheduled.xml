@@ -33,14 +33,14 @@
 	<task:scheduled-tasks scheduler="scheduler">
 
 		<task:scheduled ref="proxyCheckTask" method="run" cron="0 0,30 * * * ?" />
-		<task:scheduled ref="dianPing_GW_ZHSC_Task" method="run" cron="0 10 10 25 * ?" />
-		<task:scheduled ref="dianPing_JD_CSGG_Task" method="run" cron="0 0 0 24 * ?" />
-		<task:scheduled ref="dianPing_JD_DZWY_Task" method="run" cron="0 0 12 24 * ?" />
-		<task:scheduled ref="dianPing_JD_GZ_Task" method="run" cron="0 0 0 25 * ?" />
-		<task:scheduled ref="dianPing_JD_MSGJ_Task" method="run" cron="0 0 0 1 * ?" />
-		<task:scheduled ref="dianPing_JD_YLY_Task" method="run" cron="0 0 0 26 * ?" />
-		<task:scheduled ref="dianPing_JD_ZGZL_Task" method="run" cron="0 0 12 26 * ?" />
-		<task:scheduled ref="dianPing_JD_ZRFG_Task" method="run" cron="0 0 0 27 * ?" />
+		<task:scheduled ref="dianPing_GW_ZHSC_Task" method="run" cron="0 0 0 1 * ?" />
+		<task:scheduled ref="dianPing_JD_CSGG_Task" method="run" cron="0 0 12 1 * ?" />
+		<task:scheduled ref="dianPing_JD_DZWY_Task" method="run" cron="0 0 0 2 * ?" />
+		<task:scheduled ref="dianPing_JD_GZ_Task" method="run" cron="0 0 12 2 * ?" />
+		<task:scheduled ref="dianPing_JD_MSGJ_Task" method="run" cron="0 0 0 3 * ?" />
+		<task:scheduled ref="dianPing_JD_YLY_Task" method="run" cron="0 0 12 3 * ?" />
+		<task:scheduled ref="dianPing_JD_ZGZL_Task" method="run" cron="0 0 0 4 * ?" />
+		<task:scheduled ref="dianPing_JD_ZRFG_Task" method="run" cron="0 40 21 26 * ?" />
 		<task:scheduled ref="dianPing_JIUD_3XJJD_Task" method="run" cron="0 0 12 27 * ?" />
 		<task:scheduled ref="dianPing_JIUD_DJC_Task" method="run" cron="0 0 0 28 * ?" />
 		<task:scheduled ref="dianPing_JIUD_JJXJD_Task" method="run" cron="0 0 12 28 * ?" />

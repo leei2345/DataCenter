@@ -8,7 +8,7 @@ import java.util.Map;
 import org.apache.catalina.util.URLEncoder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
-import org.apache.http.cookie.Cookie;
+import org.apache.http.HttpHost;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -17,20 +17,16 @@ import org.jsoup.select.Elements;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.jinba.core.BaseListClawer;
-import com.jinba.pojo.AnalysisType;
 import com.jinba.pojo.NewsEntity;
-import com.jinba.scheduled.dianping.DianPingListClawer;
 import com.jinba.spider.core.HttpMethod;
 import com.jinba.spider.core.HttpResponseConfig;
-import com.jinba.spider.core.HttpsMethod;
 import com.jinba.spider.core.Params;
-import com.jinba.utils.Convert;
 import com.jinba.utils.CountDownLatchUtils;
 
 public class SogouListClawer extends BaseListClawer<NewsEntity>{
 
 	private static final int TARGETID = 2;
-	private static String tempUrl = "http://weixin.sogou.com/weixin?type=2&query=##&ie=utf8&w=&sut=&sst0=&lkt=&page=$$";
+	private static String tempUrl = "http://weixin.sogou.com/weixin?type=2&query=##&ie=utf8&sourceid=inttime_day&w=&sut=&sst0=&lkt=&page=$$";
 	private static final String FROMHOST = "weixin.sogou.com";
 	private static FastDateFormat sim = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss");
 	private static FastDateFormat dateFormat = FastDateFormat.getInstance("yyyy-MM-dd");
@@ -54,15 +50,15 @@ public class SogouListClawer extends BaseListClawer<NewsEntity>{
 		int pageIndex = 1;
 		String areaNameEn = new URLEncoder().encode(areaName);
 		boolean next = true;
+		String firstUrl = "http://weixin.sogou.com";
+		HttpMethod m = new HttpMethod(targetId);
+		m.GetHtml(firstUrl, HttpResponseConfig.ResponseAsStream);
+		HttpHost proxy = m.getProxy();
+		BasicCookieStore cookie = m.getCookieStore();
 		do {
 			next = false;
 			String url = tempUrl.replace("##", areaNameEn).replace("$$", String.valueOf(pageIndex));
-
-			String firstUrl = "http://weixin.sogou.com";
-			HttpMethod m = new HttpMethod(TARGETID);
-			System.out.println(m.GetHtml(firstUrl, HttpResponseConfig.ResponseAsStream));
-			BasicCookieStore cookie = m.getCookieStore();
-			String html = httpGet(url, cookie);
+			String html = httpGet(url, cookie, proxy);
 			if (StringUtils.isBlank(html)) {
 				break;
 			}
@@ -112,8 +108,8 @@ public class SogouListClawer extends BaseListClawer<NewsEntity>{
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
 		Map<Params, String> paramsMap = new HashMap<Params, String>();
-		paramsMap.put(Params.area, "北京市");
-		paramsMap.put(Params.citycode, "1101");
+		paramsMap.put(Params.area, "东城区");
+		paramsMap.put(Params.citycode, "110101");
 		try {
 			new SogouListClawer(paramsMap, new CountDownLatchUtils(1)).listAction();
 		} catch (Exception e) {

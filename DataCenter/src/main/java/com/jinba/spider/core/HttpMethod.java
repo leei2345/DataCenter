@@ -68,6 +68,7 @@ public class HttpMethod {
 	private HttpClientBuilder clientBuilder = HttpClientBuilder.create();
 	private int identidy;
 	private HttpHost proxy;
+	private boolean setProxy = false;
 	private String getHtml = "";
 	private String getException = "";
 	private int getStatus = 0;
@@ -126,18 +127,14 @@ public class HttpMethod {
 		this.client = this.clientBuilder.setDefaultRequestConfig(this.config.build()).setDefaultCookieStore(cookie).build();
 	}
 
-//	public static String initProxyMap() {
-//		long nowTimeStemp = System.currentTimeMillis();
-//		if (nowTimeStemp - timeStemp > INTERVALTIME) {
-//			proxyMap = ProxyChecker.initProxyMap();
-//			if (proxyMap == null) {
-//				proxyMap = new ConcurrentHashMap<String, List<HttpHost>>();
-//			}
-//			LoggerUtil.HttpInfoLog("[HttpThings Proxy Boxs Init Complment]");
-//			timeStemp = nowTimeStemp;
-//		}
-//		return "[HttpThings Proxy Boxs Init Complment]";
-//	}
+	public HttpHost getProxy() {
+		return proxy;
+	}
+
+	public void setProxy(HttpHost proxy) {
+		this.setProxy = true;
+		this.proxy = proxy;
+	}
 
 	public void SetConnectionTimeOutThreshold(Method method, int timeOut) {
 		this.config.setConnectTimeout(timeOut);
@@ -203,7 +200,7 @@ public class HttpMethod {
 		} else {
 			responseAsStream = httpResponseConfig.isYesOrNo();
 		}
-		HttpHost proxy = null;
+		proxy = null;
 		String locationHeader = "";
 		for (int retryIndex = 1; retryIndex <= retryCount; retryIndex++) {
 			if (this.get == null) {
@@ -216,7 +213,7 @@ public class HttpMethod {
 				LoggerUtil.HttpInfoLog("[数据获取][url=" + url + "][status=" + this.getStatus + "][exception=" + this.getException + "]");
 				break;
 			}
-			if (identidy != 0) {
+			if (identidy != 0 && !setProxy) {
 				ProxyCheckResEntity p = ProxyQueue.getProxy(identidy);
 				proxy = new HttpHost(p.host, p.port);
 				if (proxy != null) {
@@ -334,6 +331,11 @@ public class HttpMethod {
 		if ((this.getStatus == 302) && (StringUtils.isBlank(this.getHtml))) {
 			this.getHtml = locationHeader;
 		}
+		try {
+			this.client.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return this.getHtml;
 	}
 	
@@ -370,7 +372,7 @@ public class HttpMethod {
 				LoggerUtil.HttpDebugLog("[数据获取][url=" + url + "][body=" + body + "][status=" + this.postStatus + "][exception=" + this.postException + "]");
 				break;
 			}
-			if (identidy != 0) {
+			if (identidy != 0 && !setProxy) {
 				ProxyCheckResEntity p = ProxyQueue.getProxy(identidy);
 				proxy = new HttpHost(p.host, p.port);
 				if (proxy != null) {
@@ -492,6 +494,11 @@ public class HttpMethod {
 		if ((this.getStatus == 302) && (StringUtils.isBlank(this.getHtml))) {
 			this.getHtml = locationHeader;
 		}
+		try {
+			this.client.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return this.postHtml;
 	}
 	
@@ -591,7 +598,11 @@ public class HttpMethod {
 				this.postException = "response null";
 				continue;
 			}
-			
+		}
+		try {
+			this.client.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		return this.postHtml;
 	}
@@ -684,6 +695,11 @@ public class HttpMethod {
 				continue;
 			}
 		}
+		try {
+			this.client.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return this.getHtml;
 	}
 	
@@ -761,6 +777,11 @@ public class HttpMethod {
 				continue;
 			}
 		}
+		try {
+			this.client.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return this.getHtml;
 	}
 	
@@ -788,7 +809,7 @@ public class HttpMethod {
 				LoggerUtil.HttpDebugLog("[图片数据获取][url=" + url + "][status=" + this.getStatus + "][exception=" + this.getException + "]");
 				break;
 			}
-			if (identidy != 0) {
+			if (identidy != 0 && !setProxy) {
 				ProxyCheckResEntity p = ProxyQueue.getProxy(identidy);
 				proxy = new HttpHost(p.host, p.port);
 				if (proxy != null) {
@@ -872,6 +893,11 @@ public class HttpMethod {
 				this.getException = "response_null";
 				continue;
 			}
+		}
+		try {
+			this.client.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		return fileData;
 	}

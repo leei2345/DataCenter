@@ -3,7 +3,6 @@ package com.jinba.scheduled.dianping;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
@@ -15,6 +14,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import com.jinba.core.BaseListClawer;
 import com.jinba.pojo.AnalysisType;
 import com.jinba.pojo.XiaoQuEntity;
+import com.jinba.scheduled.DianPingWorker;
 import com.jinba.spider.core.Params;
 import com.jinba.utils.CountDownLatchUtils;
 
@@ -23,7 +23,7 @@ import com.jinba.utils.CountDownLatchUtils;
  * @author leei
  *
  */
-public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements Callable<List<XiaoQuEntity>> {
+public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements Runnable {
 
 	private static final int TARGETID = 1;
 	private static final String TARGETINFO = "dianping";
@@ -119,6 +119,11 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 		}
 	}
 	
+	public void run() {
+		List<XiaoQuEntity> list = this.listAction();
+		DianPingWorker.offerWork(list);
+	}
+
 	public static void main(String[] args) {
 		@SuppressWarnings("resource")
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
@@ -129,14 +134,11 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 		paramsMap.put(Params.xiaoquType, "4");
 		paramsMap.put(Params.analysistype, AnalysisType.dp_general.toString());
 		try {
-			new DianPingListClawer(paramsMap, new CountDownLatchUtils(1)).call();
+			new DianPingListClawer(paramsMap, new CountDownLatchUtils(1)).run();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	public List<XiaoQuEntity> call() throws Exception {
-		return this.listAction();
-	}
 
 }

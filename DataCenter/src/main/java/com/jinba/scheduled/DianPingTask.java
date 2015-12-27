@@ -1,24 +1,18 @@
 package com.jinba.scheduled;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import javax.annotation.Resource;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.jinba.core.BaseDetailClawer;
 import com.jinba.dao.MysqlDao;
 import com.jinba.pojo.AnalysisType;
-import com.jinba.pojo.XiaoQuEntity;
-import com.jinba.scheduled.dianping.DianPingDetailClawer;
 import com.jinba.scheduled.dianping.DianPingListClawer;
 import com.jinba.spider.core.Params;
 import com.jinba.utils.CountDownLatchUtils;
@@ -34,8 +28,7 @@ public class DianPingTask implements Runnable {
 	private MysqlDao dao;
 	@Value("${dpclaw.thread.pool}")
 	private int threadPoolSize = 40;
-	private static ExecutorService detailThreadPool;
-	private static ExecutorService listThreadPool;
+	private ExecutorService listThreadPool;
 	
 	public DianPingTask (String tempUrl, int xiaoquType, AnalysisType analysisType) {
 		this.tempUrl = tempUrl;
@@ -51,7 +44,6 @@ public class DianPingTask implements Runnable {
 		int listSize = cityList.size();
 		CountDownLatchUtils listCdl = new CountDownLatchUtils(listSize);
 		LoggerUtil.TaskInfoLog("[" + this.getClass().getSimpleName() + "][Start][CitySize " + cityList.size() + "]");
-		List<Future<List<XiaoQuEntity>>> resultList = new ArrayList<Future<List<XiaoQuEntity>>>();
 		listThreadPool = Executors.newFixedThreadPool(threadPoolSize/10);
 		for (String eachCity : cityList) {
 			String[] cityInfo = eachCity.split("_");
@@ -62,54 +54,16 @@ public class DianPingTask implements Runnable {
 			paramsMap.put(Params.xiaoquType, String.valueOf(xiaoquType));
 			paramsMap.put(Params.analysistype, analysisType.toString());
 			DianPingListClawer listClawer = new DianPingListClawer(paramsMap, listCdl);
-			resultList.add(listThreadPool.submit(listClawer));
-		}
-		int xiaoquSize = 0;
-		for (Future<List<XiaoQuEntity>> future : resultList) {
-			List<XiaoQuEntity> cityXiaoquList;
-			try {
-				cityXiaoquList = future.get();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-				continue;
-			} catch (ExecutionException e) {
-				e.printStackTrace();
-				continue;
-			}
-			if (cityXiaoquList != null) {
-				xiaoquSize += cityXiaoquList.size();
-			}
-		}
-		listThreadPool.shutdownNow();
-		listThreadPool = null;
-		detailThreadPool = Executors.newFixedThreadPool(threadPoolSize);
-		CountDownLatchUtils cdl = new CountDownLatchUtils(xiaoquSize);
-		for (Future<List<XiaoQuEntity>> future : resultList) {
-			List<XiaoQuEntity> cityXiaoquList;
-			try {
-				cityXiaoquList = future.get();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-				continue;
-			} catch (ExecutionException e) {
-				e.printStackTrace();
-				continue;
-			}
-			if (cityXiaoquList !=null) {
-				for (XiaoQuEntity inner : cityXiaoquList) {
-					BaseDetailClawer<XiaoQuEntity> detailClawer = new DianPingDetailClawer(inner, cdl);
-					detailThreadPool.execute(detailClawer);
-				}
-			}
+			listThreadPool.execute(listClawer);
 		}
 		try {
-			cdl.await();
+			listCdl.await();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		LoggerUtil.TaskInfoLog("[" + this.getClass().getSimpleName() + "][Done][DetailSize " + xiaoquSize + "]");
-		detailThreadPool.shutdownNow();
-		detailThreadPool = null;
+		LoggerUtil.TaskInfoLog("[" + this.getClass().getSimpleName() + "][Done]");
+		listThreadPool.shutdownNow();
+		listThreadPool = null;
 	}
 	
 	

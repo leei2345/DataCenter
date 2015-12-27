@@ -373,7 +373,7 @@ public class MysqlDao  {
 		ResultSet rs = null;
 		List<String> res = new ArrayList<String>();
 		try {
-			String sql = "select areacode,areaname,postcode from t_area where level!=1 and switch=1";
+			String sql = "select areacode,areaname,postcode from t_area where level in (2,3)";
 			conn = spiderSource.getConnection();
 			st = conn.prepareStatement(sql);
 			rs = st.executeQuery();
@@ -422,10 +422,19 @@ public class MysqlDao  {
 		ResultSet rs = null;
 		Map<AreaType, Map<String, String>> res = new HashMap<AreaType, Map<String, String>>();
 		try {
+			String selectMuiltAreaSql = "SELECT areacode,COUNT(1) count FROM t_area GROUP BY areaname HAVING count>1";
+			List<String> muiltAreaList = new ArrayList<String>();
+			conn = spiderSource.getConnection();
+			st = conn.prepareStatement(selectMuiltAreaSql);
+			rs = st.executeQuery();
+			while (rs.next()) {
+				String areaCode = rs.getString("areacode");
+				muiltAreaList.add(areaCode);
+			}
+			String muiltAreaCodeStr = muiltAreaList.toString().replace("[", "(").replace("]", ")");
 			/** 商圈 */
 			Map<String, String> districtMap = new HashMap<String, String>();
-			String sql = "select areaname,areacode from t_area where level=4";
-			conn = spiderSource.getConnection();
+			String sql = "select areaname,areacode from t_area where level=4 and areacode not in " + muiltAreaCodeStr;
 			st = conn.prepareStatement(sql);
 			rs = st.executeQuery();
 			while (rs.next()) {
@@ -436,7 +445,7 @@ public class MysqlDao  {
 			res.put(AreaType.District, districtMap);
 			/** 区县 */
 			Map<String, String> districtCountyMap = new HashMap<String, String>();
-			sql = "select areaname,areacode from t_area where level=3";
+			sql = "select areaname,areacode from t_area where level=3 and areacode not in " + muiltAreaCodeStr;
 			st = conn.prepareStatement(sql);
 			rs = st.executeQuery();
 			while (rs.next()) {
@@ -447,7 +456,7 @@ public class MysqlDao  {
 			res.put(AreaType.DistrictCounty, districtCountyMap);
 			/** 区县 */
 			Map<String, String> nomalMap = new HashMap<String, String>();
-			sql = "select areaname,areacode from t_area where level!=1 and level!=3 and level!=4";
+			sql = "select areaname,areacode from t_area where level!=1 and level!=3 and level!=4 and areacode not in " + muiltAreaCodeStr;
 			st = conn.prepareStatement(sql);
 			rs = st.executeQuery();
 			while (rs.next()) {
@@ -456,6 +465,62 @@ public class MysqlDao  {
 				nomalMap.put(areaName, areaCode);
 			}
 			res.put(AreaType.Nomal, nomalMap);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			if (st != null) {
+				try {
+					st.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return res;
+	}
+	
+	public Map<AreaType, Map<String, Map<String, String>>> getMuiltAreaMap () {
+		DruidPooledConnection conn = null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		Map<AreaType, Map<String, Map<String, String>>> res = new HashMap<AreaType, Map<String, Map<String, String>>>();
+		try {
+			String selectMuiltAreaSql = "select b.areacode,b.fullname,b.areaname from t_area b, (SELECT areaname,COUNT(1) count FROM t_area GROUP BY areaname HAVING count>1) a where a.areaname=b.areaname order by b.areaname";
+			conn = spiderSource.getConnection();
+			st = conn.prepareStatement(selectMuiltAreaSql);
+			rs = st.executeQuery();
+			Map<String, Map<String, String>> map =  new HashMap<String, Map<String,String>>();
+			while (rs.next()) {
+				String areaName = rs.getString("areaname");
+				Map<String, String> innerMap = map.get(areaName);
+				if (innerMap == null) {
+					innerMap = new HashMap<String, String>();
+				}
+				String fullName = rs.getString("fullname");
+				String[] fullNameArr = fullName.split("\\s+");
+				if (fullNameArr.length < 1) {
+					continue;
+				}
+				String city = fullNameArr[0];
+				String areaCode = rs.getString("areacode");
+				innerMap.put(city, areaCode);
+				map.put(areaName, innerMap);
+			}
+			res.put(AreaType.FirstStemp, map);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {

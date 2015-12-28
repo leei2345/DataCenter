@@ -100,6 +100,8 @@ public abstract class BaseDetailClawer<T extends BaseEntity> extends BaseClawer 
 			logBuilder.append("[Detail Error][" + e.getMessage() + "]");
 		} finally {
 			cdl.countDown();
+			this.detailEntity = null;
+			this.http = null;
 			LoggerUtil.ClawerInfoLog(logBuilder.toString() + "[" + cdl.getCount() + "/" + cdl.getAmount() + "][Done]");
 		}
 	}

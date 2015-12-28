@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.druid.pool.DruidDataSource;
@@ -26,6 +27,7 @@ import com.jinba.pojo.SyntaxEntity.SyntaxType;
 import com.jinba.pojo.TargetEntity;
 
 @Component
+@Scope("singleton")
 public class MysqlDao  {
 	
 	@Autowired
@@ -416,25 +418,16 @@ public class MysqlDao  {
 	}
 	
 	@SuppressWarnings("resource")
-	public Map<AreaType, Map<String, String>> getAreaMap () {
+	public Map<AreaType, Map<String, String>> getAreaMap (String cityCode) {
 		DruidPooledConnection conn = null;
 		PreparedStatement st = null;
 		ResultSet rs = null;
 		Map<AreaType, Map<String, String>> res = new HashMap<AreaType, Map<String, String>>();
 		try {
-			String selectMuiltAreaSql = "SELECT areacode,COUNT(1) count FROM t_area GROUP BY areaname HAVING count>1";
-			List<String> muiltAreaList = new ArrayList<String>();
-			conn = spiderSource.getConnection();
-			st = conn.prepareStatement(selectMuiltAreaSql);
-			rs = st.executeQuery();
-			while (rs.next()) {
-				String areaCode = rs.getString("areacode");
-				muiltAreaList.add(areaCode);
-			}
-			String muiltAreaCodeStr = muiltAreaList.toString().replace("[", "(").replace("]", ")");
 			/** 商圈 */
 			Map<String, String> districtMap = new HashMap<String, String>();
-			String sql = "select areaname,areacode from t_area where level=4 and areacode not in " + muiltAreaCodeStr;
+			String sql = "select areaname,areacode from t_area where level=4 and areacode like '" + cityCode + "%'";
+			conn = spiderSource.getConnection();
 			st = conn.prepareStatement(sql);
 			rs = st.executeQuery();
 			while (rs.next()) {
@@ -445,7 +438,7 @@ public class MysqlDao  {
 			res.put(AreaType.District, districtMap);
 			/** 区县 */
 			Map<String, String> districtCountyMap = new HashMap<String, String>();
-			sql = "select areaname,areacode from t_area where level=3 and areacode not in " + muiltAreaCodeStr;
+			sql = "select areaname,areacode from t_area where level=3 and areacode like '" + cityCode + "%'";
 			st = conn.prepareStatement(sql);
 			rs = st.executeQuery();
 			while (rs.next()) {
@@ -456,7 +449,7 @@ public class MysqlDao  {
 			res.put(AreaType.DistrictCounty, districtCountyMap);
 			/** 区县 */
 			Map<String, String> nomalMap = new HashMap<String, String>();
-			sql = "select areaname,areacode from t_area where level!=1 and level!=3 and level!=4 and areacode not in " + muiltAreaCodeStr;
+			sql = "select areaname,areacode from t_area where level!=1 and level!=3 and level!=4 and areacode like '" + cityCode + "%'";;
 			st = conn.prepareStatement(sql);
 			rs = st.executeQuery();
 			while (rs.next()) {

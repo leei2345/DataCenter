@@ -93,7 +93,8 @@ public class DianPingDetailClawer extends BaseDetailClawer<XiaoQuEntity>{
 		try {
 			infoObject = JSONObject.parseObject(info);
 		} catch (Exception e) {
-			info = httpGet(url);
+			HttpMethod newmethod = new HttpMethod(TARGETID);
+			info = newmethod.GetHtml(url, HttpResponseConfig.ResponseAsStream);
 			try {
 				infoObject = JSONObject.parseObject(info);
 			} catch (Exception innere) {
@@ -113,17 +114,22 @@ public class DianPingDetailClawer extends BaseDetailClawer<XiaoQuEntity>{
 		this.detailEntity.setLatitude(new BigDecimal(String.valueOf(glat)));
 		String areaCode = null;
 		List<String> areaNameList = new ArrayList<String>();
-		String cityName = this.detailEntity.getCityInfo().get(Params.cityname);
+		String cityCode = this.detailEntity.getCityInfo().get(Params.citycode);
+		int anchor = 0;
+		int count = areaNameNodes.size() - 3;
 		for (int index = areaNameNodes.size() - 1; index >=0; index--) {
+			anchor++;
 			Element node = areaNameNodes.get(index);
 			String areaName = node.text();
 			areaNameList.add(areaName);
-			areaName = areaName.replace("其他", "").replace("景点", "").replace("酒店", "").replace("购物", "").replace("休闲娱乐", "");
-			String[] innerArr = areaName.split("/");
-			for (String inner : innerArr) {
-				if (StringUtils.isBlank(areaCode)) {
-					areaCode = AreaInfoMap.getAreaCode(inner, cityName);
-				} 
+			if (anchor > count) {
+				areaName = areaName.replace("其他", "").replace("景点", "").replace("酒店", "").replace("购物", "").replace("休闲娱乐", "");
+				String[] innerArr = areaName.split("/");
+				for (String inner : innerArr) {
+					if (StringUtils.isBlank(areaCode)) {
+						areaCode = AreaInfoMap.getAreaCode(inner, cityCode);
+					} 
+				}
 			}
 		}
 		if (StringUtils.isBlank(areaCode)) {
@@ -188,7 +194,7 @@ public class DianPingDetailClawer extends BaseDetailClawer<XiaoQuEntity>{
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
 		/** 非酒店 */
-		String json = "{\"address\":null,\"analysisType\":\"dp_general\",\"areacode\":null,\"cityInfo\":{\"citycode\":\"1101\",\"cityname\":\"北京市\"},\"createtime\":\"1970-01-01\",\"fromhost\":\"www.dianping.com\",\"fromkey\":\"1768042\",\"fromurl\":\"http://www.dianping.com/shop/1768042\",\"headimg\":\"http://i3.s2.dpfile.com/pc/9479d8318516cb5693d7cfdc5cd6a61a(240c180)/thumb.jpg\",\"intro\":null,\"latitude\":0,\"longItude\":0,\"phone\":null,\"xiaoquType\":3,\"xiaoquname\":\"北海公园\"}";
+		String json = "{\"address\":null,\"analysisType\":\"dp_trade\",\"areacode\":null,\"cityInfo\":{\"citycode\":\"1201\",\"cityname\":\"天津市\"},\"createtime\":\"1970-01-01\",\"fromhost\":\"www.dianping.com\",\"fromkey\":\"2112838\",\"fromurl\":\"http://www.dianping.com/shop/2112838\",\"headimg\":\"http://i3.s2.dpfile.com/pc/9479d8318516cb5693d7cfdc5cd6a61a(240c180)/thumb.jpg\",\"intro\":null,\"latitude\":0,\"longItude\":0,\"phone\":null,\"xiaoquType\":3,\"xiaoquname\":\"北海公园\"}";
 		/** 酒店 */
 //		String json = "{\"address\":null,\"areacode\":null,\"createtime\":\"1970-01-01\",\"fromhost\":\"192.168.31.125\",\"fromkey\":\"dp_1769485\",\"fromurl\":\"http://www.dianping.com/shop/2802772\",\"headimg\":\"http://i3.s2.dpfile.com/pc/9479d8318516cb5693d7cfdc5cd6a61a(240c180)/thumb.jpg\",\"hotel\":true,\"intro\":null,\"latitude\":0,\"longItude\":0,\"phone\":null,\"xiaoquType\":3,\"xiaoquname\":\"王府井希尔顿酒店\"}";
 		/** 购物 */

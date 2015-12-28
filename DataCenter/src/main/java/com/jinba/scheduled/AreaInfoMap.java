@@ -13,29 +13,28 @@ import com.jinba.pojo.AreaType;
 
 public class AreaInfoMap {
 	
-	private static Map<AreaType, Map<String, String>> areaMap = new HashMap<AreaType, Map<String, String>>();
-	private static Map<AreaType, Map<String, Map<String, String>>> muiltAreaMap = new HashMap<AreaType, Map<String, Map<String, String>>>();
+	private static Map<String, Map<AreaType, Map<String, String>>> areaMap = new HashMap<String, Map<AreaType, Map<String, String>>>();
 	
-	public static String getAreaCode (String areaName, String cityName) {
-		if (areaMap.size() == 0) {
-			areaMap = MysqlDao.getInstance().getAreaMap();
+	public static String getAreaCode (String areaName, String cityCode) {
+		Map<AreaType, Map<String, String>> areaStempMap = areaMap.get(cityCode);
+		if (areaStempMap == null) {
+			synchronized (AreaInfoMap.class) {
+				if (areaStempMap == null) {
+					areaStempMap = MysqlDao.getInstance().getAreaMap(cityCode);
+					areaMap.put(cityCode, areaStempMap);
+				}
+			}
 		}
-		if (muiltAreaMap.size() == 0) {
-			muiltAreaMap = MysqlDao.getInstance().getMuiltAreaMap();
-		}
-		Map<String, String> muiltInfo = muiltAreaMap.get(AreaType.FirstStemp).get(areaName);
-		String cityInfo = muiltInfo.get(cityName);
+		String cityInfo = areaStempMap.get(AreaType.District).get(areaName);
 		if (StringUtils.isBlank(cityInfo)) {
-			cityInfo = areaMap.get(AreaType.District).get(areaName);
+			cityInfo = areaStempMap.get(AreaType.DistrictCounty).get(areaName);
 		}
 		if (StringUtils.isBlank(cityInfo)) {
-			cityInfo = areaMap.get(AreaType.DistrictCounty).get(areaName);
-		}
-		if (StringUtils.isBlank(cityInfo)) {
-			cityInfo = areaMap.get(AreaType.Nomal).get(areaName);
+			cityInfo = areaStempMap.get(AreaType.Nomal).get(areaName);
 		}
 		return cityInfo;
 	}
+		
 	
 	public static void main(String[] args) {
 		List<String> l = new ArrayList<String>();

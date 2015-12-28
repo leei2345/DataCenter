@@ -18,7 +18,7 @@ public class DianPingCityMap {
 		cityMap.put("上海市", "3101_1_shanghai");
 		cityMap.put("北京市", "1101_2_beijing");
 		cityMap.put("重庆市", "5001_9_chongqing");
-		cityMap.put("天津市", "1301_10_tianjin");
+		cityMap.put("天津市", "1201_10_tianjin");
 		cityMap.put("密云县", "110128_434_miyun");
 		cityMap.put("延庆县", "110129_435_yanqing");
 		cityMap.put("潼南县", "500223_2283_tongnan");

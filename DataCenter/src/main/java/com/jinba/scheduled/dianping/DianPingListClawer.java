@@ -15,6 +15,8 @@ import com.jinba.core.BaseListClawer;
 import com.jinba.pojo.AnalysisType;
 import com.jinba.pojo.XiaoQuEntity;
 import com.jinba.scheduled.DianPingWorker;
+import com.jinba.spider.core.HttpMethod;
+import com.jinba.spider.core.HttpResponseConfig;
 import com.jinba.spider.core.Params;
 import com.jinba.utils.CountDownLatchUtils;
 
@@ -63,7 +65,8 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 	protected void analysisAction(List<XiaoQuEntity> box) {
 		for (int pageIndex = 1; pageIndex <= pageCount; pageIndex++) {
 			String url = eachPageUrl.replace("$$", String.valueOf(pageIndex));
-			String html = httpGet(url);
+			HttpMethod m = new HttpMethod(TARGETID);
+			String html = m.GetHtml(url, HttpResponseConfig.ResponseAsString);
 			Document doc = Jsoup.parse(html, url);
 			if (pageIndex == 1) {
 				Elements lastPageNode = doc.select("div.page>a:nth-last-of-type(+2)");
@@ -121,7 +124,11 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 	
 	public void run() {
 		List<XiaoQuEntity> list = this.listAction();
-		DianPingWorker.offerWork(list);
+//		for (XiaoQuEntity xiaoQuEntity : list) {
+//			System.out.println(xiaoQuEntity.getCityInfo().get(Params.cityname) + "," + xiaoQuEntity.getFromkey());
+//		}
+		DianPingWorker.getInstance().offerWork(list);
+		list = null;
 	}
 
 	public static void main(String[] args) {
@@ -129,10 +136,10 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
 		Map<Params, String> paramsMap = new HashMap<Params, String>();
-		paramsMap.put(Params.tempurl, "http://www.dianping.com/search/category/##/35/g2901/p$$");
-		paramsMap.put(Params.area, "北京市");
-		paramsMap.put(Params.xiaoquType, "4");
-		paramsMap.put(Params.analysistype, AnalysisType.dp_general.toString());
+		paramsMap.put(Params.tempurl, "http://www.dianping.com/search/category/##/20/g119p$$");
+		paramsMap.put(Params.area, "天津市");
+		paramsMap.put(Params.xiaoquType, "3");
+		paramsMap.put(Params.analysistype, AnalysisType.dp_trade.toString());
 		try {
 			new DianPingListClawer(paramsMap, new CountDownLatchUtils(1)).run();
 		} catch (Exception e) {

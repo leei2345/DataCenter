@@ -5,10 +5,13 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.tomcat.util.threads.ThreadPoolExecutor;
 
 import com.jinba.spider.core.HttpMethod;
 import com.jinba.utils.ConfigUtils;
@@ -18,6 +21,7 @@ public class ImageClawer implements Runnable {
 
 	private static String imgeFilePath;
 	private static ExecutorService threadPool = null;
+	private static BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
 	private static final String THREADPOOLCONF = "dpimgclaw.thread.pool";
 	private static final String IMAGEPATHCONF = "image.file.path";
 	protected HttpMethod http = null;
@@ -30,7 +34,7 @@ public class ImageClawer implements Runnable {
 	static {
 		imgeFilePath = ConfigUtils.getValue(IMAGEPATHCONF);
 		String threadPoolStr = ConfigUtils.getValue(THREADPOOLCONF);
-		threadPool = Executors.newFixedThreadPool(Integer.parseInt(threadPoolStr));
+		threadPool = new ThreadPoolExecutor(5, Integer.parseInt(threadPoolStr), 60000, TimeUnit.MILLISECONDS, queue);
 	}
 	
 	public ImageClawer (String url, int targetId, String targetInfo, String identidy) {
@@ -56,7 +60,7 @@ public class ImageClawer implements Runnable {
 	
 	public void run() {
 		if (StringUtils.isBlank(imageUrl)) {
-			LoggerUtil.ImageInfoLog("[ImageClaw][" + targetId + "][" + identidy + "][" + imageUrl + "][Fail]");
+			LoggerUtil.ImageInfoLog("[ImageClaw][Queue Size " + queue.size() + "][" + targetId + "][" + identidy + "][" + imageUrl + "][Fail]");
 			return;
 		}
 		
@@ -66,7 +70,7 @@ public class ImageClawer implements Runnable {
 		}
 		String fileType = new String(imageClawRes[1]);
 		if (StringUtils.equals(fileType, "txt") || StringUtils.isBlank(fileType)) {
-			LoggerUtil.ImageInfoLog("[ImageClaw][" + targetId + "][" + identidy + "][" + imageUrl + "][Fail]");
+			LoggerUtil.ImageInfoLog("[ImageClaw][Queue Size " + queue.size() + "][" + targetId + "][" + identidy + "][" + imageUrl + "][Fail]");
 			return;
 		}
 		String filePath = "";
@@ -88,11 +92,11 @@ public class ImageClawer implements Runnable {
 			imageStream.write(imageArr);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-			LoggerUtil.ImageInfoLog("[ImageClaw][" + targetId + "][" + identidy + "][" + imageUrl + "][Error]");
+			LoggerUtil.ImageInfoLog("[ImageClaw][Queue Size " + queue.size() + "][" + targetId + "][" + identidy + "][" + imageUrl + "][Error]");
 			return;
 		} catch (IOException e) {
 			e.printStackTrace();
-			LoggerUtil.ImageInfoLog("[ImageClaw][" + targetId + "][" + identidy + "][" + imageUrl + "][Error]");
+			LoggerUtil.ImageInfoLog("[ImageClaw][Queue Size " + queue.size() + "][" + targetId + "][" + identidy + "][" + imageUrl + "][Error]");
 			return;
 		} finally {
 			if (imageStream != null) {
@@ -103,7 +107,7 @@ public class ImageClawer implements Runnable {
 				}
 			}
 		}
-		LoggerUtil.ImageInfoLog("[ImageClaw][" + targetId + "][" + identidy + "][" + imageUrl + "][Succ]");
+		LoggerUtil.ImageInfoLog("[ImageClaw][Queue Size " + queue.size() + "][" + targetId + "][" + identidy + "][" + imageUrl + "][Succ]");
 	}
 
 }

@@ -22,15 +22,15 @@ public class DianPingWorker implements Runnable{
 	
 	private static ExecutorService detailThreadPool;
 	private static LinkedBlockingQueue<XiaoQuEntity> queue = new LinkedBlockingQueue<XiaoQuEntity>(); 
-	private static BlockingQueue<Runnable> threadQueue = new LinkedBlockingQueue<Runnable>(2000); 
+	private static BlockingQueue<Runnable> threadQueue = new LinkedBlockingQueue<Runnable>(); 
 
 	@Value("${dpclaw.thread.pool}")
-	private int threadPoolSize = 30;
+	private int threadPoolSize = 20;
 	private static DianPingWorker instance;
 	
 	public DianPingWorker () {
 		LoggerUtil.TaskInfoLog("[DianPingWorker][Init Start]");
-		detailThreadPool = new ThreadPoolExecutor(20, threadPoolSize, 60000, TimeUnit.MILLISECONDS, threadQueue);
+		detailThreadPool = new ThreadPoolExecutor(threadPoolSize, threadPoolSize, 60000, TimeUnit.MILLISECONDS, threadQueue);
 		new Thread(this).start();
 		instance = this;
 	}

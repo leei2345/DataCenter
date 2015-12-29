@@ -319,8 +319,6 @@ public class HttpMethod {
 			} finally {
 				this.get.abort();
 				this.get.releaseConnection();
-				clientBuilder = null;
-				config = null;
 			}
 			if ((this.getStatus == 200) && (!StringUtils.isBlank(this.getHtml))) {
 				LoggerUtil.HttpDebugLog("[数据获取][url=" + url + "][html=" + this.getHtml + "]");
@@ -338,6 +336,8 @@ public class HttpMethod {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		clientBuilder = null;
+		config = null;
 		return this.getHtml;
 	}
 	

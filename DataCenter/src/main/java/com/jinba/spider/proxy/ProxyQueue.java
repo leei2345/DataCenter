@@ -29,9 +29,11 @@ public class ProxyQueue {
 	 */
 	public static ProxyCheckResEntity getProxy (int targetId) {
 		ConcurrentLinkedQueue<ProxyCheckResEntity> proxyList = proxyCenter.get(targetId);
-		if (proxyList == null || proxyList.size() == 0) {
-			refreshProxy(targetId);
-			proxyList = proxyCenter.get(targetId);
+		if (proxyList == null) {
+			proxyList = new ConcurrentLinkedQueue<ProxyCheckResEntity>();
+		}
+		if (proxyList.isEmpty()) {
+			refreshProxy(targetId, proxyList);
 		}
 		return proxyList.poll();
 	}
@@ -40,9 +42,10 @@ public class ProxyQueue {
 	 * 刷新目标代理队列
 	 * @param targetId
 	 */
-	public static void refreshProxy (int targetId) {
+	public static void refreshProxy (int targetId, ConcurrentLinkedQueue<ProxyCheckResEntity> proxyList) {
 		ConcurrentLinkedQueue<ProxyCheckResEntity> proxyQueue = dao.getProxyQueue(targetId);
-		proxyCenter.put(targetId, proxyQueue);
+		proxyList.addAll(proxyQueue);
+		proxyCenter.put(targetId, proxyList);
 	}
 	
 	

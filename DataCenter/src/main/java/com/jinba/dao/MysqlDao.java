@@ -188,6 +188,41 @@ public class MysqlDao  {
 		return res;
 	}
 	
+	/**
+	 * 查看目标代理已有数量
+	 * @param targetId为-1 时 查看代理源的总数
+	 * @return
+	 */
+	public void removeProxy (String proxy, int targetId) {
+		DruidPooledConnection conn = null;
+		Statement st = null;
+		try {
+			String[] proxyInfo = proxy.split(":");
+			String sql = "delete from tb_proxy_avail where target_id=" + targetId + " and `host`='" + proxyInfo[0] + "' and `port`=" + proxyInfo[1] + " and enable=0";
+			conn = spiderSource.getConnection();
+			st = conn.createStatement();
+			st.execute(sql);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (st != null) {
+				try {
+					st.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	
 	public boolean insertProxyToAvail (String host, String port, int targetId) {
 		DruidPooledConnection conn = null;
 		Statement st = null;

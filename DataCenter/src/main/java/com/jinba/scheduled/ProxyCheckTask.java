@@ -66,7 +66,13 @@ public class ProxyCheckTask implements Runnable, ApplicationContextAware{
 					String host = str.split(":")[0];
 					String port = str.split(":")[1];
 					dao.insertProxyToAvail(host, port, targetId);
+					LoggerUtil.ProxyLog("[Add Proxy][" + targetId + "][" + str + "]");
 				}
+			}
+			targetProxySet.removeAll(proxySourceSet);
+			for (String proxy : targetProxySet.elementSet()) {
+				dao.removeProxy(proxy, targetId);
+				LoggerUtil.ProxyLog("[Remove Proxy][" + targetId + "][" + proxy + "]");
 			}
 			TargetEntity targetEntity = entry.getValue();
 			List<ProxyCheckResEntity> proxyList = dao.getNeedCheckProxy(targetId);

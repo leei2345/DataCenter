@@ -377,7 +377,7 @@ public class HttpsMethod {
 				this.get.abort();
 				this.get.releaseConnection();
 			}
-			if ((this.getStatus == 200) && (!StringUtils.isBlank(this.getHtml))) {
+			if ((this.getStatus == 200 && !StringUtils.isBlank(this.getHtml)) || this.getStatus == 404) {
 				LoggerUtil.HttpDebugLog("[数据获取][url=" + url + "][html=" + this.getHtml + "]");
 				break;
 			} else {

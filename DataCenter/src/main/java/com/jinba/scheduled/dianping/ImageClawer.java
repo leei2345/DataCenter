@@ -34,7 +34,7 @@ public class ImageClawer implements Runnable {
 	static {
 		imgeFilePath = ConfigUtils.getValue(IMAGEPATHCONF);
 		String threadPoolStr = ConfigUtils.getValue(THREADPOOLCONF);
-		threadPool = new ThreadPoolExecutor(5, Integer.parseInt(threadPoolStr), 60000, TimeUnit.MILLISECONDS, queue);
+		threadPool = new ThreadPoolExecutor(Integer.parseInt(threadPoolStr), Integer.parseInt(threadPoolStr), 60000, TimeUnit.MILLISECONDS, queue);
 	}
 	
 	public ImageClawer (String url, int targetId, String targetInfo, String identidy) {

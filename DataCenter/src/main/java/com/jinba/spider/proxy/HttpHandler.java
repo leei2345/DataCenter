@@ -37,13 +37,13 @@ public class HttpHandler {
 	}
 	
 	public HttpHandler () {
-		hc.getHttpConnectionManager().getParams().setConnectionTimeout(15000);
-		hc.getHttpConnectionManager().getParams().setSoTimeout(10000);
+		hc.getHttpConnectionManager().getParams().setConnectionTimeout(30000);
+		hc.getHttpConnectionManager().getParams().setSoTimeout(15000);
 	}
 	
 	public void SetTimeOut (int timeOut) {
 		hc.getHttpConnectionManager().getParams().setConnectionTimeout(timeOut);
-		hc.getHttpConnectionManager().getParams().setSoTimeout(10000);
+		hc.getHttpConnectionManager().getParams().setSoTimeout(15000);
 	}
 	
 	public void AddHeader (String key, String value) {

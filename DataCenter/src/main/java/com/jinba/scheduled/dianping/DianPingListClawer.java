@@ -58,6 +58,7 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 		String tempUrl = paramsMap.get(Params.tempurl);
 		eachPageUrl = tempUrl.replace("@@", cityEnCode).replace("##", cityNumCode);
 		xiaoquType = Integer.parseInt(paramsMap.get(Params.xiaoquType));
+		paramsMap = null;
 		return ActionRes.INITSUCC;
 	}
 

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import com.jinba.pojo.AnalysisType;
 
 /**
- * 生活服务-医院
+ * 生活服务-商务楼
  * @author leei
  *
  */

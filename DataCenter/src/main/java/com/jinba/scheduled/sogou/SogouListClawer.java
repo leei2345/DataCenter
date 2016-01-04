@@ -1,5 +1,6 @@
 package com.jinba.scheduled.sogou;
 
+import java.net.URI;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +18,7 @@ import org.jsoup.select.Elements;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.jinba.core.BaseListClawer;
+import com.jinba.dao.MysqlDao;
 import com.jinba.pojo.NewsEntity;
 import com.jinba.spider.core.HttpMethod;
 import com.jinba.spider.core.HttpResponseConfig;
@@ -51,14 +53,15 @@ public class SogouListClawer extends BaseListClawer<NewsEntity>{
 		String areaNameEn = new URLEncoder().encode(areaName);
 		boolean next = true;
 		String firstUrl = "http://weixin.sogou.com";
-		HttpMethod m = new HttpMethod(targetId);
+ 		HttpMethod m = new HttpMethod(targetId);
 		m.GetHtml(firstUrl, HttpResponseConfig.ResponseAsStream);
 		HttpHost proxy = m.getProxy();
 		BasicCookieStore cookie = m.getCookieStore();
 		do {
 			next = false;
 			String url = tempUrl.replace("##", areaNameEn).replace("$$", String.valueOf(pageIndex));
-			String html = httpGet(url, cookie, proxy);
+	 		HttpMethod inner = new HttpMethod(targetId, cookie, proxy);
+			String html = inner.GetHtml(url, HttpResponseConfig.ResponseAsStream);
 			if (StringUtils.isBlank(html)) {
 				break;
 			}
@@ -74,8 +77,24 @@ public class SogouListClawer extends BaseListClawer<NewsEntity>{
 				} catch (Exception e) {
 					continue;
 				}
+				String fromKey = element.attr("d").trim();
+				newsEntity.setFromkey(fromKey);
+				String selectSql = "select newsid from t_news where fromhost='" + FROMHOST + "' and fromkey='" +fromKey + "'";;
+				List<Map<String, Object>> selectRes = MysqlDao.getInstance().select(selectSql);
+				if (selectRes != null && selectRes.size() > 0) {
+					continue;
+				}
 				String fromUrl = element.select("div.txt-box > h4 > a").attr("abs:href").trim();
-				newsEntity.setFromurl(fromUrl);
+				HttpMethod entityMe = new HttpMethod(TARGETID, cookie, proxy);
+				String entityRes = entityMe.GetLocationUrl(fromUrl);
+				if (!StringUtils.isBlank(entityRes)) {
+					try {
+						URI uri = new URI(entityRes);
+						newsEntity.setFromurl(uri.toString());
+					} catch (Exception e) {
+						continue;
+					}
+				}
 				String dateStr = element.select("div.txt-box > div.s-p").attr("t").trim();
 				long time = 0l;
 				try {
@@ -92,10 +111,9 @@ public class SogouListClawer extends BaseListClawer<NewsEntity>{
 					continue;
 				}
 				newsEntity.setNewstime(sim.format(postDate));
+				newsEntity.setPosttime(today);
 				String source = element.select("div.s-p > a#weixin_account").attr("title").trim();
 				newsEntity.setSource(source);
-				String fromKey = element.attr("d").trim();
-				newsEntity.setFromkey(fromKey);
 				box.add(newsEntity);
 			}
 			pageIndex++;
@@ -111,7 +129,10 @@ public class SogouListClawer extends BaseListClawer<NewsEntity>{
 		paramsMap.put(Params.area, "东城区");
 		paramsMap.put(Params.citycode, "110101");
 		try {
-			new SogouListClawer(paramsMap, new CountDownLatchUtils(1)).listAction();
+			List<NewsEntity> l = new SogouListClawer(paramsMap, new CountDownLatchUtils(1)).listAction();
+			for (NewsEntity newsEntity : l) {
+				System.out.println(newsEntity);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

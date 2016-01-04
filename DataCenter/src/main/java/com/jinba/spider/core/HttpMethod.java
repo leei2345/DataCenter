@@ -108,6 +108,20 @@ public class HttpMethod {
 		this.client = this.clientBuilder.setDefaultRequestConfig(this.config.build()).setDefaultCookieStore(cookieStore).build();
 	}
 	
+	public HttpMethod(int identidy, BasicCookieStore cookieStore, HttpHost proxy) {
+		this.identidy = identidy;
+		this.proxy = proxy;
+		this.setProxy = true;
+		this.config.setAuthenticationEnabled(true);
+		this.config.setConnectTimeout(30000);
+		this.config.setSocketTimeout(30000);
+		this.clientBuilder = HttpClientBuilder.create();
+		this.clientBuilder.setMaxConnTotal(100);
+		this.clientBuilder.setMaxConnPerRoute(500);
+		this.cookieStore = cookieStore;
+		this.client = this.clientBuilder.setDefaultRequestConfig(this.config.build()).setDefaultCookieStore(cookieStore).build();
+	}
+	
 	public HttpMethod(BasicCookieStore cookieStore) {
 		this(0, cookieStore);
 	}
@@ -193,10 +207,15 @@ public class HttpMethod {
 		if (httpResponseConfig == null) {
 			getLocation = true;
 			RequestConfig.Builder builder = this.config;
+			builder.setAuthenticationEnabled(true);
 			builder.setRelativeRedirectsAllowed(false);
 			builder.setCircularRedirectsAllowed(false);
 			builder.setRedirectsEnabled(false);
-			this.client = this.clientBuilder.setDefaultRequestConfig(builder.build()).build();
+			HttpClientBuilder clientBuilder = this.clientBuilder;
+			clientBuilder = HttpClientBuilder.create();
+			clientBuilder.setMaxConnTotal(100);
+			clientBuilder.setMaxConnPerRoute(500);
+			this.client = clientBuilder.setDefaultRequestConfig(builder.build()).setDefaultCookieStore(cookieStore).build();
 		} else {
 			responseAsStream = httpResponseConfig.isYesOrNo();
 		}
@@ -231,6 +250,7 @@ public class HttpMethod {
 				this.get.setURI(uri);
 				HttpContext context = new BasicHttpContext();
 				CloseableHttpResponse response = this.client.execute(this.get, context);
+				this.getStatus = response.getStatusLine().getStatusCode();
 				if (getLocation) {
 					try {
 						locationHeader = response.getFirstHeader("Location").getValue();
@@ -241,7 +261,6 @@ public class HttpMethod {
 						continue;
 					}
 				}
-				this.getStatus = response.getStatusLine().getStatusCode();
 				HttpEntity entity = response.getEntity();
 				ContentType contentType = ContentType.getOrDefault(entity);
 				entity = new BufferedHttpEntity(entity);
@@ -320,7 +339,7 @@ public class HttpMethod {
 				this.get.abort();
 				this.get.releaseConnection();
 			}
-			if ((this.getStatus == 200) && (!StringUtils.isBlank(this.getHtml))) {
+			if ((this.getStatus == 200) && (!StringUtils.isBlank(this.getHtml)) || (this.getStatus == 404) && (!StringUtils.isBlank(this.getHtml))) {
 				LoggerUtil.HttpDebugLog("[数据获取][url=" + url + "][html=" + this.getHtml + "]");
 				break;
 			} else {

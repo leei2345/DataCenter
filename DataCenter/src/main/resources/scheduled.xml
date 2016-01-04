@@ -35,7 +35,7 @@
 		<task:scheduled ref="dianPing_SHFW_XQ_SWL_Task" method="run" cron="0 0 23 2 * ?" />
 		<task:scheduled ref="dianPing_JD_CSGG_Task" method="run" cron="0 0 12 3 * ?" />
 		<task:scheduled ref="dianPing_JD_DZWY_Task" method="run" cron="0 0 0 4 * ?" />
-		<task:scheduled ref="dianPing_JD_GZ_Task" method="run" cron="0 0 12 4 * ?" />
+		<task:scheduled ref="dianPing_JD_GZ_Task" method="run" cron="0 36 14 4 * ?" />
 		<task:scheduled ref="dianPing_SHFW_YY_Task" method="run" cron="0 0 0 5 * ?" />
 		<task:scheduled ref="dianPing_JD_MSGJ_Task" method="run" cron="0 0 12 5 * ?" />
 		<task:scheduled ref="dianPing_JD_YLY_Task" method="run" cron="0 0 0 6 * ?" />

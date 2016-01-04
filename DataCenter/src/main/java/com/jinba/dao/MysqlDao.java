@@ -262,7 +262,7 @@ public class MysqlDao  {
 		ResultSet rs = null;
 		List<ProxyCheckResEntity> res = new ArrayList<ProxyCheckResEntity>();
 		try {
-			String sql = "select host,port from tb_proxy_avail where target_id=" + targetId + " order by u_time limit 500";
+			String sql = "select host,port from tb_proxy_avail where target_id=" + targetId + " order by u_time limit 1000";
 			conn = spiderSource.getConnection();
 			st = conn.prepareStatement(sql);
 			rs = st.executeQuery();

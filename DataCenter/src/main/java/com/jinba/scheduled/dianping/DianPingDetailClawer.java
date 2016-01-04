@@ -18,6 +18,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.jinba.core.BaseDetailClawer;
 import com.jinba.core.DBHandle;
+import com.jinba.dao.MysqlDao;
 import com.jinba.pojo.AnalysisType;
 import com.jinba.pojo.XiaoQuEntity;
 import com.jinba.scheduled.AreaInfoMap;
@@ -47,7 +48,14 @@ public class DianPingDetailClawer extends BaseDetailClawer<XiaoQuEntity>{
 
 	@Override
 	protected ActionRes initParams() {
-		return ActionRes.INITSUCC;
+		String fromkey = this.detailEntity.getFromkey();
+		String selectSql = "select comments from t_xiaoqu where fromkey='" + fromkey + "'";
+		List<Map<String, Object>> commentsRes = MysqlDao.getInstance().select(selectSql);
+		if (commentsRes.size() > 0) {
+			return ActionRes.INITEXIST;
+		} else {
+			return ActionRes.INITSUCC;
+		}
 	}
 
 	@Override
@@ -98,7 +106,6 @@ public class DianPingDetailClawer extends BaseDetailClawer<XiaoQuEntity>{
 			try {
 				infoObject = JSONObject.parseObject(info);
 			} catch (Exception innere) {
-				innere.printStackTrace();
 				return ActionRes.ANALYSIS_FAIL;
 			}
 		}
@@ -194,7 +201,7 @@ public class DianPingDetailClawer extends BaseDetailClawer<XiaoQuEntity>{
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
 		/** 非酒店 */
-		String json = "{\"address\":null,\"analysisType\":\"dp_trade\",\"areacode\":null,\"cityInfo\":{\"citycode\":\"1201\",\"cityname\":\"天津市\"},\"createtime\":\"1970-01-01\",\"fromhost\":\"www.dianping.com\",\"fromkey\":\"2112838\",\"fromurl\":\"http://www.dianping.com/shop/2112838\",\"headimg\":\"http://i3.s2.dpfile.com/pc/9479d8318516cb5693d7cfdc5cd6a61a(240c180)/thumb.jpg\",\"intro\":null,\"latitude\":0,\"longItude\":0,\"phone\":null,\"xiaoquType\":3,\"xiaoquname\":\"北海公园\"}";
+		String json = "{\"address\":null,\"analysisType\":\"dp_trade\",\"areacode\":null,\"cityInfo\":{\"citycode\":\"1201\",\"cityname\":\"天津市\"},\"createtime\":\"1970-01-01\",\"fromhost\":\"www.dianping.com\",\"fromkey\":\"1768042\",\"fromurl\":\"http://www.dianping.com/shop/1768042\",\"headimg\":\"http://i3.s2.dpfile.com/pc/9479d8318516cb5693d7cfdc5cd6a61a(240c180)/thumb.jpg\",\"intro\":null,\"latitude\":0,\"longItude\":0,\"phone\":null,\"xiaoquType\":3,\"xiaoquname\":\"北海公园\"}";
 		/** 酒店 */
 //		String json = "{\"address\":null,\"areacode\":null,\"createtime\":\"1970-01-01\",\"fromhost\":\"192.168.31.125\",\"fromkey\":\"dp_1769485\",\"fromurl\":\"http://www.dianping.com/shop/2802772\",\"headimg\":\"http://i3.s2.dpfile.com/pc/9479d8318516cb5693d7cfdc5cd6a61a(240c180)/thumb.jpg\",\"hotel\":true,\"intro\":null,\"latitude\":0,\"longItude\":0,\"phone\":null,\"xiaoquType\":3,\"xiaoquname\":\"王府井希尔顿酒店\"}";
 		/** 购物 */

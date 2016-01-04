@@ -65,7 +65,11 @@ public class ProxyCheckTask implements Runnable, ApplicationContextAware{
 					}
 					String host = str.split(":")[0];
 					String port = str.split(":")[1];
-					dao.insertProxyToAvail(host, port, targetId);
+					try {
+						dao.insertProxyToAvail(host, port, targetId);
+					} catch (Exception e) {
+						continue;
+					}
 					LoggerUtil.ProxyLog("[Add Proxy][" + targetId + "][" + str + "]");
 				}
 			}

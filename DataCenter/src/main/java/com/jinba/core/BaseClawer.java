@@ -28,6 +28,7 @@ public abstract class BaseClawer {
 	public enum ActionRes {
 		INITSUCC,
 		INITFAIL,
+		INITEXIST,
 		ANALYSIS_SUCC,
 		ANALYSIS_FAIL,
 		DBHAND_FAIL,

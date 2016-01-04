@@ -51,6 +51,9 @@ public abstract class BaseDetailClawer<T extends BaseEntity> extends BaseClawer 
 			long initParamsTime = watch.getSplitTime();
 			if (initRes.equals(ActionRes.INITSUCC)) {
 				logBuilder.append("[InitParam Succ][" + initParamsTime + "]");
+			} else if (initRes.equals(ActionRes.INITEXIST)) {
+				logBuilder.append("[InitParam Exist][" + initParamsTime + "]");
+				return;
 			} else {
 				logBuilder.append("[InitParam Fail][" + initParamsTime + "]");
 				return;

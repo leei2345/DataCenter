@@ -63,7 +63,18 @@ public class ImageClawer implements Runnable {
 			LoggerUtil.ImageInfoLog("[ImageClaw][Queue Size " + queue.size() + "][" + targetId + "][" + identidy + "][" + imageUrl + "][Fail]");
 			return;
 		}
-		
+		if (!StringUtils.isBlank(imageDirName)) {
+			String existFilePath = imgeFilePath + targetInfo + "/" + imageDirName + "/"+ identidy + ".jpg";
+			File existFile = new File(existFilePath);
+			if (existFile.exists()) {
+				return;
+			}
+			existFilePath = imgeFilePath + targetInfo + "/" + imageDirName + "/"+ identidy + ".png";
+			existFile = new File(existFilePath);
+			if (existFile.exists()) {
+				return;
+			}
+		} 
 		byte[][] imageClawRes = http.GetImageByteArr(imageUrl);
 		if (imageClawRes == null || imageClawRes[0] ==null || imageClawRes[1] == null) {
 			return;
@@ -108,6 +119,11 @@ public class ImageClawer implements Runnable {
 			}
 		}
 		LoggerUtil.ImageInfoLog("[ImageClaw][Queue Size " + queue.size() + "][" + targetId + "][" + identidy + "][" + imageUrl + "][Succ]");
+	}
+	
+	public static void main(String[] args) {
+		ImageClawer i = new ImageClawer("http://i1.s2.dpfile.com/pc/146a7fe725a14850a8d216c0135d6952(249x249)/thumb.jpg", 1, "dianping", "17648042", "shop");
+		new Thread(i).start();
 	}
 
 }

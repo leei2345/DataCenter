@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import org.apache.catalina.util.URLEncoder;
 import org.apache.commons.lang3.StringUtils;
@@ -25,7 +26,7 @@ import com.jinba.spider.core.HttpResponseConfig;
 import com.jinba.spider.core.Params;
 import com.jinba.utils.CountDownLatchUtils;
 
-public class SogouListClawer extends BaseListClawer<NewsEntity>{
+public class SogouListClawer extends BaseListClawer<NewsEntity> implements Callable<List<NewsEntity>>{
 
 	private static final int TARGETID = 2;
 	private static String tempUrl = "http://weixin.sogou.com/weixin?type=2&query=##&ie=utf8&sourceid=inttime_day&w=&sut=&sst0=&lkt=&page=$$";
@@ -119,7 +120,11 @@ public class SogouListClawer extends BaseListClawer<NewsEntity>{
 			pageIndex++;
 		} while (next && pageIndex <= 10);
 	}
-
+	
+	public List<NewsEntity> call() throws Exception {
+		List<NewsEntity> list = this.listAction();
+		return list;
+	}
 	
 	public static void main(String[] args) {
 		@SuppressWarnings("resource")
@@ -138,5 +143,6 @@ public class SogouListClawer extends BaseListClawer<NewsEntity>{
 		}
 	
 	}
+
 
 }

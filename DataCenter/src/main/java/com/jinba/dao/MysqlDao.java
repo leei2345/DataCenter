@@ -13,18 +13,21 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.pool.DruidPooledConnection;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
+import com.jinba.pojo.AreaType;
 import com.jinba.pojo.ProxyCheckResEntity;
 import com.jinba.pojo.SyntaxEntity;
 import com.jinba.pojo.SyntaxEntity.SyntaxType;
 import com.jinba.pojo.TargetEntity;
 
 @Component
+@Scope("singleton")
 public class MysqlDao  {
 	
 	@Autowired
@@ -185,6 +188,41 @@ public class MysqlDao  {
 		return res;
 	}
 	
+	/**
+	 * 查看目标代理已有数量
+	 * @param targetId为-1 时 查看代理源的总数
+	 * @return
+	 */
+	public void removeProxy (String proxy, int targetId) {
+		DruidPooledConnection conn = null;
+		Statement st = null;
+		try {
+			String[] proxyInfo = proxy.split(":");
+			String sql = "delete from tb_proxy_avail where target_id=" + targetId + " and `host`='" + proxyInfo[0] + "' and `port`=" + proxyInfo[1] + " and enable=0";
+			conn = spiderSource.getConnection();
+			st = conn.createStatement();
+			st.execute(sql);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (st != null) {
+				try {
+					st.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	
 	public boolean insertProxyToAvail (String host, String port, int targetId) {
 		DruidPooledConnection conn = null;
 		Statement st = null;
@@ -224,7 +262,7 @@ public class MysqlDao  {
 		ResultSet rs = null;
 		List<ProxyCheckResEntity> res = new ArrayList<ProxyCheckResEntity>();
 		try {
-			String sql = "select host,port from tb_proxy_avail where target_id=" + targetId + " order by u_time limit 500";
+			String sql = "select host,port from tb_proxy_avail where target_id=" + targetId + " order by u_time limit 1000";
 			conn = spiderSource.getConnection();
 			st = conn.prepareStatement(sql);
 			rs = st.executeQuery();
@@ -372,7 +410,7 @@ public class MysqlDao  {
 		ResultSet rs = null;
 		List<String> res = new ArrayList<String>();
 		try {
-			String sql = "select areacode,areaname,postcode from t_area where `level` IN (2,3) AND switch=1";
+			String sql = "select areacode,areaname,postcode from t_area where level in (2,3)";
 			conn = spiderSource.getConnection();
 			st = conn.prepareStatement(sql);
 			rs = st.executeQuery();
@@ -414,13 +452,138 @@ public class MysqlDao  {
 		return res;
 	}
 	
-	public Map<String, String> getAreaCodeMap () {
+	@SuppressWarnings("resource")
+	public Map<AreaType, Map<String, String>> getAreaMap (String cityCode) {
+		DruidPooledConnection conn = null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		Map<AreaType, Map<String, String>> res = new HashMap<AreaType, Map<String, String>>();
+		try {
+			/** 商圈 */
+			Map<String, String> districtMap = new HashMap<String, String>();
+			String sql = "select areaname,areacode from t_area where level=4 and areacode like '" + cityCode + "%'";
+			conn = spiderSource.getConnection();
+			st = conn.prepareStatement(sql);
+			rs = st.executeQuery();
+			while (rs.next()) {
+				String areaCode = rs.getString("areacode");
+				String areaName = rs.getString("areaname");
+				districtMap.put(areaName, areaCode);
+			}
+			res.put(AreaType.District, districtMap);
+			/** 区县 */
+			Map<String, String> districtCountyMap = new HashMap<String, String>();
+			sql = "select areaname,areacode from t_area where level=3 and areacode like '" + cityCode + "%'";
+			st = conn.prepareStatement(sql);
+			rs = st.executeQuery();
+			while (rs.next()) {
+				String areaCode = rs.getString("areacode");
+				String areaName = rs.getString("areaname");
+				districtCountyMap.put(areaName, areaCode);
+			}
+			res.put(AreaType.DistrictCounty, districtCountyMap);
+			/** 区县 */
+			Map<String, String> nomalMap = new HashMap<String, String>();
+			sql = "select areaname,areacode from t_area where level!=1 and level!=3 and level!=4 and areacode like '" + cityCode + "%'";;
+			st = conn.prepareStatement(sql);
+			rs = st.executeQuery();
+			while (rs.next()) {
+				String areaCode = rs.getString("areacode");
+				String areaName = rs.getString("areaname");
+				nomalMap.put(areaName, areaCode);
+			}
+			res.put(AreaType.Nomal, nomalMap);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			if (st != null) {
+				try {
+					st.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return res;
+	}
+	
+	public Map<AreaType, Map<String, Map<String, String>>> getMuiltAreaMap () {
+		DruidPooledConnection conn = null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		Map<AreaType, Map<String, Map<String, String>>> res = new HashMap<AreaType, Map<String, Map<String, String>>>();
+		try {
+			String selectMuiltAreaSql = "select b.areacode,b.fullname,b.areaname from t_area b, (SELECT areaname,COUNT(1) count FROM t_area GROUP BY areaname HAVING count>1) a where a.areaname=b.areaname order by b.areaname";
+			conn = spiderSource.getConnection();
+			st = conn.prepareStatement(selectMuiltAreaSql);
+			rs = st.executeQuery();
+			Map<String, Map<String, String>> map =  new HashMap<String, Map<String,String>>();
+			while (rs.next()) {
+				String areaName = rs.getString("areaname");
+				Map<String, String> innerMap = map.get(areaName);
+				if (innerMap == null) {
+					innerMap = new HashMap<String, String>();
+				}
+				String fullName = rs.getString("fullname");
+				String[] fullNameArr = fullName.split("\\s+");
+				if (fullNameArr.length < 1) {
+					continue;
+				}
+				String city = fullNameArr[0];
+				String areaCode = rs.getString("areacode");
+				innerMap.put(city, areaCode);
+				map.put(areaName, innerMap);
+			}
+			res.put(AreaType.FirstStemp, map);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			if (st != null) {
+				try {
+					st.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return res;
+	}
+	
+	/*public Map<String, String> getChengquCode () {
 		DruidPooledConnection conn = null;
 		PreparedStatement st = null;
 		ResultSet rs = null;
 		Map<String, String> res = new HashMap<String, String>();
 		try {
-			String sql = "select areaname,areacode from t_area where areaname LIKE '%区'";
+			String sql = "select areaname,areacode from t_area where level=3";
 			conn = spiderSource.getConnection();
 			st = conn.prepareStatement(sql);
 			rs = st.executeQuery();
@@ -455,7 +618,7 @@ public class MysqlDao  {
 			}
 		}
 		return res;
-	}
+	}*/
 	
 	public List<Map<String, Object>> select (String sql) {
 		List<Map<String, Object>> resList = new ArrayList<Map<String, Object>>();

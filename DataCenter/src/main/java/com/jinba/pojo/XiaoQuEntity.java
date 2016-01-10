@@ -35,7 +35,14 @@ public class XiaoQuEntity extends BaseEntity {
 	/** 类型0大众类型 1酒店类 2教育类 */
 	private AnalysisType analysisType = AnalysisType.dp_general;
 	private Map<Params, String> cityInfo = new HashMap<Params, String>();
-	
+	private String comments;
+
+	public String getComments() {
+		return comments;
+	}
+	public void setComments(String comments) {
+		this.comments = comments;
+	}
 	public AnalysisType getAnalysisType() {
 		return analysisType;
 	}

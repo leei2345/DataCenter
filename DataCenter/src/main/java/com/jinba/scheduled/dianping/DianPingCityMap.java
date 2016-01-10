@@ -8,20 +8,17 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.jinba.dao.MysqlDao;
-
 
 public class DianPingCityMap {
 	
 	private static Map<String, String> cityMap = new HashMap<String, String>();
-	private static Map<String, String> areaMap = new HashMap<String, String>();
 	
 	static {
 		
 		cityMap.put("上海市", "3101_1_shanghai");
 		cityMap.put("北京市", "1101_2_beijing");
 		cityMap.put("重庆市", "5001_9_chongqing");
-		cityMap.put("天津市", "1301_10_tianjin");
+		cityMap.put("天津市", "1201_10_tianjin");
 		cityMap.put("密云县", "110128_434_miyun");
 		cityMap.put("延庆县", "110129_435_yanqing");
 		cityMap.put("潼南县", "500223_2283_tongnan");
@@ -445,7 +442,7 @@ public class DianPingCityMap {
 		cityMap.put("肇东市", "231282_816_zhaodong");
 		cityMap.put("海伦市", "231283_817_hailun");
 		cityMap.put("望奎县", "231221_818_wangkui");
-		cityMap.put("兰���县", "231222_819_lanxixian");
+		cityMap.put("兰西县", "231222_819_lanxixian");
 		cityMap.put("青冈县", "231223_820_qinggang");
 		cityMap.put("庆安县", "231224_821_qingan");
 		cityMap.put("明水县", "231225_822_mingshui");
@@ -2279,18 +2276,6 @@ public class DianPingCityMap {
 		}
 		String[] cityInfoArr = cityInfo.split("_");
 		return cityInfoArr[index];
-	}
-	
-	
-	public static String getAreaCodePro (String cityName) {
-		if (areaMap.size() == 0) {
-			areaMap = MysqlDao.getInstance().getAreaCodeMap();
-		}
-		String cityInfo = areaMap.get(cityName);
-		if (StringUtils.isBlank(cityInfo)) {
-			return "";
-		}
-		return cityInfo;
 	}
 	
 	public static void main(String[] args) throws IOException {

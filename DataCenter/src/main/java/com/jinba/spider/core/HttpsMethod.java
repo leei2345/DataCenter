@@ -11,12 +11,20 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
@@ -27,23 +35,22 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ConnectTimeoutException;
+import org.apache.http.conn.socket.LayeredConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
 import com.jinba.pojo.ProxyCheckResEntity;
@@ -51,14 +58,13 @@ import com.jinba.spider.proxy.ProxyQueue;
 import com.jinba.utils.LoggerUtil;
 
 
-@SuppressWarnings("deprecation")
 /**
  * 数据抓取核心，http请求发起端
  * @author leei
  */
-public class HttpMethod {
+public class HttpsMethod {
 	
-	private CloseableHttpClient client = new DefaultHttpClient();
+	private HttpClient client  = null;
 	private BasicCookieStore cookieStore = new BasicCookieStore();
 	private HttpGet get = null;
 	private HttpPost post = null;
@@ -68,7 +74,6 @@ public class HttpMethod {
 	private HttpClientBuilder clientBuilder = HttpClientBuilder.create();
 	private int identidy;
 	private HttpHost proxy;
-	private boolean setProxy = false;
 	private String getHtml = "";
 	private String getException = "";
 	private int getStatus = 0;
@@ -76,11 +81,11 @@ public class HttpMethod {
 	private String postException = "";
 	private int postStatus = 0;
 
-	public HttpMethod() {
+	public HttpsMethod() {
 		this(0);
 	}
 	
-	public HttpMethod(int identidy) {
+	public HttpsMethod(int identidy) {
 		this.identidy = identidy;
 		this.config.setAuthenticationEnabled(true);
 		this.config.setConnectTimeout(30000);
@@ -88,15 +93,35 @@ public class HttpMethod {
 		this.clientBuilder = HttpClientBuilder.create();
 		this.clientBuilder.setMaxConnTotal(100);
 		this.clientBuilder.setMaxConnPerRoute(500);
-		this.client = this.clientBuilder.setDefaultRequestConfig(this.config.build()).setDefaultCookieStore(cookieStore).build();
+		try {
+			SSLContext ctx = SSLContext.getInstance("SSL");  
+			X509TrustManager tm = new X509TrustManager() {  
+				public void checkClientTrusted(X509Certificate[] xcs,  
+						String string) throws CertificateException {  
+				}  
+				public void checkServerTrusted(X509Certificate[] xcs,  
+						String string) throws CertificateException {  
+				}  
+				public X509Certificate[] getAcceptedIssuers() {  
+					return null;  
+				}  
+			};  
+			ctx.init(null, new TrustManager[] { tm }, null);
+			LayeredConnectionSocketFactory ssf = new SSLConnectionSocketFactory(ctx);
+			this.client = this.clientBuilder.setSSLSocketFactory(ssf).setDefaultRequestConfig(this.config.build()).setDefaultCookieStore(cookieStore).build();
+		} catch (KeyManagementException e) {
+			e.printStackTrace();
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}  
 	}
 	
-	public HttpMethod(int identidy, CloseableHttpClient client) {
+	public HttpsMethod(int identidy, CloseableHttpClient client) {
 		this.identidy = identidy;
 		this.client = client;
 	}
 	
-	public HttpMethod(int identidy, BasicCookieStore cookieStore) {
+	public HttpsMethod(int identidy, BasicCookieStore cookieStore) {
 		this.identidy = identidy;
 		this.config.setAuthenticationEnabled(true);
 		this.config.setConnectTimeout(30000);
@@ -105,50 +130,49 @@ public class HttpMethod {
 		this.clientBuilder.setMaxConnTotal(100);
 		this.clientBuilder.setMaxConnPerRoute(500);
 		this.cookieStore = cookieStore;
-		this.client = this.clientBuilder.setDefaultRequestConfig(this.config.build()).setDefaultCookieStore(cookieStore).build();
+		try {
+			SSLContext ctx = SSLContext.getInstance("SSL");  
+			X509TrustManager tm = new X509TrustManager() {  
+				public void checkClientTrusted(X509Certificate[] xcs,  
+						String string) throws CertificateException {  
+				}  
+				public void checkServerTrusted(X509Certificate[] xcs,  
+						String string) throws CertificateException {  
+				}  
+				public X509Certificate[] getAcceptedIssuers() {  
+					return null;  
+				}  
+			};  
+			ctx.init(null, new TrustManager[] { tm }, null);
+			LayeredConnectionSocketFactory ssf = new SSLConnectionSocketFactory(ctx);
+			this.client = this.clientBuilder.setSSLSocketFactory(ssf).setDefaultRequestConfig(this.config.build()).setDefaultCookieStore(cookieStore).build();
+		} catch (KeyManagementException e) {
+			e.printStackTrace();
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}  
 	}
 	
-	public HttpMethod(int identidy, BasicCookieStore cookieStore, HttpHost proxy) {
-		this.identidy = identidy;
-		this.proxy = proxy;
-		this.setProxy = true;
-		this.config.setAuthenticationEnabled(true);
-		this.config.setConnectTimeout(30000);
-		this.config.setSocketTimeout(30000);
-		this.clientBuilder = HttpClientBuilder.create();
-		this.clientBuilder.setMaxConnTotal(100);
-		this.clientBuilder.setMaxConnPerRoute(500);
-		this.cookieStore = cookieStore;
-		this.client = this.clientBuilder.setDefaultRequestConfig(this.config.build()).setDefaultCookieStore(cookieStore).build();
-	}
-	
-	public HttpMethod(BasicCookieStore cookieStore) {
+	public HttpsMethod(BasicCookieStore cookieStore) {
 		this(0, cookieStore);
 	}
 	
 	public BasicCookieStore getCookieStore() {
 		return cookieStore;
 	}
-	
-	public void setCookieStore(BasicCookieStore cookie) {
-		this.cookieStore = cookie;
-		this.config.setAuthenticationEnabled(true);
-		this.config.setConnectTimeout(30000);
-		this.config.setSocketTimeout(30000);
-		this.clientBuilder = HttpClientBuilder.create();
-		this.clientBuilder.setMaxConnTotal(100);
-		this.clientBuilder.setMaxConnPerRoute(500);
-		this.client = this.clientBuilder.setDefaultRequestConfig(this.config.build()).setDefaultCookieStore(cookie).build();
-	}
 
-	public HttpHost getProxy() {
-		return proxy;
-	}
-
-	public void setProxy(HttpHost proxy) {
-		this.setProxy = true;
-		this.proxy = proxy;
-	}
+//	public static String initProxyMap() {
+//		long nowTimeStemp = System.currentTimeMillis();
+//		if (nowTimeStemp - timeStemp > INTERVALTIME) {
+//			proxyMap = ProxyChecker.initProxyMap();
+//			if (proxyMap == null) {
+//				proxyMap = new ConcurrentHashMap<String, List<HttpHost>>();
+//			}
+//			LoggerUtil.HttpInfoLog("[HttpThings Proxy Boxs Init Complment]");
+//			timeStemp = nowTimeStemp;
+//		}
+//		return "[HttpThings Proxy Boxs Init Complment]";
+//	}
 
 	public void SetConnectionTimeOutThreshold(Method method, int timeOut) {
 		this.config.setConnectTimeout(timeOut);
@@ -207,19 +231,34 @@ public class HttpMethod {
 		if (httpResponseConfig == null) {
 			getLocation = true;
 			RequestConfig.Builder builder = this.config;
-			builder.setAuthenticationEnabled(true);
 			builder.setRelativeRedirectsAllowed(false);
 			builder.setCircularRedirectsAllowed(false);
 			builder.setRedirectsEnabled(false);
-			HttpClientBuilder clientBuilder = this.clientBuilder;
-			clientBuilder = HttpClientBuilder.create();
-			clientBuilder.setMaxConnTotal(100);
-			clientBuilder.setMaxConnPerRoute(500);
-			this.client = clientBuilder.setDefaultRequestConfig(builder.build()).setDefaultCookieStore(cookieStore).build();
+			try {
+				SSLContext ctx = SSLContext.getInstance("SSL");  
+				X509TrustManager tm = new X509TrustManager() {  
+					public void checkClientTrusted(X509Certificate[] xcs,  
+							String string) throws CertificateException {  
+					}  
+					public void checkServerTrusted(X509Certificate[] xcs,  
+							String string) throws CertificateException {  
+					}  
+					public X509Certificate[] getAcceptedIssuers() {  
+						return null;  
+					}  
+				};  
+				ctx.init(null, new TrustManager[] { tm }, null);
+				LayeredConnectionSocketFactory ssf = new SSLConnectionSocketFactory(ctx);
+				this.client = this.clientBuilder.setSSLSocketFactory(ssf).setDefaultRequestConfig(this.config.build()).setDefaultCookieStore(cookieStore).build();
+			} catch (KeyManagementException e) {
+				e.printStackTrace();
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+			} 
 		} else {
 			responseAsStream = httpResponseConfig.isYesOrNo();
 		}
-		proxy = null;
+		HttpHost proxy = null;
 		String locationHeader = "";
 		for (int retryIndex = 1; retryIndex <= retryCount; retryIndex++) {
 			if (this.get == null) {
@@ -232,7 +271,7 @@ public class HttpMethod {
 				LoggerUtil.HttpInfoLog("[数据获取][url=" + url + "][status=" + this.getStatus + "][exception=" + this.getException + "]");
 				break;
 			}
-			if (identidy != 0 && !setProxy) {
+			if (identidy != 0) {
 				ProxyCheckResEntity p = ProxyQueue.getProxy(identidy);
 				proxy = new HttpHost(p.host, p.port);
 				if (proxy != null) {
@@ -248,9 +287,7 @@ public class HttpMethod {
 			try {
 				URI uri = new URI(url);
 				this.get.setURI(uri);
-				HttpContext context = new BasicHttpContext();
-				CloseableHttpResponse response = this.client.execute(this.get, context);
-				this.getStatus = response.getStatusLine().getStatusCode();
+				HttpResponse response = this.client.execute(this.get);
 				if (getLocation) {
 					try {
 						locationHeader = response.getFirstHeader("Location").getValue();
@@ -261,6 +298,7 @@ public class HttpMethod {
 						continue;
 					}
 				}
+				this.getStatus = response.getStatusLine().getStatusCode();
 				HttpEntity entity = response.getEntity();
 				ContentType contentType = ContentType.getOrDefault(entity);
 				entity = new BufferedHttpEntity(entity);
@@ -339,7 +377,7 @@ public class HttpMethod {
 				this.get.abort();
 				this.get.releaseConnection();
 			}
-			if ((this.getStatus == 200) && (!StringUtils.isBlank(this.getHtml)) || (this.getStatus == 404) && (!StringUtils.isBlank(this.getHtml))) {
+			if ((this.getStatus == 200 && !StringUtils.isBlank(this.getHtml)) || this.getStatus == 404) {
 				LoggerUtil.HttpDebugLog("[数据获取][url=" + url + "][html=" + this.getHtml + "]");
 				break;
 			} else {
@@ -350,13 +388,6 @@ public class HttpMethod {
 		if ((this.getStatus == 302) && (StringUtils.isBlank(this.getHtml))) {
 			this.getHtml = locationHeader;
 		}
-		try {
-			this.client.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		clientBuilder = null;
-		config = null;
 		return this.getHtml;
 	}
 	
@@ -393,7 +424,7 @@ public class HttpMethod {
 				LoggerUtil.HttpDebugLog("[数据获取][url=" + url + "][body=" + body + "][status=" + this.postStatus + "][exception=" + this.postException + "]");
 				break;
 			}
-			if (identidy != 0 && !setProxy) {
+			if (identidy != 0) {
 				ProxyCheckResEntity p = ProxyQueue.getProxy(identidy);
 				proxy = new HttpHost(p.host, p.port);
 				if (proxy != null) {
@@ -515,11 +546,6 @@ public class HttpMethod {
 		if ((this.getStatus == 302) && (StringUtils.isBlank(this.getHtml))) {
 			this.getHtml = locationHeader;
 		}
-		try {
-			this.client.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 		return this.postHtml;
 	}
 	
@@ -619,11 +645,7 @@ public class HttpMethod {
 				this.postException = "response null";
 				continue;
 			}
-		}
-		try {
-			this.client.close();
-		} catch (IOException e) {
-			e.printStackTrace();
+			
 		}
 		return this.postHtml;
 	}
@@ -716,11 +738,6 @@ public class HttpMethod {
 				continue;
 			}
 		}
-		try {
-			this.client.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 		return this.getHtml;
 	}
 	
@@ -798,11 +815,6 @@ public class HttpMethod {
 				continue;
 			}
 		}
-		try {
-			this.client.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 		return this.getHtml;
 	}
 	
@@ -830,7 +842,7 @@ public class HttpMethod {
 				LoggerUtil.HttpDebugLog("[图片数据获取][url=" + url + "][status=" + this.getStatus + "][exception=" + this.getException + "]");
 				break;
 			}
-			if (identidy != 0 && !setProxy) {
+			if (identidy != 0) {
 				ProxyCheckResEntity p = ProxyQueue.getProxy(identidy);
 				proxy = new HttpHost(p.host, p.port);
 				if (proxy != null) {
@@ -846,7 +858,7 @@ public class HttpMethod {
 			try {
 				URI uri = new URI(url);
 				this.get.setURI(uri);
-				CloseableHttpResponse response = this.client.execute(this.get);
+				HttpResponse response = this.client.execute(this.get);
 				Header header = response.getFirstHeader("Content-Type");
 				if (header != null) {
 					String value = header.getValue();
@@ -915,11 +927,6 @@ public class HttpMethod {
 				continue;
 			}
 		}
-		try {
-			this.client.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 		return fileData;
 	}
 
@@ -932,7 +939,27 @@ public class HttpMethod {
 	public void SetTimeOut(int timeout) {
 		this.config.setConnectTimeout(timeout);
 		this.config.setSocketTimeout(timeout);
-		this.client = this.clientBuilder.setDefaultRequestConfig(this.config.build()).setDefaultCookieStore(cookieStore).build();
+		try {
+			SSLContext ctx = SSLContext.getInstance("SSL");  
+			X509TrustManager tm = new X509TrustManager() {  
+				public void checkClientTrusted(X509Certificate[] xcs,  
+						String string) throws CertificateException {  
+				}  
+				public void checkServerTrusted(X509Certificate[] xcs,  
+						String string) throws CertificateException {  
+				}  
+				public X509Certificate[] getAcceptedIssuers() {  
+					return null;  
+				}  
+			};  
+			ctx.init(null, new TrustManager[] { tm }, null);
+			LayeredConnectionSocketFactory ssf = new SSLConnectionSocketFactory(ctx);
+			this.client = this.clientBuilder.setSSLSocketFactory(ssf).setDefaultRequestConfig(this.config.build()).setDefaultCookieStore(cookieStore).build();
+		} catch (KeyManagementException e) {
+			e.printStackTrace();
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}  
 	}
 
 	public static Charset getCharsetFromByte(byte[] byteArray) {

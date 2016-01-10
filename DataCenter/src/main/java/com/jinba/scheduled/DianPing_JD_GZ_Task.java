@@ -1,5 +1,6 @@
 package com.jinba.scheduled;
 
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.jinba.pojo.AnalysisType;
@@ -20,5 +21,12 @@ public class DianPing_JD_GZ_Task extends DianPingTask {
 		super(tempUrl, xiaoquType, analysisType);
 	}
 	
+	public static void main(String[] args) {
+		@SuppressWarnings("resource")
+		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
+		application.start();
+		DianPingTask d = (DianPingTask) application.getBean("dianPing_JD_GZ_Task");
+		d.run();
+	}
 	
 }

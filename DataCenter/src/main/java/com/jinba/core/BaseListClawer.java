@@ -7,6 +7,7 @@ import org.apache.commons.lang3.time.StopWatch;
 
 import com.alibaba.fastjson.JSON;
 import com.jinba.pojo.BaseEntity;
+import com.jinba.utils.CountDownLatchUtils;
 import com.jinba.utils.LoggerUtil;
 
 /**
@@ -17,8 +18,11 @@ import com.jinba.utils.LoggerUtil;
  */
 public abstract class BaseListClawer<T extends BaseEntity> extends BaseClawer {
 
-	public BaseListClawer (int targetId) {
+	private CountDownLatchUtils cdl;
+	
+	public BaseListClawer (int targetId, CountDownLatchUtils cdl) {
 		super(targetId);
+		this.cdl = cdl;
 	}
 	
 	/**
@@ -56,12 +60,13 @@ public abstract class BaseListClawer<T extends BaseEntity> extends BaseClawer {
 			analysisAction(box);
 			watch.split();
 			long analysisTime = watch.getSplitTime();
-			logBuilder.append("[Analysis Done][" + analysisTime + "]");
+			logBuilder.append("[Analysis Done][" + analysisTime + "][Get Entity " + box.size() + "]");
 		} catch (Exception e) {
 			e.printStackTrace();
 			logBuilder.append("[List Error][" + e.getMessage() + "]");
 		} finally {
-			LoggerUtil.ClawerInfoLog(logBuilder.toString());
+			cdl.countDown();
+			LoggerUtil.TaskInfoLog(logBuilder.toString() + "[" + cdl.getCount() + "/" + cdl.getAmount() + "]");
 		}
 		return box;
 	}

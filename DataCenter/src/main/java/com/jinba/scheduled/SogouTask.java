@@ -1,16 +1,21 @@
 package com.jinba.scheduled;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.jinba.dao.MysqlDao;
+import com.jinba.pojo.NewsEntity;
+import com.jinba.scheduled.sogou.SogouDetailClawer;
 import com.jinba.scheduled.sogou.SogouListClawer;
 import com.jinba.spider.core.Params;
 import com.jinba.utils.CountDownLatchUtils;
@@ -29,6 +34,7 @@ public class SogouTask implements Runnable {
 		List<String> cityList = dao.getAreaList();
 		int listSize = cityList.size();
 		CountDownLatchUtils listCdl = new CountDownLatchUtils(listSize);
+		List<Future<List<NewsEntity>>> resList = new ArrayList<Future<List<NewsEntity>>>();
 		LoggerUtil.TaskInfoLog("[" + this.getClass().getSimpleName() + "][Start][CitySize " + cityList.size() + "]");
 		listThreadPool = Executors.newFixedThreadPool(threadPoolSize);
 		for (String eachCity : cityList) {
@@ -39,12 +45,23 @@ public class SogouTask implements Runnable {
 			paramsMap.put(Params.area, cityName);
 			paramsMap.put(Params.citycode, areaCode);
 			SogouListClawer listClawer = new SogouListClawer(paramsMap, listCdl);
-			listThreadPool.submit(listClawer);
+			resList.add(listThreadPool.submit(listClawer));
 		}
-		try {
-			listCdl.await();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+		for (Future<List<NewsEntity>> future : resList) {
+			List<NewsEntity> detailList;
+			try {
+				detailList = future.get();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+				continue;
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+				continue;
+			}
+			for (NewsEntity newsEntity : detailList) {
+				SogouDetailClawer detail = new SogouDetailClawer(newsEntity);
+				detail.detailAction();
+			}
 		}
 		LoggerUtil.TaskInfoLog("[" + this.getClass().getSimpleName() + "][Done]");
 		listThreadPool.shutdownNow();

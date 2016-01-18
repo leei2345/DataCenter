@@ -14,8 +14,9 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.jinba.core.BaseListClawer;
-import com.jinba.dao.MysqlDao;
 import com.jinba.pojo.NewsEntity;
+import com.jinba.spider.core.HttpMethod;
+import com.jinba.spider.core.HttpResponseConfig;
 import com.jinba.spider.core.Params;
 import com.jinba.utils.CountDownLatchUtils;
 import com.jinba.utils.MD5;
@@ -52,7 +53,9 @@ public class BaiduListClawer extends BaseListClawer<NewsEntity> implements Calla
 		do {
 			next = false;
 			String url = tempUrl.replace("##", areaNameEn).replace("$$", String.valueOf(pageIndex * 20));
-			String html = httpGet(url);
+			//String html = httpGet(url);
+			HttpMethod inner = new HttpMethod(targetId);
+			String html = inner.GetHtml(url, HttpResponseConfig.ResponseAsStream);
 			if (StringUtils.isBlank(html)) {
 				break;
 			}
@@ -79,11 +82,11 @@ public class BaiduListClawer extends BaseListClawer<NewsEntity> implements Calla
 						String fromKey = MD5.GetMD5Code(source + newstime);
 	//					String fromKey = MD5Encoder.encode(new String(source + newstime).getBytes());
 						//先判断数据库中是否存在这条数据，如果存在则不进行写入
-						String selectSql = "select newsid from t_news where fromhost='" + FROMHOST + "' and fromkey='" + fromKey + "'";;
-						List<Map<String, Object>> selectRes = MysqlDao.getInstance().select(selectSql);
-						if (selectRes != null && selectRes.size() > 0) {
-							continue;
-						}
+//						String selectSql = "select newsid from t_news where fromhost='" + FROMHOST + "' and fromkey='" + fromKey + "'";;
+//						List<Map<String, Object>> selectRes = MysqlDao.getInstance().select(selectSql);
+//						if (selectRes != null && selectRes.size() > 0) {
+//							continue;
+//						}
 						if(today.equals(newsdate)){//先根据时间去判断是否今天的，如果没有一条是今天的，则不进行抓取
 							next = true;
 							bean.setNewstime(newstime);//资讯时间

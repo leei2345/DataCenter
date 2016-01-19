@@ -695,5 +695,44 @@ public class MysqlDao  {
 		return res;
 	}
 	
+	public int insertAndGetId (String sql) {
+		int id = 0;
+		DruidPooledConnection conn = null;
+		PreparedStatement  sm = null;
+		ResultSet rs = null;
+		try {
+			conn = spiderSource.getConnection();
+			sm = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+			sm.executeUpdate();
+			rs = sm.getGeneratedKeys();
+			if (rs.next()) {
+				id = rs.getInt(1);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null)
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			if (sm != null)
+				try {
+					sm.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			if (conn != null)
+	        	try {
+	        		conn.close();
+	        	} catch (SQLException e) {
+	        		e.printStackTrace();
+	        	}
+		}
+		return id;
+	}
+	
+	
 	
 }

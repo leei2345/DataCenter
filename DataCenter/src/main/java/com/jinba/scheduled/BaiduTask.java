@@ -33,7 +33,7 @@ public class BaiduTask implements Runnable {
 	
 	public void run() {
 		List<String> cityList = dao.getAreaList();
-//		cityList.clear();cityList.add("北京市_1101");
+		cityList.clear();cityList.add("中关村_11010801");
 		int listSize = cityList.size();
 		CountDownLatchUtils listCdl = new CountDownLatchUtils(listSize);
 		List<Future<List<NewsEntity>>> resList = new ArrayList<Future<List<NewsEntity>>>();
@@ -72,7 +72,7 @@ public class BaiduTask implements Runnable {
 	
 	public static void main(String[] args) {
 		@SuppressWarnings("resource")
-		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml","scheduled.xml"});
+		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
 		BaiduTask a = (BaiduTask) application.getBean("baiduTask");
 		a.run();

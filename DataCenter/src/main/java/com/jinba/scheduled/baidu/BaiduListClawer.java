@@ -25,6 +25,7 @@ public class BaiduListClawer extends BaseListClawer<NewsEntity> implements Calla
 	
 	private static final int TARGETID = 3;//百度为3
 	//##地区名称   $$替换当前第几条开始
+	//http://m.baidu.com/news?tn=bdapinewsearch&word=%E4%B8%AD%E5%85%B3%E6%9D%91&pn=0&rn=20&ct=1
 	private static String tempUrl = "http://m.baidu.com/news?tn=bdapinewsearch&word=##&pn=$$&rn=20&ct=1";
 	
 	private static final String FROMHOST = "m.baidu.com";
@@ -102,6 +103,7 @@ public class BaiduListClawer extends BaseListClawer<NewsEntity> implements Calla
 					//资讯标题
 					String title = tempInfo.getString("title");
 					if(!StringUtils.isBlank(title)){
+						title = title.replace("'", "‘").replace(",", "，");
 						bean.setTitle(title);
 					}
 					//转自网页
@@ -109,6 +111,13 @@ public class BaiduListClawer extends BaseListClawer<NewsEntity> implements Calla
 					if(!StringUtils.isBlank(fromurl)){
 						bean.setFromurl(fromurl);
 					}
+					String content = tempInfo.getString("abs");
+					if (!StringUtils.isBlank(content)) {
+						content = content.replace("'", "‘").replace(",", "，");
+					}
+					bean.setContent(content);
+					String imgUrl = tempInfo.getString("imgUrl");
+					bean.setHeadimg(imgUrl);
 					box.add(bean);
 				}
 				Thread.sleep(1000);

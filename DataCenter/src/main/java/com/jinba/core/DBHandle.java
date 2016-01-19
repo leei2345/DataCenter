@@ -21,6 +21,13 @@ public interface DBHandle {
 	public boolean insert (String sql);
 	
 	/**
+	 * 不存在insert
+	 * @param sql
+	 * @return true 成功 false 失败
+	 */
+	public int insertAndGetId (String sql);
+	
+	/**
 	 * 存在就update
 	 * @param sql
 	 * @return true 成功 false 失败

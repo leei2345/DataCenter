@@ -816,7 +816,7 @@ public class HttpMethod {
 		builderInner.setRelativeRedirectsAllowed(false);
 		builderInner.setCircularRedirectsAllowed(false);
 		builderInner.setRedirectsEnabled(false);
-		builderInner.setConnectTimeout(20000);
+		builderInner.setConnectTimeout(30000);
 		builderInner.setSocketTimeout(20000);
 		String imageType = "txt";
 		for (int retryIndex = 1; retryIndex <= retryCount; retryIndex++) {

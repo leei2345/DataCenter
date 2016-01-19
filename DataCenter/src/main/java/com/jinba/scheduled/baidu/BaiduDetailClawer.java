@@ -3,12 +3,14 @@ package com.jinba.scheduled.baidu;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.alibaba.fastjson.JSON;
 import com.jinba.core.BaseDetailClawer;
 import com.jinba.core.DBHandle;
 import com.jinba.pojo.NewsEntity;
+import com.jinba.spider.core.ImageClawer;
 import com.jinba.utils.CountDownLatchUtils;
 
 /**
@@ -19,6 +21,8 @@ import com.jinba.utils.CountDownLatchUtils;
 public class BaiduDetailClawer extends BaseDetailClawer<NewsEntity>{
 
 	private static final int TARGETID = 3;
+	private static final String TARGETINFO = "baidu";
+	private static final String IMAGEDIRNAME = "news";
 	
 	public BaiduDetailClawer(NewsEntity detailEntity, CountDownLatchUtils cdl) {
 		super(TARGETID, detailEntity, cdl);
@@ -43,11 +47,21 @@ public class BaiduDetailClawer extends BaseDetailClawer<NewsEntity>{
 		String selectSql = "select newsid from t_news where fromhost='" + detailEntity.getFromhost() + "' and fromkey='" + detailEntity.getFromkey() + "'";;
 		List<Map<String, Object>> selectRes = dbHandle.select(selectSql);
 		StringBuilder iubuilder = new StringBuilder();
+		int id = 0;
+		String imgurl = null;
+		String areacode = null;
 		boolean iuRes = false;
 		if (selectRes != null && selectRes.size() > 0) {
+			Map<String, Object> idMap = selectRes.get(0);
+			long idL =  (Long) idMap.get("newsid");
+			id = (int)idL;
+			imgurl = detailEntity.getHeadimg();
+			areacode = detailEntity.getAreacode();
 			iubuilder.append("update t_news set ");
-			iubuilder.append("areacode='" + detailEntity.getAreacode() + "',");
+			iubuilder.append("areacode='" + areacode + "',");
 			iubuilder.append("title='" + detailEntity.getTitle() + "',");
+			iubuilder.append("content='" + detailEntity.getContent() + "',");
+			iubuilder.append("headimg='" + imgurl + "',");
 			iubuilder.append("source='" + detailEntity.getSource().replace(",", "，") + "',");
 			iubuilder.append("newstime='" + detailEntity.getNewstime() + "',");
 			iubuilder.append("posttime='" + detailEntity.getPosttime() + "',");
@@ -58,9 +72,11 @@ public class BaiduDetailClawer extends BaseDetailClawer<NewsEntity>{
 			String updateSql = this.checkUpdateSql(iubuilder.toString());
 			iuRes = dbHandle.update(updateSql);
 		} else {
-			iubuilder.append("insert into t_news (areacode,title,source,newstime,posttime,fromhost,fromurl,fromkey,updatetime) values (");
+			iubuilder.append("insert into t_news (areacode,title,content,headimg,source,newstime,posttime,fromhost,fromurl,fromkey,updatetime) values (");
 			iubuilder.append("'" + detailEntity.getAreacode() + "',");
 			iubuilder.append("'" + detailEntity.getTitle() + "',");
+			iubuilder.append("'" + detailEntity.getContent() + "',");
+			iubuilder.append("'" + detailEntity.getHeadimg()+ "',");
 			iubuilder.append("'" + detailEntity.getSource().replace(",", "，") + "',");
 			iubuilder.append("'" + detailEntity.getNewstime() + "',");
 			iubuilder.append("'" + detailEntity.getPosttime() + "',");
@@ -68,9 +84,20 @@ public class BaiduDetailClawer extends BaseDetailClawer<NewsEntity>{
 			iubuilder.append("'" + detailEntity.getFromurl() + "',");
 			iubuilder.append("'" + detailEntity.getFromkey() + "',");
 			iubuilder.append("now())");
-			String insertSql = this.checkInsertSql(iubuilder.toString());
-			iuRes = dbHandle.insert(insertSql);
+//			String insertSql = this.checkInsertSql(iubuilder.toString());
+			id = dbHandle.insertAndGetId(iubuilder.toString());
+			if (id > 0) {
+				iuRes = true;
+			}
+			imgurl = detailEntity.getHeadimg();
+			areacode = detailEntity.getAreacode();
 		}
+		if (!StringUtils.isBlank(imgurl) && iuRes) {
+			ImageClawer imgClawer = new ImageClawer(imgurl, TARGETID, TARGETINFO, String.valueOf(id), areacode, IMAGEDIRNAME);
+			imgClawer.addHeader("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 9_2 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13C75 Safari/601.1");
+			ImageClawer.ExecutorClaw(imgClawer);
+		}
+		
 		ActionRes res = null;
 		if (iuRes) {
 			res = ActionRes.ANALYSIS_SUCC;

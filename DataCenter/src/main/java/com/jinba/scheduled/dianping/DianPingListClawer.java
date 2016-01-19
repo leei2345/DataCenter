@@ -17,6 +17,7 @@ import com.jinba.pojo.XiaoQuEntity;
 import com.jinba.scheduled.DianPingWorker;
 import com.jinba.spider.core.HttpMethod;
 import com.jinba.spider.core.HttpResponseConfig;
+import com.jinba.spider.core.ImageClawer;
 import com.jinba.spider.core.Params;
 import com.jinba.utils.CountDownLatchUtils;
 

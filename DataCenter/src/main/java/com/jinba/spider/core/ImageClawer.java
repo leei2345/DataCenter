@@ -1,4 +1,4 @@
-package com.jinba.scheduled.dianping;
+package com.jinba.spider.core;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -12,8 +12,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.threads.ThreadPoolExecutor;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import com.jinba.spider.core.HttpMethod;
 import com.jinba.utils.ConfigUtils;
 import com.jinba.utils.LoggerUtil;
 
@@ -48,6 +48,10 @@ public class ImageClawer implements Runnable {
 		this.imageDirName = imageDirName;
 	}
 	
+	public void addHeader (String key, String value) {
+		http.AddHeader(Method.Get, key, value);
+	}
+	
 	public static void ExecutorClaw (ImageClawer imageClawer) {
 		threadPool.execute(imageClawer);
 	}
@@ -61,6 +65,14 @@ public class ImageClawer implements Runnable {
 		File dir = new File(dirPath);
 		if (!dir.exists()) {
 			dir.mkdirs();
+		}
+		File jpgImg = new File(dirPath + identidy + ".jpg");
+		if (jpgImg.exists()) {
+			return;
+		}
+		File pngImg = new File(dirPath + identidy + ".png");
+		if (pngImg.exists()) {
+			return;
 		}
 		byte[][] imageClawRes = http.GetImageByteArr(imageUrl);
 		if (imageClawRes == null || imageClawRes[0] ==null || imageClawRes[1] == null) {
@@ -106,7 +118,10 @@ public class ImageClawer implements Runnable {
 	}
 	
 	public static void main(String[] args) {
-		ImageClawer i = new ImageClawer("http://i1.s2.dpfile.com/pc/146a7fe725a14850a8d216c0135d6952(249x249)/thumb.jpg", 1, "dianping", "00102","17648042", "shop");
+		@SuppressWarnings("resource")
+		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml","scheduled.xml"});
+		application.start();
+		ImageClawer i = new ImageClawer("http://t11.baidu.com/it/u=1223062447,3520786440&fm=82&s=B5026BB556022AFA04B84563030010D2&w=121&h=81&img.JPEG", 3, "dianping", "00102","17648042", "shop");
 		new Thread(i).start();
 	}
 

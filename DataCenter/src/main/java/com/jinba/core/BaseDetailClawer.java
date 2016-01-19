@@ -89,6 +89,10 @@ public abstract class BaseDetailClawer<T extends BaseEntity> extends BaseClawer 
 				 public boolean update(String sql) {
 					return MysqlDao.getInstance().execut(sql);
 				}
+				 
+				public int insertAndGetId (String sql) {
+					return MysqlDao.getInstance().insertAndGetId(sql);
+				}
 				
 			});
 			watch.split();

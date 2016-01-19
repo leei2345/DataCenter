@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.apache.catalina.util.URLEncoder;
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.http.HttpHost;
@@ -53,12 +54,12 @@ public class SogouListClawer extends BaseListClawer<NewsEntity> implements Calla
 		int pageIndex = 1;
 		String areaNameEn = new URLEncoder().encode(areaName);
 		boolean next = true;
-		String firstUrl = "http://weixin.sogou.com";
- 		HttpMethod m = new HttpMethod(targetId);
-		m.GetHtml(firstUrl, HttpResponseConfig.ResponseAsStream);
-		HttpHost proxy = m.getProxy();
-		BasicCookieStore cookie = m.getCookieStore();
 		do {
+			String firstUrl = "http://weixin.sogou.com";
+			HttpMethod m = new HttpMethod(targetId);
+			m.GetHtml(firstUrl, HttpResponseConfig.ResponseAsStream);
+			HttpHost proxy = m.getProxy();
+			BasicCookieStore cookie = m.getCookieStore();
 			next = false;
 			String url = tempUrl.replace("##", areaNameEn).replace("$$", String.valueOf(pageIndex));
 	 		HttpMethod inner = new HttpMethod(targetId, cookie, proxy);
@@ -68,6 +69,7 @@ public class SogouListClawer extends BaseListClawer<NewsEntity> implements Calla
 			}
 			Document doc = Jsoup.parse(html, url);
 			Elements nodes = doc.select("div.results > div[class=wx-rb wx-rb3]");
+			int index = 1;
 			for (Element element : nodes) {
 				NewsEntity newsEntity = new NewsEntity();
 				newsEntity.setAreacode(areaCode);
@@ -86,6 +88,17 @@ public class SogouListClawer extends BaseListClawer<NewsEntity> implements Calla
 					continue;
 				}
 				String fromUrl = element.select("div.txt-box > h4 > a").attr("abs:href").trim();
+				try {
+					Thread.sleep(RandomUtils.nextLong(1000, 4000));
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+				}
+				if (index % 10 == 0) {
+					m = new HttpMethod(targetId);
+					m.GetHtml(firstUrl, HttpResponseConfig.ResponseAsStream);
+					proxy = m.getProxy();
+					cookie = m.getCookieStore();
+				}
 				HttpMethod entityMe = new HttpMethod(TARGETID, cookie, proxy);
 				String entityRes = entityMe.GetLocationUrl(fromUrl);
 				if (!StringUtils.isBlank(entityRes)) {
@@ -116,6 +129,7 @@ public class SogouListClawer extends BaseListClawer<NewsEntity> implements Calla
 				String source = element.select("div.s-p > a#weixin_account").attr("title").trim();
 				newsEntity.setSource(source);
 				box.add(newsEntity);
+				index++;
 			}
 			pageIndex++;
 		} while (next && pageIndex <= 10);

@@ -11,6 +11,7 @@ import java.util.concurrent.Future;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.jinba.dao.MysqlDao;
@@ -32,6 +33,7 @@ public class SogouTask implements Runnable {
 	
 	public void run() {
 		List<String> cityList = dao.getAreaList();
+//		cityList.clear();cityList.add("北京市_1101");
 		int listSize = cityList.size();
 		CountDownLatchUtils listCdl = new CountDownLatchUtils(listSize);
 		List<Future<List<NewsEntity>>> resList = new ArrayList<Future<List<NewsEntity>>>();
@@ -66,6 +68,14 @@ public class SogouTask implements Runnable {
 		LoggerUtil.TaskInfoLog("[" + this.getClass().getSimpleName() + "][Done]");
 		listThreadPool.shutdownNow();
 		listThreadPool = null;
+	}
+	
+	public static void main(String[] args) {
+		@SuppressWarnings("resource")
+		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
+		application.start();
+		SogouTask a = (SogouTask) application.getBean("sogouTask");
+		a.run();
 	}
 
 }

@@ -81,6 +81,7 @@ public class BaiduDetailClawer extends BaseDetailClawer<NewsEntity>{
 	}
 	
 	public static void main(String[] args) {
+		@SuppressWarnings("resource")
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
 		/** 非酒店 */

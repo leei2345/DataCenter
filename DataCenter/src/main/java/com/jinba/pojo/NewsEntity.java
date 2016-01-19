@@ -12,7 +12,21 @@ public class NewsEntity extends BaseEntity {
 	private String source;
 	private String newstime;
 	private String posttime;
+	private String content;
+	private String headimg;
 	
+	public String getContent() {
+		return content;
+	}
+	public void setContent(String content) {
+		this.content = content;
+	}
+	public String getHeadimg() {
+		return headimg;
+	}
+	public void setHeadimg(String headimg) {
+		this.headimg = headimg;
+	}
 	public String getAreacode() {
 		return areacode;
 	}

@@ -116,7 +116,7 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 				x.setFromurl(sourceUrl);
 				String fromKey = sourceUrl.replaceAll("\\D+", "");
 				x.setFromkey(fromKey);
-				ImageClawer imageClawer = new ImageClawer(headPhotoUrl, TARGETID, TARGETINFO, fromKey, IMAGEDIRNAME);
+				ImageClawer imageClawer = new ImageClawer(headPhotoUrl, TARGETID, TARGETINFO, cityInfo.get(Params.cityname) ,fromKey, IMAGEDIRNAME);
 				ImageClawer.ExecutorClaw(imageClawer);
 				box.add(x);
 			}

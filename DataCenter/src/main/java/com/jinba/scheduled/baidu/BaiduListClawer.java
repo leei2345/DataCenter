@@ -111,6 +111,7 @@ public class BaiduListClawer extends BaseListClawer<NewsEntity> implements Calla
 					}
 					box.add(bean);
 				}
+				Thread.sleep(1000);
 				pageIndex++;
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -124,6 +125,7 @@ public class BaiduListClawer extends BaseListClawer<NewsEntity> implements Calla
 	}
 	
 	public static void main(String[] args) {
+		@SuppressWarnings("resource")
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
 		Map<Params, String> paramsMap = new HashMap<Params, String>();

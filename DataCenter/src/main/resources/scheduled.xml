@@ -53,12 +53,12 @@
 		<task:scheduled ref="dianPing_GW_ZHSC_Task" method="run" cron="0 0 0 11 * ?" />
 		<task:scheduled ref="dianPing_JYPX_JYYX_Task" method="run" cron="0 0 0 12 * ?" />
 		
-<!-- 		<task:scheduled ref="baiduTask" method="run" cron="0 0 0,2,4,6,8,10,12,14,16,18,20,22 * * ?" />
- -->		
+ 		<task:scheduled ref="baiduTask" method="run" cron="0 0 1,4,7,10,13,16,19,22 * * ?" />
+	
 	</task:scheduled-tasks>
 	
 	<task:scheduled-tasks scheduler="proxy_scheduler">
-		<task:scheduled ref="proxyCheckTask" method="run" cron="0 0,30 * * * ?" />
+		<task:scheduled ref="proxyCheckTask" method="run" cron="0 0 0-23 * * ?" />
 	</task:scheduled-tasks>
 
 

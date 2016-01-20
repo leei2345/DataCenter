@@ -33,7 +33,7 @@ public class BaiduTask implements Runnable {
 	
 	public void run() {
 		List<String> cityList = dao.getAreaList();
-		cityList.clear();cityList.add("中关村_11010801");
+//		cityList.clear();cityList.add("中关村_11010801");
 		int listSize = cityList.size();
 		CountDownLatchUtils listCdl = new CountDownLatchUtils(listSize);
 		List<Future<List<NewsEntity>>> resList = new ArrayList<Future<List<NewsEntity>>>();

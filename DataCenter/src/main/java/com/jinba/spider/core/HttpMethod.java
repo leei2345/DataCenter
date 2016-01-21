@@ -219,7 +219,6 @@ public class HttpMethod {
 		} else {
 			responseAsStream = httpResponseConfig.isYesOrNo();
 		}
-		proxy = null;
 		String locationHeader = "";
 		for (int retryIndex = 1; retryIndex <= retryCount; retryIndex++) {
 			if (this.get == null) {

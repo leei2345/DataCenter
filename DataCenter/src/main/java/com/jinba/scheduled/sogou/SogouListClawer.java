@@ -22,10 +22,13 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import com.jinba.core.BaseListClawer;
 import com.jinba.dao.MysqlDao;
 import com.jinba.pojo.NewsEntity;
+import com.jinba.pojo.SogouCookieEntity;
+import com.jinba.scheduled.SogouCookieTask;
 import com.jinba.spider.core.HttpMethod;
 import com.jinba.spider.core.HttpResponseConfig;
 import com.jinba.spider.core.Params;
 import com.jinba.utils.CountDownLatchUtils;
+import com.jinba.utils.LoggerUtil;
 
 public class SogouListClawer extends BaseListClawer<NewsEntity> implements Callable<List<NewsEntity>>{
 
@@ -55,21 +58,22 @@ public class SogouListClawer extends BaseListClawer<NewsEntity> implements Calla
 		String areaNameEn = new URLEncoder().encode(areaName);
 		boolean next = true;
 		do {
-			String firstUrl = "http://weixin.sogou.com";
-			HttpMethod m = new HttpMethod(targetId);
-			m.GetHtml(firstUrl, HttpResponseConfig.ResponseAsStream);
+			SogouCookieEntity m = SogouCookieTask.getResource();
 			HttpHost proxy = m.getProxy();
-			BasicCookieStore cookie = m.getCookieStore();
+			BasicCookieStore cookie = m.getCookie();
 			next = false;
 			String url = tempUrl.replace("##", areaNameEn).replace("$$", String.valueOf(pageIndex));
 	 		HttpMethod inner = new HttpMethod(targetId, cookie, proxy);
 			String html = inner.GetHtml(url, HttpResponseConfig.ResponseAsStream);
-			if (StringUtils.isBlank(html)) {
+			if (!StringUtils.isBlank(html) && !html.contains("您的访问过于频繁")) {
+				SogouCookieTask.returnResource(m);
+				LoggerUtil.ClawerInfoLog("[Sogou Cookie Queue Available][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
+			} else {
+				LoggerUtil.ClawerInfoLog("[Sogou Cookie Queue Unavailable][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
 				break;
 			}
 			Document doc = Jsoup.parse(html, url);
 			Elements nodes = doc.select("div.results > div[class=wx-rb wx-rb3]");
-			int index = 1;
 			for (Element element : nodes) {
 				NewsEntity newsEntity = new NewsEntity();
 				newsEntity.setAreacode(areaCode);
@@ -80,6 +84,14 @@ public class SogouListClawer extends BaseListClawer<NewsEntity> implements Calla
 				} catch (Exception e) {
 					continue;
 				}
+				try {
+					String content = element.select("div.txt-box > p").first().text().trim();
+					newsEntity.setContent(content);
+				} catch (Exception e) {
+					continue;
+				}
+				String headimgurl = element.select("div.img_box2 > a > img").attr("src").trim();
+				newsEntity.setHeadimg(headimgurl);
 				String fromKey = element.attr("d").trim();
 				newsEntity.setFromkey(fromKey);
 				String selectSql = "select newsid from t_news where fromhost='" + FROMHOST + "' and fromkey='" +fromKey + "'";;
@@ -93,21 +105,23 @@ public class SogouListClawer extends BaseListClawer<NewsEntity> implements Calla
 				} catch (InterruptedException e1) {
 					e1.printStackTrace();
 				}
-				if (index % 10 == 0) {
-					m = new HttpMethod(targetId);
-					m.GetHtml(firstUrl, HttpResponseConfig.ResponseAsStream);
-					proxy = m.getProxy();
-					cookie = m.getCookieStore();
-				}
+				m = SogouCookieTask.getResource();
+				proxy = m.getProxy();
+				cookie = m.getCookie();
 				HttpMethod entityMe = new HttpMethod(TARGETID, cookie, proxy);
 				String entityRes = entityMe.GetLocationUrl(fromUrl);
 				if (!StringUtils.isBlank(entityRes)) {
 					try {
 						URI uri = new URI(entityRes);
 						newsEntity.setFromurl(uri.toString());
+						SogouCookieTask.returnResource(m);
+						LoggerUtil.ClawerInfoLog("[Sogou Cookie Queue Available][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
 					} catch (Exception e) {
+						LoggerUtil.ClawerInfoLog("[Sogou Cookie Queue Unavailable][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
 						continue;
 					}
+				} else {
+					continue;
 				}
 				String dateStr = element.select("div.txt-box > div.s-p").attr("t").trim();
 				long time = 0l;
@@ -129,10 +143,9 @@ public class SogouListClawer extends BaseListClawer<NewsEntity> implements Calla
 				String source = element.select("div.s-p > a#weixin_account").attr("title").trim();
 				newsEntity.setSource(source);
 				box.add(newsEntity);
-				index++;
 			}
 			pageIndex++;
-		} while (next && pageIndex <= 10);
+		} while (next && pageIndex <= 2);
 	}
 	
 	public List<NewsEntity> call() throws Exception {

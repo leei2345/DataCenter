@@ -66,11 +66,15 @@ public class SogouListClawer extends BaseListClawer<NewsEntity> implements Calla
 	 		HttpMethod inner = new HttpMethod(targetId, cookie, proxy);
 			String html = inner.GetHtml(url, HttpResponseConfig.ResponseAsStream);
 			if (!StringUtils.isBlank(html) && !html.contains("您的访问过于频繁")) {
-				SogouCookieTask.returnResource(m);
 				LoggerUtil.ClawerInfoLog("[Sogou Cookie Queue Available][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
 			} else {
 				LoggerUtil.ClawerInfoLog("[Sogou Cookie Queue Unavailable][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
-				break;
+				m = SogouCookieTask.getResource();
+				proxy = m.getProxy();
+				cookie = m.getCookie();
+				next = false;
+		 		inner = new HttpMethod(targetId, cookie, proxy);
+				html = inner.GetHtml(url, HttpResponseConfig.ResponseAsStream);
 			}
 			Document doc = Jsoup.parse(html, url);
 			Elements nodes = doc.select("div.results > div[class=wx-rb wx-rb3]");
@@ -105,16 +109,12 @@ public class SogouListClawer extends BaseListClawer<NewsEntity> implements Calla
 				} catch (InterruptedException e1) {
 					e1.printStackTrace();
 				}
-				m = SogouCookieTask.getResource();
-				proxy = m.getProxy();
-				cookie = m.getCookie();
 				HttpMethod entityMe = new HttpMethod(TARGETID, cookie, proxy);
 				String entityRes = entityMe.GetLocationUrl(fromUrl);
 				if (!StringUtils.isBlank(entityRes)) {
 					try {
 						URI uri = new URI(entityRes);
 						newsEntity.setFromurl(uri.toString());
-						SogouCookieTask.returnResource(m);
 						LoggerUtil.ClawerInfoLog("[Sogou Cookie Queue Available][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
 					} catch (Exception e) {
 						LoggerUtil.ClawerInfoLog("[Sogou Cookie Queue Unavailable][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
@@ -144,6 +144,7 @@ public class SogouListClawer extends BaseListClawer<NewsEntity> implements Calla
 				newsEntity.setSource(source);
 				box.add(newsEntity);
 			}
+			SogouCookieTask.returnResource(m);
 			pageIndex++;
 		} while (next && pageIndex <= 2);
 	}

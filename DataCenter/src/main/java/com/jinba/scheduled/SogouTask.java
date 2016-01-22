@@ -28,12 +28,11 @@ public class SogouTask implements Runnable {
 	@Autowired
 	private MysqlDao dao;
 	@Value("${sgclaw.thread.pool}")
-	private int threadPoolSize = 30;
+	private int threadPoolSize = 10;
 	private ExecutorService listThreadPool;
 	
 	public void run() {
 		List<String> cityList = dao.getAreaList();
-//		cityList.clear();cityList.add("北京市_1101");
 		int listSize = cityList.size();
 		CountDownLatchUtils listCdl = new CountDownLatchUtils(listSize);
 		List<Future<List<NewsEntity>>> resList = new ArrayList<Future<List<NewsEntity>>>();
@@ -74,6 +73,13 @@ public class SogouTask implements Runnable {
 		@SuppressWarnings("resource")
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
+		SogouCookieTask cookieTask = (SogouCookieTask) application.getBean("sogouCookieTask");
+		cookieTask.run();
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		SogouTask a = (SogouTask) application.getBean("sogouTask");
 		a.run();
 	}

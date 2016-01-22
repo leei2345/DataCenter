@@ -10,6 +10,7 @@ public class LoggerUtil {
 	private static Logger proxyLogger = LoggerFactory.getLogger("proxyLogger");
 	private static Logger taskLogger = LoggerFactory.getLogger("taskLogger");
 	private static Logger imageLogger = LoggerFactory.getLogger("imageLogger");
+	private static Logger cookieLogger = LoggerFactory.getLogger("cookieLogger");
 
 	public static void ClawerInfoLog (String log) {
 		clawerLogger.info(log);
@@ -33,6 +34,10 @@ public class LoggerUtil {
 	
 	public static void HttpDebugLog (String log) {
 		httpLogger.debug(log);
+	}
+	
+	public static void CookieInfoLog (String log) {
+		cookieLogger.info(log);
 	}
 	
 }

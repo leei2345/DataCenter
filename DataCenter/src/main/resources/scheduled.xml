@@ -56,14 +56,14 @@
 		<task:scheduled ref="dianPing_GW_ZHSC_Task" method="run" cron="0 0 0 11 * ?" />
 		<task:scheduled ref="dianPing_JYPX_JYYX_Task" method="run" cron="0 0 0 12 * ?" />
 		
- 		<task:scheduled ref="baiduTask" method="run" cron="0 0 7,10,13,17 * * ?" />
+ 		<task:scheduled ref="baiduTask" method="run" cron="0 0 7,10,13,16 * * ?" />
  		<task:scheduled ref="sogouTask" method="run" cron="0 0 8,11,14,18 * * ?" />
 
 	</task:scheduled-tasks>
 	
 	<task:scheduled-tasks scheduler="proxy_scheduler">
 		<task:scheduled ref="proxyCheckTask" method="run" cron="0 0,30 * * * ?" />
-		<task:scheduled ref="SogouCookieTask" method="run" cron="0 20 6-20 * * ?" />
+		<task:scheduled ref="SogouCookieTask" method="run" cron="0 50 6-20 * * ?" />
 	</task:scheduled-tasks>
 
 

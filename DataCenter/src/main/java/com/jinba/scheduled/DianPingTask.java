@@ -9,6 +9,7 @@ import java.util.concurrent.Executors;
 import javax.annotation.Resource;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.jinba.dao.MysqlDao;
@@ -64,6 +65,14 @@ public class DianPingTask implements Runnable {
 		LoggerUtil.TaskInfoLog("[" + this.getClass().getSimpleName() + "][Done]");
 		listThreadPool.shutdownNow();
 		listThreadPool = null;
+	}
+	
+	public static void main(String[] args) {
+		@SuppressWarnings("resource")
+		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[] { "database.xml" });
+		application.start();
+		SogouCookieTask a = (SogouCookieTask) application.getBean("sogouCookieTask");
+		a.run();
 	}
 	
 	

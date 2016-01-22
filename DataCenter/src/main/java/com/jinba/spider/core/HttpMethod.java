@@ -115,6 +115,7 @@ public class HttpMethod {
 		this.config.setAuthenticationEnabled(true);
 		this.config.setConnectTimeout(30000);
 		this.config.setSocketTimeout(30000);
+		this.config.setProxy(proxy);
 		this.clientBuilder = HttpClientBuilder.create();
 		this.clientBuilder.setMaxConnTotal(100);
 		this.clientBuilder.setMaxConnPerRoute(500);
@@ -206,16 +207,14 @@ public class HttpMethod {
 		boolean getLocation = false;
 		if (httpResponseConfig == null) {
 			getLocation = true;
-			RequestConfig.Builder builder = this.config;
-			builder.setAuthenticationEnabled(true);
-			builder.setRelativeRedirectsAllowed(false);
-			builder.setCircularRedirectsAllowed(false);
-			builder.setRedirectsEnabled(false);
-			HttpClientBuilder clientBuilder = this.clientBuilder;
+			config.setAuthenticationEnabled(true);
+			config.setRelativeRedirectsAllowed(false);
+			config.setCircularRedirectsAllowed(false);
+			config.setRedirectsEnabled(false);
 			clientBuilder = HttpClientBuilder.create();
 			clientBuilder.setMaxConnTotal(100);
 			clientBuilder.setMaxConnPerRoute(500);
-			this.client = clientBuilder.setDefaultRequestConfig(builder.build()).setDefaultCookieStore(cookieStore).build();
+			this.client = clientBuilder.setDefaultRequestConfig(config.build()).setDefaultCookieStore(cookieStore).build();
 		} else {
 			responseAsStream = httpResponseConfig.isYesOrNo();
 		}

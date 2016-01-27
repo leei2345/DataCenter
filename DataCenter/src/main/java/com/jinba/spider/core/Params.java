@@ -9,6 +9,8 @@ public enum Params {
 	cityname,
 	citycode,
 	analysistype,
+	parttype,
+	sourcecitycode,
 	;
 	
 	

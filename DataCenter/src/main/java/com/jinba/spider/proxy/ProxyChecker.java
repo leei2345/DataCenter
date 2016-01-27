@@ -1,27 +1,17 @@
 package com.jinba.spider.proxy;
 
-
-import javax.annotation.Resource;
-
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
-
 import com.jinba.dao.MysqlDao;
 import com.jinba.pojo.ProxyCheckResEntity;
 import com.jinba.pojo.TargetEntity;
 import com.jinba.utils.CountDownLatchUtils;
 import com.jinba.utils.LoggerUtil;
 
-@Component
-@Scope("prototype")
 public class ProxyChecker implements Runnable {
 
 	private TargetEntity target;
 	private ProxyCheckResEntity proxy;
 	private CountDownLatchUtils cdl = new CountDownLatchUtils(1);
 	private static final String IDENTIDY = "ProxyCheck";
-	@Resource
-	private MysqlDao dao;
 	
 	public ProxyChecker setCdl (CountDownLatchUtils cdl) {
 		this.cdl = cdl;
@@ -54,7 +44,7 @@ public class ProxyChecker implements Runnable {
 			e.printStackTrace();
 			LoggerUtil.ProxyLog("[" + IDENTIDY + "][" + target.getId() + "][" + e.getMessage() + "]");
 		} finally {
-			dao.updateProxyCheckRes(proxy);
+			MysqlDao.getInstance().updateProxyCheckRes(proxy);
 			cdl.countDown();
 		}
 		LoggerUtil.ProxyLog("[" + IDENTIDY + "][" + target.getId() + "][" + cdl.getCount() + "/" + cdl.getAmount() + "][" + proxy.host + ":" + proxy.port + "][" + proxy.getEnabled() + "]");

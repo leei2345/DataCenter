@@ -32,7 +32,7 @@ public class SogouTask implements Runnable {
 	private ExecutorService listThreadPool;
 	
 	public void run() {
-		List<String> cityList = dao.getAreaList();
+		List<String> cityList = dao.getAreaList(2,3,4);
 		int listSize = cityList.size();
 		CountDownLatchUtils listCdl = new CountDownLatchUtils(listSize);
 		List<Future<List<NewsEntity>>> resList = new ArrayList<Future<List<NewsEntity>>>();

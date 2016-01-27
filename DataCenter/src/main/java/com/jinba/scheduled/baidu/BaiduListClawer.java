@@ -19,7 +19,6 @@ import com.jinba.spider.core.HttpMethod;
 import com.jinba.spider.core.HttpResponseConfig;
 import com.jinba.spider.core.Params;
 import com.jinba.utils.CountDownLatchUtils;
-import com.jinba.utils.MD5;
 
 public class BaiduListClawer extends BaseListClawer<NewsEntity> implements Callable<List<NewsEntity>>{
 	
@@ -80,7 +79,7 @@ public class BaiduListClawer extends BaseListClawer<NewsEntity> implements Calla
 						long newsTimeTemp = Long.parseLong(newstimeStr);
 						String newstime = sim.format(new Date(newsTimeTemp * 1000));//资讯时间
 						String newsdate = dateFormat.format(new Date(newsTimeTemp * 1000));//资讯时间的天数，木有时分秒
-						String fromKey = MD5.GetMD5Code(source + newstime);
+//						String fromKey = MD5.GetMD5Code(source + newstime);
 	//					String fromKey = MD5Encoder.encode(new String(source + newstime).getBytes());
 						//先判断数据库中是否存在这条数据，如果存在则不进行写入
 //						String selectSql = "select newsid from t_news where fromhost='" + FROMHOST + "' and fromkey='" + fromKey + "'";;
@@ -92,7 +91,7 @@ public class BaiduListClawer extends BaseListClawer<NewsEntity> implements Calla
 							next = true;
 							bean.setNewstime(newstime);//资讯时间
 							bean.setPosttime(sim.format(new Date()));//发布时间为当前系统时间
-							bean.setFromkey(fromKey);//信息来源主键
+//							bean.setFromkey(fromKey);//信息来源主键
 						}else{
 							continue;
 						}
@@ -111,11 +110,6 @@ public class BaiduListClawer extends BaseListClawer<NewsEntity> implements Calla
 					if(!StringUtils.isBlank(fromurl)){
 						bean.setFromurl(fromurl);
 					}
-					String content = tempInfo.getString("abs");
-					if (!StringUtils.isBlank(content)) {
-						content = content.replace("'", "‘").replace(",", "，");
-					}
-					bean.setContent(content);
 					String imgUrl = tempInfo.getString("imgUrl");
 					bean.setHeadimg(imgUrl);
 					box.add(bean);
@@ -138,8 +132,8 @@ public class BaiduListClawer extends BaseListClawer<NewsEntity> implements Calla
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
 		Map<Params, String> paramsMap = new HashMap<Params, String>();
-		paramsMap.put(Params.area, "东城区");
-		paramsMap.put(Params.citycode, "110101");
+		paramsMap.put(Params.area, "沙河");
+		paramsMap.put(Params.citycode, "11011410");
 		try {
 			List<NewsEntity> l = new BaiduListClawer(paramsMap, new CountDownLatchUtils(1)).listAction();
 			for (NewsEntity newsEntity : l) {

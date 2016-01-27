@@ -8,10 +8,7 @@ import java.util.concurrent.Executors;
 
 import javax.annotation.Resource;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -29,17 +26,20 @@ import com.jinba.utils.LoggerUtil;
  *
  */
 @Component
-public class ProxyCheckTask implements Runnable, ApplicationContextAware{
+public class ProxyCheckTask implements Runnable {
 	
 	@Value("${check.thread.pool}")
 	private int threadPoolSize = 30;
-	private static ExecutorService threadPool;
+	private ExecutorService threadPool;
 	@Resource
 	private MysqlDao dao;
 	private static final String IDENTIDY = "ProxyCheck";
-    private ApplicationContext context;
+	private TargetEntity target;
+    
+	public ProxyCheckTask () {}
 	
-	public ProxyCheckTask () {
+	public ProxyCheckTask (TargetEntity target) {
+		this.target = target;
 		threadPool = Executors.newFixedThreadPool(threadPoolSize);
 	}
 	
@@ -51,53 +51,53 @@ public class ProxyCheckTask implements Runnable, ApplicationContextAware{
 	 * 定时任务主方法，方便扩展为异步方式
 	 */
 	public void run() {
-		/** 首先获取要检测的目标列表 **/
-		Map<Integer, TargetEntity> targetMap = dao.getTargetMap();
-		Multiset<String> proxySourceSet = dao.getTargetProxyCount(-1);
-		for (Entry<Integer, TargetEntity> entry : targetMap.entrySet()) {
-			int targetId = entry.getKey();
-			/** 查看目标代理是否已经在代理表中存在 */
-			Multiset<String> targetProxySet = dao.getTargetProxyCount(targetId);
-			if (!targetProxySet.containsAll(proxySourceSet)) {
-				for (String str : proxySourceSet.elementSet()) {
-					if (targetProxySet.contains(str)) {
-						continue;
-					}
-					String host = str.split(":")[0];
-					String port = str.split(":")[1];
-					try {
-						dao.insertProxyToAvail(host, port, targetId);
-					} catch (Exception e) {
-						continue;
-					}
-					LoggerUtil.ProxyLog("[Add Proxy][" + targetId + "][" + str + "]");
+		Multiset<String> proxySourceSet = MysqlDao.getInstance().getTargetProxyCount(-1);
+		int targetId = target.getId();
+		/** 查看目标代理是否已经在代理表中存在 */
+		Multiset<String> targetProxySet = MysqlDao.getInstance().getTargetProxyCount(targetId);
+		if (!targetProxySet.containsAll(proxySourceSet)) {
+			for (String str : proxySourceSet.elementSet()) {
+				if (targetProxySet.contains(str)) {
+					continue;
 				}
+				String host = str.split(":")[0];
+				String port = str.split(":")[1];
+				try {
+					MysqlDao.getInstance().insertProxyToAvail(host, port, targetId);
+				} catch (Exception e) {
+					continue;
+				}
+				LoggerUtil.ProxyLog("[Add Proxy][" + targetId + "][" + str + "]");
 			}
-			targetProxySet.removeAll(proxySourceSet);
-			for (String proxy : targetProxySet.elementSet()) {
-				dao.removeProxy(proxy, targetId);
-				LoggerUtil.ProxyLog("[Remove Proxy][" + targetId + "][" + proxy + "]");
-			}
-			TargetEntity targetEntity = entry.getValue();
-			List<ProxyCheckResEntity> proxyList = dao.getNeedCheckProxy(targetId);
-			CountDownLatchUtils cdl = new CountDownLatchUtils(proxyList.size());
-			LoggerUtil.ProxyLog("[" + IDENTIDY + "][" + targetId + "][Start]");
-			for (ProxyCheckResEntity proxyCheckResEntity : proxyList) {
-				ProxyChecker checker = (ProxyChecker) this.context.getBean("proxyChecker");
-				checker.setTarget(targetEntity).setProxy(proxyCheckResEntity).setCdl(cdl);
-				threadPool.execute(checker);
-			}
-			try {
-				cdl.await();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			LoggerUtil.ProxyLog("[" + IDENTIDY + "][" + targetId + "][Done]");
 		}
+		targetProxySet.removeAll(proxySourceSet);
+		for (String proxy : targetProxySet.elementSet()) {
+			MysqlDao.getInstance().removeProxy(proxy, targetId);
+			LoggerUtil.ProxyLog("[Remove Proxy][" + targetId + "][" + proxy + "]");
+		}
+		List<ProxyCheckResEntity> proxyList = MysqlDao.getInstance().getNeedCheckProxy(targetId);
+		CountDownLatchUtils cdl = new CountDownLatchUtils(proxyList.size());
+		LoggerUtil.ProxyLog("[" + IDENTIDY + "][" + targetId + "][Start]");
+		for (ProxyCheckResEntity proxyCheckResEntity : proxyList) {
+			ProxyChecker checker = new ProxyChecker();
+			checker.setTarget(target).setProxy(proxyCheckResEntity).setCdl(cdl);
+			threadPool.execute(checker);
+		}
+		try {
+			cdl.await();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		LoggerUtil.ProxyLog("[" + IDENTIDY + "][" + targetId + "][Done]");
 	}
 	
-	public void setApplicationContext(ApplicationContext paramApplicationContext) throws BeansException {
-		this.context = (ApplicationContext)paramApplicationContext;    		
+	public void startCheck () {
+		Map<Integer, TargetEntity> targetMap = dao.getTargetMap();
+		for (Entry<Integer, TargetEntity> map : targetMap.entrySet()) {
+			ProxyCheckTask proxyChecker = new ProxyCheckTask(map.getValue());
+			new Thread(proxyChecker).start();
+		}
+		
 	}
 
 	public static void main(String[] args) {
@@ -105,7 +105,7 @@ public class ProxyCheckTask implements Runnable, ApplicationContextAware{
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
 		ProxyCheckTask a = (ProxyCheckTask) application.getBean("proxyCheckTask");
-		a.run();
+		a.startCheck();
 	}
 
 	

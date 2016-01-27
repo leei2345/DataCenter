@@ -27,10 +27,8 @@ public class ImageClawer implements Runnable {
 	protected HttpMethod http = null;
 	private String imageUrl;
 	private int targetId;
-	private String targetInfo;
-	private String identidy;
-	private String areacode;
-	private String imageDirName;
+	private String path;
+	private String imgName;
 
 	static {
 		imgeFilePath = ConfigUtils.getValue(IMAGEPATHCONF);
@@ -38,14 +36,12 @@ public class ImageClawer implements Runnable {
 		threadPool = new ThreadPoolExecutor(Integer.parseInt(threadPoolStr), Integer.parseInt(threadPoolStr), 60000, TimeUnit.MILLISECONDS, queue);
 	}
 	
-	public ImageClawer (String url, int targetId, String targetInfo, String identidy, String areacode, String imageDirName) {
+	public ImageClawer (String url, int targetId, String path, String imgName) {
 		this.http = new HttpMethod(targetId);
 		this.imageUrl = url;
 		this.targetId = targetId;
-		this.targetInfo = targetInfo;
-		this.identidy = identidy;
-		this.areacode = areacode;
-		this.imageDirName = imageDirName;
+		this.path = path;
+		this.imgName = imgName;
 	}
 	
 	public void addHeader (String key, String value) {
@@ -58,19 +54,19 @@ public class ImageClawer implements Runnable {
 	
 	public void run() {
 		if (StringUtils.isBlank(imageUrl)) {
-			LoggerUtil.ImageInfoLog("[ImageClaw][Queue Size " + queue.size() + "][" + targetId + "][" + identidy + "][" + imageUrl + "][Fail]");
+			LoggerUtil.ImageInfoLog("[ImageClaw][Queue Size " + queue.size() + "][" + targetId + "][" + path + "][" + imageUrl + "][Fail]");
 			return;
 		}
-		String dirPath = imgeFilePath + targetInfo + "/" + imageDirName + "/" + areacode + "/";
+		String dirPath = imgeFilePath + path + "/";
 		File dir = new File(dirPath);
 		if (!dir.exists()) {
 			dir.mkdirs();
 		}
-		File jpgImg = new File(dirPath + identidy + ".jpg");
+		File jpgImg = new File(dirPath + imgName + ".jpg");
 		if (jpgImg.exists()) {
 			return;
 		}
-		File pngImg = new File(dirPath + identidy + ".png");
+		File pngImg = new File(dirPath + imgName + ".png");
 		if (pngImg.exists()) {
 			return;
 		}
@@ -80,12 +76,12 @@ public class ImageClawer implements Runnable {
 		}
 		String fileType = new String(imageClawRes[1]);
 		if (StringUtils.equals(fileType, "txt") || StringUtils.isBlank(fileType)) {
-			LoggerUtil.ImageInfoLog("[ImageClaw][Queue Size " + queue.size() + "][" + targetId + "][" + identidy + "][" + imageUrl + "][Fail]");
+			LoggerUtil.ImageInfoLog("[ImageClaw][Queue Size " + queue.size() + "][" + targetId + "][" + path + "][" + imageUrl + "][Fail]");
 			return;
 		}
 		String filePath = "";
-		if (!StringUtils.isBlank(identidy)) {
-			filePath = dirPath + identidy + "." + fileType;
+		if (!StringUtils.isBlank(imgName)) {
+			filePath = dirPath + imgName + "." + fileType;
 		} else {
 			return;
 		}
@@ -99,11 +95,11 @@ public class ImageClawer implements Runnable {
 			imageStream.write(imageArr);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-			LoggerUtil.ImageInfoLog("[ImageClaw][Queue Size " + queue.size() + "][" + targetId + "][" + identidy + "][" + imageUrl + "][Error]");
+			LoggerUtil.ImageInfoLog("[ImageClaw][Queue Size " + queue.size() + "][" + targetId + "][" + path + "][" + imageUrl + "][Error]");
 			return;
 		} catch (IOException e) {
 			e.printStackTrace();
-			LoggerUtil.ImageInfoLog("[ImageClaw][Queue Size " + queue.size() + "][" + targetId + "][" + identidy + "][" + imageUrl + "][Error]");
+			LoggerUtil.ImageInfoLog("[ImageClaw][Queue Size " + queue.size() + "][" + targetId + "][" + path + "][" + imageUrl + "][Error]");
 			return;
 		} finally {
 			if (imageStream != null) {
@@ -114,15 +110,13 @@ public class ImageClawer implements Runnable {
 				}
 			}
 		}
-		LoggerUtil.ImageInfoLog("[ImageClaw][Queue Size " + queue.size() + "][" + targetId + "][" + identidy + "][" + imageUrl + "][Succ]");
+		LoggerUtil.ImageInfoLog("[ImageClaw][Queue Size " + queue.size() + "][" + targetId + "][" + path + "][" + imageUrl + "][Succ]");
 	}
 	
 	public static void main(String[] args) {
 		@SuppressWarnings("resource")
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml","scheduled.xml"});
 		application.start();
-		ImageClawer i = new ImageClawer("http://t11.baidu.com/it/u=1223062447,3520786440&fm=82&s=B5026BB556022AFA04B84563030010D2&w=121&h=81&img.JPEG", 3, "dianping", "00102","17648042", "shop");
-		new Thread(i).start();
 	}
 
 }

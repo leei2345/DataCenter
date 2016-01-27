@@ -37,6 +37,7 @@ public abstract class BaseClawer {
 		INITEXIST,
 		ANALYSIS_SUCC,
 		ANALYSIS_FAIL,
+		ANALYSIS_HTML_NULL,
 		DBHAND_FAIL,
 		;
 	}

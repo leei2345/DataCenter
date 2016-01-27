@@ -41,7 +41,7 @@ public class DianPingTask implements Runnable {
 	}
 	
 	public void run() {
-		List<String> cityList = dao.getAreaList();
+		List<String> cityList = dao.getAreaList(2,3);
 		int listSize = cityList.size();
 		CountDownLatchUtils listCdl = new CountDownLatchUtils(listSize);
 		LoggerUtil.TaskInfoLog("[" + this.getClass().getSimpleName() + "][Start][CitySize " + cityList.size() + "]");

@@ -15,15 +15,12 @@ import org.apache.http.HttpHost;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Component;
 
 @Component
 public class SogouCookieTask implements Runnable {
 
-	@Autowired
-	private MysqlDao dao;
 	private static final int TARGETID = 2;
 	private static final String URL = "http://weixin.sogou.com";
 	private static final long timeStep = 3600000L;

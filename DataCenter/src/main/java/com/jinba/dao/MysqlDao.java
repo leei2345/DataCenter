@@ -6,6 +6,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -404,13 +405,14 @@ public class MysqlDao  {
 		return res;
 	}
 	
-	public List<String> getAreaList () {
+	public List<String> getAreaList (int... areaLevel) {
 		DruidPooledConnection conn = null;
 		PreparedStatement st = null;
 		ResultSet rs = null;
 		List<String> res = new ArrayList<String>();
 		try {
-			String sql = "select areacode,areaname,postcode from t_area where level in (2,3)";
+			String areaLevelArr = Arrays.toString(areaLevel).replace("[", "").replace("]", "");
+			String sql = "select areacode,areaname,postcode from t_area where level in (" + areaLevelArr + ")";
 			conn = spiderSource.getConnection();
 			st = conn.prepareStatement(sql);
 			rs = st.executeQuery();

@@ -62,7 +62,7 @@
 	</task:scheduled-tasks>
 	
 	<task:scheduled-tasks scheduler="proxy_scheduler">
-		<task:scheduled ref="proxyCheckTask" method="run" cron="0 0,30 * * * ?" />
+		<task:scheduled ref="proxyCheckTask" method="startCheck" cron="0 0 * * * ?" />
 		<task:scheduled ref="SogouCookieTask" method="run" cron="0 50 6-20 * * ?" />
 	</task:scheduled-tasks>
 

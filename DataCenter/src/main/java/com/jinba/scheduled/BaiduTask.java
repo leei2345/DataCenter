@@ -32,7 +32,7 @@ public class BaiduTask implements Runnable {
 	private ExecutorService listThreadPool;
 	
 	public void run() {
-		List<String> cityList = dao.getAreaList();
+		List<String> cityList = dao.getAreaList(2,3,4);
 //		cityList.clear();cityList.add("中关村_11010801");
 		int listSize = cityList.size();
 		CountDownLatchUtils listCdl = new CountDownLatchUtils(listSize);

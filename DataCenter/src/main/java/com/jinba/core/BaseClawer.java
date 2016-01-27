@@ -1,5 +1,6 @@
 package com.jinba.core;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,12 +11,15 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.impl.client.BasicCookieStore;
+import org.markdown4j.Markdown4jProcessor;
 
 import com.jinba.spider.core.HttpMethod;
 import com.jinba.spider.core.HttpRequestConfig;
 import com.jinba.spider.core.HttpResponseConfig;
+import com.jinba.spider.core.ImageParser;
 import com.jinba.spider.core.Method;
 import com.jinba.spider.core.Params;
+import com.overzealous.remark.Remark;
 
 public abstract class BaseClawer {
 
@@ -24,6 +28,8 @@ public abstract class BaseClawer {
 	protected HttpMethod http = null;
 	private static Pattern usqlp = Pattern.compile("update.*? set\\s+(.*)\\s+where.*");
 	private static Pattern isqlp = Pattern.compile("insert into\\s+(.*?)\\s+\\((.*?)\\)\\s+values\\s+\\((.*)\\)");
+	private Remark remark = new Remark();
+	private Markdown4jProcessor processor = new Markdown4jProcessor();
 	
 	public enum ActionRes {
 		INITSUCC,
@@ -163,6 +169,19 @@ public abstract class BaseClawer {
 			isql = "insert into " + tableName + " (" + keysStr.replaceFirst(",", "") + ") values (" + valuesStr.replaceFirst(",", "") + ")";
 		}
 		return isql;
+	}
+	
+	public String markdown(String text, String baseUrl) {
+		processor.addHtmlAttribute("style", "text-indent:2em","p");
+		/** 插图上传又拍云 */
+		String replaceImagedArticle = ImageParser.parseImages(text, baseUrl);
+		replaceImagedArticle = remark.convertFragment(replaceImagedArticle, baseUrl);
+		try {
+			replaceImagedArticle = processor.process(replaceImagedArticle);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return replaceImagedArticle;
 	}
 	
 }

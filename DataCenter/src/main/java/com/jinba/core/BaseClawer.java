@@ -28,8 +28,6 @@ public abstract class BaseClawer {
 	protected HttpMethod http = null;
 	private static Pattern usqlp = Pattern.compile("update.*? set\\s+(.*)\\s+where.*");
 	private static Pattern isqlp = Pattern.compile("insert into\\s+(.*?)\\s+\\((.*?)\\)\\s+values\\s+\\((.*)\\)");
-	private Remark remark = new Remark();
-	private Markdown4jProcessor processor = new Markdown4jProcessor();
 	
 	public enum ActionRes {
 		INITSUCC,
@@ -170,19 +168,6 @@ public abstract class BaseClawer {
 			isql = "insert into " + tableName + " (" + keysStr.replaceFirst(",", "") + ") values (" + valuesStr.replaceFirst(",", "") + ")";
 		}
 		return isql;
-	}
-	
-	public String markdown(String text, String baseUrl) {
-		processor.addHtmlAttribute("style", "text-indent:2em","p");
-		/** 插图上传又拍云 */
-		String replaceImagedArticle = ImageParser.parseImages(text, baseUrl);
-		replaceImagedArticle = remark.convertFragment(replaceImagedArticle, baseUrl);
-		try {
-			replaceImagedArticle = processor.process(replaceImagedArticle);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return replaceImagedArticle;
 	}
 	
 }

@@ -14,29 +14,42 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.threads.ThreadPoolExecutor;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.jinba.pojo.ImageType;
 import com.jinba.utils.ConfigUtils;
 import com.jinba.utils.LoggerUtil;
 
 public class ImageClawer implements Runnable {
 
-	private static String imgeFilePath;
+	private static String imgeFirstPath;
+	private static String entityImagePath;
+	private static String newsImagePath;
 	private static ExecutorService threadPool = null;
 	private static BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
 	private static final String THREADPOOLCONF = "imgclaw.thread.pool";
-	private static final String IMAGEPATHCONF = "image.file.path";
+	private static final String IMAGEPATHCONF = "image.dir.path";
+	private static final String ENTITYIMAGECONF = "entity.img.path";
+	private static final String NEWSIMAGECONF = "news.img.path";
 	protected HttpMethod http = null;
 	private String imageUrl;
 	private int targetId;
+	private String pathHead;
 	private String path;
 	private String imgName;
 
 	static {
-		imgeFilePath = ConfigUtils.getValue(IMAGEPATHCONF);
+		imgeFirstPath = ConfigUtils.getValue(IMAGEPATHCONF);
+		entityImagePath = ConfigUtils.getValue(ENTITYIMAGECONF);
+		newsImagePath = ConfigUtils.getValue(NEWSIMAGECONF);
 		String threadPoolStr = ConfigUtils.getValue(THREADPOOLCONF);
 		threadPool = new ThreadPoolExecutor(Integer.parseInt(threadPoolStr), Integer.parseInt(threadPoolStr), 60000, TimeUnit.MILLISECONDS, queue);
 	}
 	
-	public ImageClawer (String url, int targetId, String path, String imgName) {
+	public ImageClawer (ImageType type, String url, int targetId, String path, String imgName) {
+		if (type.equals(ImageType.EntityImage)) {
+			pathHead = imgeFirstPath + entityImagePath;
+		} else if (type.equals(ImageType.NewsImage)) {
+			pathHead = imgeFirstPath + newsImagePath;
+		}
 		this.http = new HttpMethod(targetId);
 		this.imageUrl = url;
 		this.targetId = targetId;
@@ -57,7 +70,7 @@ public class ImageClawer implements Runnable {
 			LoggerUtil.ImageInfoLog("[ImageClaw][Queue Size " + queue.size() + "][" + targetId + "][" + path + "][" + imageUrl + "][Fail]");
 			return;
 		}
-		String dirPath = imgeFilePath + path + "/";
+		String dirPath = pathHead + path + "/";
 		File dir = new File(dirPath);
 		if (!dir.exists()) {
 			dir.mkdirs();

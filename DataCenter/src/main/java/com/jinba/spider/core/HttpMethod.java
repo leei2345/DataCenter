@@ -854,9 +854,9 @@ public class HttpMethod {
 						} else if (value.toLowerCase().contains("jpg")) {
 							imageType = "jpg";
 						} else if (value.toLowerCase().contains("png")) {
-							imageType = "png";
+							imageType = "jpg";
 						} else if (value.toLowerCase().contains("gif")) {
-							imageType = "gif";
+							imageType = "jpg";
 						}
 					}
 				}

@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.alibaba.fastjson.JSON;
@@ -14,6 +13,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.jinba.core.BaseDetailClawer;
 import com.jinba.core.DBHandle;
+import com.jinba.pojo.ImageType;
 import com.jinba.pojo.NewsEntity;
 import com.jinba.spider.core.ImageClawer;
 import com.jinba.utils.CountDownLatchUtils;
@@ -65,7 +65,7 @@ public class BaiduDetailClawer extends BaseDetailClawer<NewsEntity>{
 		if (StringUtils.isBlank(html)) {
 			return ActionRes.ANALYSIS_HTML_NULL;
 		}
-		String content;
+		String content = "";
 		try {
 			JSONObject obj = JSONObject.parseObject(html);
 			JSONObject data = obj.getJSONObject("data").getJSONArray("news").getJSONObject(0);
@@ -77,17 +77,21 @@ public class BaiduDetailClawer extends BaseDetailClawer<NewsEntity>{
 				JSONObject eachContent = newContentArr.getJSONObject(index);
 				String type = eachContent.getString("type");
 				if (StringUtils.equals("image", type)) {
-					
+					String imageUrl = eachContent.getJSONObject("data").getJSONObject("original").getString("url");
+					String newPath = this.markdownImage(imageUrl, String.valueOf(imageIndex));
+					String imageDom = "<img src=\"" + newPath + "\" alt=\"img\" style=\"border:0;\"/>";
+					content += imageDom;
+					imageIndex++;
 				} else if (StringUtils.equals("text", type)) {
-					
+					String text = eachContent.getString("data");
+					text = this.markdownText(text);
+					content += text;
 				}
-				
 			}
-			
+			detailEntity.setContent(content);
 		} catch (Exception e) {
 			return ActionRes.ANALYSIS_FAIL;
 		}
-		
 		String selectSql = "select newsid from t_news where fromhost='" + detailEntity.getFromhost() + "' and fromkey='" + detailEntity.getFromkey() + "'";;
 		List<Map<String, Object>> selectRes = dbHandle.select(selectSql);
 		StringBuilder iubuilder = new StringBuilder();
@@ -137,7 +141,8 @@ public class BaiduDetailClawer extends BaseDetailClawer<NewsEntity>{
 			areacode = detailEntity.getAreacode();
 		}
 		if (!StringUtils.isBlank(imgurl) && iuRes) {
-			ImageClawer imgClawer = new ImageClawer(imgurl, TARGETID, TARGETINFO, String.valueOf(id), areacode, IMAGEDIRNAME);
+			String path = TARGETINFO + "/" + IMAGEDIRNAME + "/" + detailEntity.getAreacode() + "/";
+			ImageClawer imgClawer = new ImageClawer(ImageType.EntityImage, imgurl, TARGETID, path, String.valueOf(id));
 			imgClawer.addHeader("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 9_2 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13C75 Safari/601.1");
 			ImageClawer.ExecutorClaw(imgClawer);
 		}
@@ -156,7 +161,7 @@ public class BaiduDetailClawer extends BaseDetailClawer<NewsEntity>{
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
 		/** 非酒店 */
-		String json = "{\"areacode\":\"110101\",\"fromhost\":\"weixin.sogou.com\",\"fromkey\":\"ab735a258a90e8e1-6bee54fcbd896b2a-2ae7e42d3f34733cd5d1b194ffd7250c\",\"fromurl\":\"http://mp.weixin.qq.com/s?__biz=MzA3NjI4ODUyMQ==&mid=401126035&idx=1&sn=6e6b7e0dd75706009fae9a57854c459a&3rd=MzA3MDU4NTYzMw==&scene=6#rd\",\"newstime\":\"2016-01-04 16:19:51\",\"posttime\":\"2016-01-04\",\"source\":\"廉政东城\",\"title\":\"东城区纪委书记谈“党风廉政建设和反腐败工作”\"}";
+		String json = "{\"areacode\":\"11011410\",\"content\":null,\"fromhost\":\"m.baidu.com\",\"fromkey\":null,\"fromurl\":\"http://difang.gmw.cn/newspaper/2016-01/28/content_110924478.htm\",\"headimg\":\"http://timg01.baidu-2img.cn/timg?tc&size=w1425&sec=1453906525&di=1a4e16be4cfb49f279fea6cce9e8913a&src=http%3A%2F%2Fupload%2Eqianlong%2Ecom%2F2016%2F0127%2F1453859670146%2Ejpg\",\"newstime\":\"2016-01-28 13:10:00\",\"posttime\":\"2016-01-28 23:13:39\",\"source\":\"光明网\",\"title\":\"沙河市 警方破获系列劫案 \"}";
 		NewsEntity x = JSON.parseObject(json, NewsEntity.class);
 		BaseDetailClawer<NewsEntity> b = new BaiduDetailClawer(x, new CountDownLatchUtils(1));
 		b.detailAction();

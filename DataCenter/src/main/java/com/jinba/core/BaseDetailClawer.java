@@ -1,15 +1,19 @@
 package com.jinba.core;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
+import org.markdown4j.Markdown4jProcessor;
 
 import com.jinba.dao.MysqlDao;
 import com.jinba.pojo.BaseEntity;
+import com.jinba.spider.core.ImageParser;
 import com.jinba.utils.CountDownLatchUtils;
 import com.jinba.utils.LoggerUtil;
+import com.overzealous.remark.Remark;
 
 
 /**
@@ -23,6 +27,8 @@ public abstract class BaseDetailClawer<T extends BaseEntity> extends BaseClawer 
 
 	protected T detailEntity; 
 	protected CountDownLatchUtils cdl;
+	private Remark remark = new Remark();
+	private Markdown4jProcessor processor = new Markdown4jProcessor();
 	
 	public BaseDetailClawer(int targetId, T detailEntity, CountDownLatchUtils cdl) {
 		super(targetId);
@@ -115,6 +121,31 @@ public abstract class BaseDetailClawer<T extends BaseEntity> extends BaseClawer 
 
 	public void run() {
 		this.detailAction();
+	}
+	
+	public String markdownImage(String imageUrl, String imageName) {
+		String fromhost = this.detailEntity.getFromhost();
+		String fromkey = this.detailEntity.getFromkey();
+		processor.addHtmlAttribute("style", "text-indent:2em","p");
+		String replaceImagedArticle = ImageParser.parseImagesByUrl(imageUrl, fromhost, fromkey, imageName, targetId);
+		replaceImagedArticle = remark.convertFragment(replaceImagedArticle, "");
+		try {
+			replaceImagedArticle = processor.process(replaceImagedArticle);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return replaceImagedArticle;
+	}
+	
+	public String markdownText(String text) {
+		processor.addHtmlAttribute("style", "text-indent:2em","p");
+		String replaceImagedArticle =null;
+		try {
+			replaceImagedArticle = processor.process(replaceImagedArticle);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return replaceImagedArticle;
 	}
 	
 	

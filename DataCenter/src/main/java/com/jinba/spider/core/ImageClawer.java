@@ -70,7 +70,7 @@ public class ImageClawer implements Runnable {
 			LoggerUtil.ImageInfoLog("[ImageClaw][Queue Size " + queue.size() + "][" + targetId + "][" + path + "][" + imageUrl + "][Fail]");
 			return;
 		}
-		String dirPath = pathHead + path + "/";
+		String dirPath = pathHead + path;
 		File dir = new File(dirPath);
 		if (!dir.exists()) {
 			dir.mkdirs();

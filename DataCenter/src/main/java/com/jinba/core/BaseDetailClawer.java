@@ -3,6 +3,7 @@ package com.jinba.core;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
@@ -141,12 +142,25 @@ public abstract class BaseDetailClawer<T extends BaseEntity> extends BaseClawer 
 		processor.addHtmlAttribute("style", "text-indent:2em","p");
 		String replaceImagedArticle =null;
 		try {
-			replaceImagedArticle = processor.process(replaceImagedArticle);
+			replaceImagedArticle = processor.process(text);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return replaceImagedArticle;
 	}
 	
+	public String markdown(String text, String baseUrl) {
+		processor.addHtmlAttribute("style", "text-indent:2em","p");
+		String path = detailEntity.getFromhost() + "/" + detailEntity.getFromkey() + "/";
+		String imgName = UUID.randomUUID().toString();
+		String replaceImagedArticle = ImageParser.parseImages(text, baseUrl, path, imgName, targetId);
+		replaceImagedArticle = remark.convertFragment(replaceImagedArticle, baseUrl);
+		try {
+			replaceImagedArticle = processor.process(replaceImagedArticle);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return replaceImagedArticle;
+	}
 	
 }

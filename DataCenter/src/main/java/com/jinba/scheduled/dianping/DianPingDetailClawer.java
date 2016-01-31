@@ -20,10 +20,12 @@ import com.jinba.core.BaseDetailClawer;
 import com.jinba.core.DBHandle;
 import com.jinba.dao.MysqlDao;
 import com.jinba.pojo.AnalysisType;
+import com.jinba.pojo.ImageType;
 import com.jinba.pojo.XiaoQuEntity;
 import com.jinba.scheduled.AreaInfoMap;
 import com.jinba.spider.core.HttpMethod;
 import com.jinba.spider.core.HttpResponseConfig;
+import com.jinba.spider.core.ImageClawer;
 import com.jinba.spider.core.Params;
 import com.jinba.utils.CountDownLatchUtils;
 
@@ -35,6 +37,8 @@ import com.jinba.utils.CountDownLatchUtils;
 public class DianPingDetailClawer extends BaseDetailClawer<XiaoQuEntity>{
 
 	private static final int TARGETID = 1;
+	private static final String TARGETINFO = "dianping";
+	private static final String IMAGEDIRNAME = "shop";
 	private String sourceKey;
 	private static Pattern phonePattern = Pattern.compile("电话\\s?(:|：){1}\\s?(\\d+-?\\d+)\\s*");
 	
@@ -149,6 +153,9 @@ public class DianPingDetailClawer extends BaseDetailClawer<XiaoQuEntity>{
 		comments = comments.replaceFirst(">", "");
 		this.detailEntity.setComments(comments);
 		this.detailEntity.setAreacode(areaCode);
+		String path = TARGETINFO + "/" + IMAGEDIRNAME + "/" + areaCode + "/";
+		ImageClawer imageClawer = new ImageClawer(ImageType.EntityImage, detailEntity.getHeadimg(), TARGETID, path, detailEntity.getFromkey());
+		ImageClawer.ExecutorClaw(imageClawer);
 		this.detailEntity.setAddress(address);
 		String selectSql = "select xiaoquid from t_xiaoqu where fromhost='" + detailEntity.getFromhost() + "' and fromkey='" + detailEntity.getFromkey() + "'";;
 		List<Map<String, Object>> selectRes = dbHandle.select(selectSql);

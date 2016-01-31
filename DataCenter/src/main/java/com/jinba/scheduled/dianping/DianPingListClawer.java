@@ -17,7 +17,6 @@ import com.jinba.pojo.XiaoQuEntity;
 import com.jinba.scheduled.DianPingWorker;
 import com.jinba.spider.core.HttpMethod;
 import com.jinba.spider.core.HttpResponseConfig;
-import com.jinba.spider.core.ImageClawer;
 import com.jinba.spider.core.Params;
 import com.jinba.utils.CountDownLatchUtils;
 
@@ -29,14 +28,12 @@ import com.jinba.utils.CountDownLatchUtils;
 public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements Runnable {
 
 	private static final int TARGETID = 1;
-	private static final String TARGETINFO = "dianping";
 	private String eachPageUrl;
 	private int pageCount = 1;
 	private int xiaoquType;
 	private AnalysisType analysisType;
 	private Map<Params, String> cityInfo = new HashMap<Params, String>();
 	private static final String FROMHOST = "www.dianping.com";
-	private static final String IMAGEDIRNAME = "shop";
 	
 	public DianPingListClawer (Map<Params, String> paramsMap, CountDownLatchUtils cdl) {
 		super(TARGETID, cdl);
@@ -117,8 +114,6 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 				x.setFromurl(sourceUrl);
 				String fromKey = sourceUrl.replaceAll("\\D+", "");
 				x.setFromkey(fromKey);
-				ImageClawer imageClawer = new ImageClawer(headPhotoUrl, TARGETID, TARGETINFO, cityInfo.get(Params.cityname) ,fromKey, IMAGEDIRNAME);
-				ImageClawer.ExecutorClaw(imageClawer);
 				box.add(x);
 			}
 		}

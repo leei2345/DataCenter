@@ -62,7 +62,7 @@ public class HttpMethod {
 	private BasicCookieStore cookieStore = new BasicCookieStore();
 	private HttpGet get = null;
 	private HttpPost post = null;
-	private static int retryCount = 4;
+	private int retryCount = 4;
 	private static final String DEFAULTCHARACTER = "UTF-8";
 	private RequestConfig.Builder config = RequestConfig.custom();
 	private HttpClientBuilder clientBuilder = HttpClientBuilder.create();
@@ -149,6 +149,11 @@ public class HttpMethod {
 	public void setProxy(HttpHost proxy) {
 		this.setProxy = true;
 		this.proxy = proxy;
+		if (this.get == null) {
+			this.get = new HttpGet();
+		}
+		this.config.setProxy(proxy);
+		this.get.setConfig(config.build());
 	}
 
 	public void SetConnectionTimeOutThreshold(Method method, int timeOut) {
@@ -237,6 +242,8 @@ public class HttpMethod {
 					this.config.setProxy(proxy);
 					this.get.setConfig(config.build());
 				}
+			} else {
+				retryCount = 1;
 			}
 			if (proxy == null) {
 				LoggerUtil.HttpInfoLog("[" + url + "][第" + retryIndex + "次抓取尝试]");

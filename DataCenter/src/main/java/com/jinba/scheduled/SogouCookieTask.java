@@ -10,11 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.impl.client.BasicCookieStore;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +19,7 @@ import org.springframework.stereotype.Component;
 public class SogouCookieTask implements Runnable {
 
 	private static final int TARGETID = 2;
-	private static final String URL = "http://weixin.sogou.com";
+	private static final String URL = "http://weixin.sogou.com/weixin?type=2&query=%E4%B8%9C%E5%9F%8E%E5%8C%BA&ie=utf8&sourceid=inttime_day&w=&sut=&sst0=&lkt=&page=1";
 	private static final long timeStep = 3600000L;
 	private static LinkedBlockingQueue<SogouCookieEntity> cookieQueue = new LinkedBlockingQueue<SogouCookieEntity>();
 
@@ -42,9 +39,7 @@ public class SogouCookieTask implements Runnable {
 			m.setProxy(proxy);
 			String html = m.GetHtml(URL, HttpResponseConfig.ResponseAsStream);
 			long ctime = System.currentTimeMillis();
-			Document doc = Jsoup.parse(html);
-			String buttonName = doc.select("div.sbtn1 > input:eq(1)").attr("value").trim();
-			if (StringUtils.equals("搜文章", buttonName)) {
+			if (html.contains("东城区")) {
 				BasicCookieStore cookie = m.getCookieStore();
 				SogouCookieEntity cookieEntity = new SogouCookieEntity();
 				cookieEntity.setCookie(cookie);
@@ -75,7 +70,7 @@ public class SogouCookieTask implements Runnable {
 		}
 
 		if (cookie == null) {
-			cookieQueue.poll();
+			cookie = cookieQueue.poll();
 		}
 		return cookie;
 	}

@@ -26,6 +26,7 @@ import com.jinba.pojo.SogouCookieEntity;
 import com.jinba.scheduled.SogouCookieTask;
 import com.jinba.spider.core.HttpMethod;
 import com.jinba.spider.core.HttpResponseConfig;
+import com.jinba.spider.core.Method;
 import com.jinba.spider.core.Params;
 import com.jinba.utils.CountDownLatchUtils;
 import com.jinba.utils.LoggerUtil;
@@ -59,12 +60,22 @@ public class SogouListClawer extends BaseListClawer<NewsEntity> implements Calla
 		boolean next = true;
 		do {
 			SogouCookieEntity m = SogouCookieTask.getResource();
+//			SogouCookieEntity m = new SogouCookieEntity();
 			HttpHost proxy = m.getProxy();
 			BasicCookieStore cookie = m.getCookie();
 			next = false;
 			String url = tempUrl.replace("##", areaNameEn).replace("$$", String.valueOf(pageIndex));
 	 		HttpMethod inner = new HttpMethod(targetId, cookie, proxy);
+//	 		HttpMethod inner = new HttpMethod(targetId);
+	 		inner.AddHeader(Method.Get, "Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
+	 		inner.AddHeader(Method.Get, "Accept-Encoding", "gzip,deflate,sdch");
+	 		inner.AddHeader(Method.Get, "Accept-Language", "zh-CN,zh;q=0.8");
+	 		inner.AddHeader(Method.Get, "Cache-Control", "max-age=0");
+	 		inner.AddHeader(Method.Get, "Connection", "keep-alive");
+	 		inner.AddHeader(Method.Get, "Host", "weixin.sogou.com");
+	 		inner.AddHeader(Method.Get, "User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1736.2 Safari/537.36");
 			String html = inner.GetHtml(url, HttpResponseConfig.ResponseAsStream);
+//			String html = inner.GetHtml(url, HttpResponseConfig.ResponseAsStream);
 			if (!StringUtils.isBlank(html) && !html.contains("您的访问过于频繁")) {
 				LoggerUtil.ClawerInfoLog("[Sogou Cookie Queue Available][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
 			} else {

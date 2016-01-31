@@ -4,11 +4,16 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.alibaba.fastjson.JSON;
 import com.jinba.core.BaseDetailClawer;
 import com.jinba.core.DBHandle;
+import com.jinba.pojo.ImageType;
 import com.jinba.pojo.NewsEntity;
 import com.jinba.spider.core.ImageClawer;
 import com.jinba.utils.CountDownLatchUtils;
@@ -23,6 +28,7 @@ public class SogouDetailClawer extends BaseDetailClawer<NewsEntity>{
 	private static final int TARGETID = 2;
 	private static final String TARGETINFO = "sogou";
 	private static final String IMAGEDIRNAME = "news";
+	private static final String BASEURL = "http://mp.weixin.qq.com/";
 	
 	public SogouDetailClawer(NewsEntity detailEntity, CountDownLatchUtils cdl) {
 		super(TARGETID, detailEntity, cdl);
@@ -39,11 +45,31 @@ public class SogouDetailClawer extends BaseDetailClawer<NewsEntity>{
 
 	@Override
 	protected String getDetailHtml() {
-		return "Done";
+		String url = detailEntity.getFromurl();
+		if (StringUtils.isBlank(url)) {
+			return null;
+		}
+		String html = httpGet(url);
+		return html;
 	}
 
 	@Override
 	protected ActionRes analysistDetail(String html, DBHandle dbHandle) {
+		if (StringUtils.isBlank(html)) {
+			return ActionRes.ANALYSIS_HTML_NULL;
+		}
+		String content = "";
+		Document doc  = Jsoup.parse(html);
+		Elements pNodes = doc.select("div.rich_media_content >p");
+		for (int index = 0; index < pNodes.size(); index++) {
+			Element pNode = pNodes.get(index);
+			String pHtml = pNode.html();
+			String pContent = this.markdown(pHtml, BASEURL);
+			content += pContent;
+		}
+		if (!StringUtils.isBlank(content)) {
+			detailEntity.setContent(content);
+		}
 		String selectSql = "select newsid from t_news where fromhost='" + detailEntity.getFromhost() + "' and fromkey='" + detailEntity.getFromkey() + "'";;
 		List<Map<String, Object>> selectRes = dbHandle.select(selectSql);
 		StringBuilder iubuilder = new StringBuilder();
@@ -93,7 +119,8 @@ public class SogouDetailClawer extends BaseDetailClawer<NewsEntity>{
 			areacode = detailEntity.getAreacode();
 		}
 		if (!StringUtils.isBlank(imgurl) && iuRes) {
-			ImageClawer imgClawer = new ImageClawer(imgurl, TARGETID, TARGETINFO, String.valueOf(id), areacode, IMAGEDIRNAME);
+			String path = TARGETINFO + "/" + IMAGEDIRNAME + "/" + detailEntity.getAreacode();
+			ImageClawer imgClawer = new ImageClawer(ImageType.EntityImage, imgurl, TARGETID, path, String.valueOf(id));
 			ImageClawer.ExecutorClaw(imgClawer);
 		}
 		
@@ -111,7 +138,7 @@ public class SogouDetailClawer extends BaseDetailClawer<NewsEntity>{
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
 		/** 非酒店 */
-		String json = "{\"areacode\":\"110101\",\"fromhost\":\"weixin.sogou.com\",\"fromkey\":\"ab735a258a90e8e1-6bee54fcbd896b2a-2ae7e42d3f34733cd5d1b194ffd7250c\",\"fromurl\":\"http://mp.weixin.qq.com/s?__biz=MzA3NjI4ODUyMQ==&mid=401126035&idx=1&sn=6e6b7e0dd75706009fae9a57854c459a&3rd=MzA3MDU4NTYzMw==&scene=6#rd\",\"newstime\":\"2016-01-04 16:19:51\",\"posttime\":\"2016-01-04\",\"source\":\"廉政东城\",\"title\":\"东城区纪委书记谈“党风廉政建设和反腐败工作”\"}";
+		String json = "{\"areacode\":\"110101\",\"content\":\"为全面推动烟花爆竹消防安全管理工作深入开展,确保春节期间东华门地区良好的消防安全环境,近日,东华门街道召开东华门地区2016年春节烟花爆竹安全管理会议,驻区中央机关、市属机关、地区职能部门、地区重点单位和社区干部等共200余人参加会议. 首先,部署了春节烟花爆竹禁...\",\"fromhost\":\"weixin.sogou.com\",\"fromkey\":\"ab735a258a90e8e1-6bee54fcbd896b2a-09ebcb58240e9fde33fa88f0f2f7b090\",\"fromurl\":\"http://mp.weixin.qq.com/s?__biz=MzAwNzE5MTUzMg==&mid=401822212&idx=1&sn=71bd326fee3689a805b9e114bf0fe1b5&3rd=MzA3MDU4NTYzMw==&scene=6#rd\",\"headimg\":\"http://img01.sogoucdn.com/net/a/04/link?appid=100520031&url=http://mmbiz.qpic.cn/mmbiz/QqfrLiaa6IZENRF1Irjz8wySx86pbmfgia2iaXyFxnYlgUxIS3Uia3YEkZs7O2hay8nV5fvMliaMQN5HIvm5hyKiavoA/0?wx_fmt=jpeg\",\"newstime\":\"2016-01-31 21:23:22\",\"posttime\":\"2016-01-31\",\"source\":\"北京东城消防\",\"title\":\"东城区东华门街道召开2016年春节烟花爆竹安全管理会议\"}";
 		NewsEntity x = JSON.parseObject(json, NewsEntity.class);
 		BaseDetailClawer<NewsEntity> b = new SogouDetailClawer(x, new CountDownLatchUtils(1));
 		b.detailAction();

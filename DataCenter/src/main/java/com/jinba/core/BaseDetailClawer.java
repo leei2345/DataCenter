@@ -163,4 +163,17 @@ public abstract class BaseDetailClawer<T extends BaseEntity> extends BaseClawer 
 		return replaceImagedArticle;
 	}
 	
+	public String markdown(String imgName, String text, String baseUrl) {
+		processor.addHtmlAttribute("style", "text-indent:2em","p");
+		String path = detailEntity.getFromhost() + "/" + detailEntity.getFromkey() + "/";
+		String replaceImagedArticle = ImageParser.parseImages(text, baseUrl, path, imgName, targetId);
+		replaceImagedArticle = remark.convertFragment(replaceImagedArticle, baseUrl);
+		try {
+			replaceImagedArticle = processor.process(replaceImagedArticle);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return replaceImagedArticle;
+	}
+	
 }

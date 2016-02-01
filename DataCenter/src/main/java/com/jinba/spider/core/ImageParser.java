@@ -51,6 +51,7 @@ public class ImageParser {
 				}
 			}
 		}
+		newArticleHtml = newArticleHtml.replace("data-src=", "src=");
 		return newArticleHtml;
 	}
 	

@@ -30,6 +30,7 @@ public class BaiduDetailClawer extends BaseDetailClawer<NewsEntity>{
 	private static final String TARGETINFO = "baidu";
 	private static final String IMAGEDIRNAME = "news";
 	private static final String URLHEAD = "http://m.baidu.com/news?tn=bdapiinstantfulltext&src=";
+	private static final String BASEURL = "http://www.jinba.com";
 	
 	public BaiduDetailClawer(NewsEntity detailEntity, CountDownLatchUtils cdl) {
 		super(TARGETID, detailEntity, cdl);
@@ -79,8 +80,8 @@ public class BaiduDetailClawer extends BaseDetailClawer<NewsEntity>{
 				String type = eachContent.getString("type");
 				if (StringUtils.equals("image", type)) {
 					String imageUrl = eachContent.getJSONObject("data").getJSONObject("original").getString("url");
-					String newPath =ImageParser.parseImagesByUrl(imageUrl, detailEntity.getFromhost(), detailEntity.getFromkey(), String.valueOf(imageIndex), targetId);
-					String imageDom = "<img src=\"" + newPath + "\" alt=\"img\" style=\"border:0;\"/>";
+					String imageDom = "<img src=\"" + imageUrl + "\" alt=\"img\" style=\"border:0;\"/>";
+					imageDom = this.markdown(String.valueOf(imageIndex), imageDom, BASEURL);
 					content += imageDom;
 					imageIndex++;
 				} else if (StringUtils.equals("text", type)) {

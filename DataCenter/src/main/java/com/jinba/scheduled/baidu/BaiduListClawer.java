@@ -50,12 +50,14 @@ public class BaiduListClawer extends BaseListClawer<NewsEntity> implements Calla
 		int pageIndex = 0;
 		String areaNameEn = new URLEncoder().encode(areaName);
 		boolean next = true;
+		String html = null;
+		String url = null;
 		do {
 			next = false;
-			String url = tempUrl.replace("##", areaNameEn).replace("$$", String.valueOf(pageIndex * 20));
+			url = tempUrl.replace("##", areaNameEn).replace("$$", String.valueOf(pageIndex * 20));
 			//String html = httpGet(url);
 			HttpMethod inner = new HttpMethod(targetId);
-			String html = inner.GetHtml(url, HttpResponseConfig.ResponseAsStream);
+			html = inner.GetHtml(url, HttpResponseConfig.ResponseAsStream);
 			if (StringUtils.isBlank(html)) {
 				break;
 			}
@@ -117,7 +119,7 @@ public class BaiduListClawer extends BaseListClawer<NewsEntity> implements Calla
 				Thread.sleep(1000);
 				pageIndex++;
 			} catch (Exception e) {
-				e.printStackTrace();
+				System.out.println(url + "\r\n" + html);
 			}
 		} while (next && pageIndex <= 10);
 	}
@@ -132,8 +134,8 @@ public class BaiduListClawer extends BaseListClawer<NewsEntity> implements Calla
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
 		Map<Params, String> paramsMap = new HashMap<Params, String>();
-		paramsMap.put(Params.area, "沙河");
-		paramsMap.put(Params.citycode, "11011410");
+		paramsMap.put(Params.area, "沧州市");
+		paramsMap.put(Params.citycode, "1309");
 		try {
 			List<NewsEntity> l = new BaiduListClawer(paramsMap, new CountDownLatchUtils(1)).listAction();
 			for (NewsEntity newsEntity : l) {

@@ -4,10 +4,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,15 +34,18 @@ public class BaiduTask implements Runnable {
 	@Value("${sgclaw.thread.pool}")
 	private int threadPoolSize = 30;
 	private ExecutorService listThreadPool;
+	private ExecutorService detailThreadpool;
+	private BlockingQueue<Runnable> workQueue = new LinkedBlockingDeque<Runnable>();
 	
 	public void run() {
 		List<String> cityList = dao.getAreaList(2,3,4);
-//		cityList.clear();cityList.add("中关村_11010801");
+//		cityList.clear();cityList.add("沧州市_1309");
 		int listSize = cityList.size();
 		CountDownLatchUtils listCdl = new CountDownLatchUtils(listSize);
 		List<Future<List<NewsEntity>>> resList = new ArrayList<Future<List<NewsEntity>>>();
 		LoggerUtil.TaskInfoLog("[" + this.getClass().getSimpleName() + "][Start][CitySize " + cityList.size() + "]");
 		listThreadPool = Executors.newFixedThreadPool(threadPoolSize);
+		detailThreadpool  = new ThreadPoolExecutor(threadPoolSize, threadPoolSize, 60000, TimeUnit.MILLISECONDS, workQueue);
 		for (String eachCity : cityList) {
 			String[] cityInfo = eachCity.split("_");
 			String cityName = cityInfo[0];
@@ -62,12 +69,15 @@ public class BaiduTask implements Runnable {
 			}
 			for (NewsEntity newsEntity : detailList) {
 				BaiduDetailClawer detail = new BaiduDetailClawer(newsEntity);
-				detail.detailAction();
+				detailThreadpool.execute(detail);
+				LoggerUtil.ClawerInfoLog("[" + this.getClass().getSimpleName() + "][Queue Size Is " + workQueue.size() + "]");
 			}
 		}
 		LoggerUtil.TaskInfoLog("[" + this.getClass().getSimpleName() + "][Done]");
 		listThreadPool.shutdownNow();
 		listThreadPool = null;
+		detailThreadpool.shutdownNow();
+		detailThreadpool = null;
 	}
 	
 	public static void main(String[] args) {

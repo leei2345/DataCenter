@@ -16,7 +16,6 @@ import com.jinba.core.DBHandle;
 import com.jinba.pojo.ImageType;
 import com.jinba.pojo.NewsEntity;
 import com.jinba.spider.core.ImageClawer;
-import com.jinba.spider.core.ImageParser;
 import com.jinba.utils.CountDownLatchUtils;
 
 /**
@@ -24,7 +23,7 @@ import com.jinba.utils.CountDownLatchUtils;
  * @author leei
  *
  */
-public class BaiduDetailClawer extends BaseDetailClawer<NewsEntity>{
+public class BaiduDetailClawer extends BaseDetailClawer<NewsEntity> {
 
 	private static final int TARGETID = 3;
 	private static final String TARGETINFO = "baidu";
@@ -158,6 +157,11 @@ public class BaiduDetailClawer extends BaseDetailClawer<NewsEntity>{
 		return res;
 	}
 	
+	@Override
+	public void run() {
+		super.run();
+	}
+
 	public static void main(String[] args) {
 		@SuppressWarnings("resource")
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});

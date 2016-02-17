@@ -80,7 +80,8 @@ public class BaiduDetailClawer extends BaseDetailClawer<NewsEntity> {
 				if (StringUtils.equals("image", type)) {
 					String imageUrl = eachContent.getJSONObject("data").getJSONObject("original").getString("url");
 					String imageDom = "<img src=\"" + imageUrl + "\" alt=\"img\" style=\"border:0;\"/>";
-					imageDom = this.markdown(String.valueOf(imageIndex), imageDom, BASEURL);
+					String path = TARGETINFO + "/" + IMAGEDIRNAME + "/" + detailEntity.getAreacode() + "/";
+					imageDom = this.markdownImage(this.detailEntity.getFromkey() + "_" + String.valueOf(imageIndex), path ,imageDom, BASEURL);
 					content += imageDom;
 					imageIndex++;
 				} else if (StringUtils.equals("text", type)) {

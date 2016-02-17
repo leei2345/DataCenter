@@ -56,7 +56,7 @@
 		<task:scheduled ref="dianPing_JD_CSGG_Task" method="run" cron="0 0 12 19 * ?" />
 		<task:scheduled ref="dianPing_JIUD_SXJJD_Task" method="run" cron="0 0 12 20 * ?" />
 		
- 		<task:scheduled ref="baiduTask" method="run" cron="0 2 12,13,16 * * ?" />
+ 		<task:scheduled ref="baiduTask" method="run" cron="0 0 12,13,16 * * ?" />
  		<task:scheduled ref="sogouTask" method="run" cron="0 0 11,14,18 * * ?" />
 
 	</task:scheduled-tasks>

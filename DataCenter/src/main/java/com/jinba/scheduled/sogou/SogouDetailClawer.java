@@ -64,7 +64,8 @@ public class SogouDetailClawer extends BaseDetailClawer<NewsEntity>{
 		for (int index = 0; index < pNodes.size(); index++) {
 			Element pNode = pNodes.get(index);
 			String pHtml = pNode.html();
-			String pContent = this.markdown(pHtml, BASEURL);
+			String path = TARGETINFO + "/" + IMAGEDIRNAME + "/" + detailEntity.getAreacode();
+			String pContent = this.markdownContent(pHtml, path, BASEURL);
 			content += pContent;
 		}
 		if (!StringUtils.isBlank(content)) {

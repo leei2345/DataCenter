@@ -28,7 +28,7 @@ public class ImageParser {
 	}
 
 	private static String saveImage(String imageUrl, String path, String imgName, int targetId) {
-		ImageClawer imgClawer = new ImageClawer(ImageType.NewsImage, imageUrl, targetId, path, imgName);
+		ImageClawer imgClawer = new ImageClawer(ImageType.EntityImage, imageUrl, targetId, path, imgName);
 		ImageClawer.ExecutorClaw(imgClawer);
 		return path + imgName + ".jpg";
 	}

@@ -149,10 +149,9 @@ public abstract class BaseDetailClawer<T extends BaseEntity> extends BaseClawer 
 		return replaceImagedArticle;
 	}
 	
-	public String markdown(String text, String baseUrl) {
+	public String markdownContent(String text, String path, String baseUrl) {
 		processor.addHtmlAttribute("style", "text-indent:2em","p");
-		String path = detailEntity.getFromhost() + "/" + detailEntity.getFromkey() + "/";
-		String imgName = UUID.randomUUID().toString();
+		String imgName = detailEntity.getFromkey() + "_" + UUID.randomUUID().toString();
 		String replaceImagedArticle = ImageParser.parseImages(text, baseUrl, path, imgName, targetId);
 		replaceImagedArticle = remark.convertFragment(replaceImagedArticle, baseUrl);
 		try {
@@ -163,9 +162,8 @@ public abstract class BaseDetailClawer<T extends BaseEntity> extends BaseClawer 
 		return replaceImagedArticle;
 	}
 	
-	public String markdown(String imgName, String text, String baseUrl) {
+	public String markdownImage(String imgName, String path, String text, String baseUrl) {
 		processor.addHtmlAttribute("style", "text-indent:2em","p");
-		String path = detailEntity.getFromhost() + "/" + detailEntity.getFromkey() + "/";
 		String replaceImagedArticle = ImageParser.parseImages(text, baseUrl, path, imgName, targetId);
 		replaceImagedArticle = remark.convertFragment(replaceImagedArticle, baseUrl);
 		try {

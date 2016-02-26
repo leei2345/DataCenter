@@ -4,10 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.alibaba.fastjson.JSON;
@@ -28,7 +24,6 @@ public class SogouDetailClawer extends BaseDetailClawer<NewsEntity>{
 	private static final int TARGETID = 2;
 	private static final String TARGETINFO = "sogou";
 	private static final String IMAGEDIRNAME = "news";
-	private static final String BASEURL = "http://mp.weixin.qq.com/";
 	
 	public SogouDetailClawer(NewsEntity detailEntity, CountDownLatchUtils cdl) {
 		super(TARGETID, detailEntity, cdl);
@@ -45,32 +40,27 @@ public class SogouDetailClawer extends BaseDetailClawer<NewsEntity>{
 
 	@Override
 	protected String getDetailHtml() {
-		String url = detailEntity.getFromurl();
-		if (StringUtils.isBlank(url)) {
-			return null;
-		}
-		String html = httpGet(url);
-		return html;
+		return "Success";
 	}
 
 	@Override
 	protected ActionRes analysistDetail(String html, DBHandle dbHandle) {
-		if (StringUtils.isBlank(html)) {
-			return ActionRes.ANALYSIS_HTML_NULL;
-		}
-		String content = "";
-		Document doc  = Jsoup.parse(html);
-		Elements pNodes = doc.select("div.rich_media_content >p");
-		for (int index = 0; index < pNodes.size(); index++) {
-			Element pNode = pNodes.get(index);
-			String pHtml = pNode.html();
-			String path = TARGETINFO + "/" + IMAGEDIRNAME + "/" + detailEntity.getAreacode();
-			String pContent = this.markdownContent(pHtml, path, BASEURL);
-			content += pContent;
-		}
-		if (!StringUtils.isBlank(content)) {
-			detailEntity.setContent(content);
-		}
+//		if (StringUtils.isBlank(html)) {
+//			return ActionRes.ANALYSIS_HTML_NULL;
+//		}
+//		String content = "";
+//		Document doc  = Jsoup.parse(html);
+//		Elements pNodes = doc.select("div.rich_media_content >p");
+//		for (int index = 0; index < pNodes.size(); index++) {
+//			Element pNode = pNodes.get(index);
+//			String pHtml = pNode.html();
+//			String path = TARGETINFO + "/" + IMAGEDIRNAME + "/" + detailEntity.getAreacode();
+//			String pContent = this.markdownContent(pHtml, path, BASEURL);
+//			content += pContent;
+//		}
+//		if (!StringUtils.isBlank(content)) {
+//			detailEntity.setContent(content);
+//		}
 		String selectSql = "select newsid from t_news where fromhost='" + detailEntity.getFromhost() + "' and fromkey='" + detailEntity.getFromkey() + "'";;
 		List<Map<String, Object>> selectRes = dbHandle.select(selectSql);
 		StringBuilder iubuilder = new StringBuilder();
@@ -94,12 +84,13 @@ public class SogouDetailClawer extends BaseDetailClawer<NewsEntity>{
 			iubuilder.append("posttime='" + detailEntity.getPosttime() + "',");
 			iubuilder.append("fromhost='" + detailEntity.getFromhost() + "',");
 			iubuilder.append("fromurl='" + detailEntity.getFromurl() + "',");
+			iubuilder.append("options='" + detailEntity.getOptions() + "',");
 			iubuilder.append("updatetime=now() ");
 			iubuilder.append("where fromkey='" + detailEntity.getFromkey() + "'");
 			String updateSql = this.checkUpdateSql(iubuilder.toString());
 			iuRes = dbHandle.update(updateSql);
 		} else {
-			iubuilder.append("insert into t_news (areacode,title,content,headimg,source,newstime,posttime,fromhost,fromurl,fromkey,updatetime) values (");
+			iubuilder.append("insert into t_news (areacode,title,content,headimg,source,newstime,posttime,fromhost,fromurl,fromkey,options,updatetime) values (");
 			iubuilder.append("'" + detailEntity.getAreacode() + "',");
 			iubuilder.append("'" + detailEntity.getTitle() + "',");
 			iubuilder.append("'" + detailEntity.getContent() + "',");
@@ -110,6 +101,7 @@ public class SogouDetailClawer extends BaseDetailClawer<NewsEntity>{
 			iubuilder.append("'" + detailEntity.getFromhost() + "',");
 			iubuilder.append("'" + detailEntity.getFromurl() + "',");
 			iubuilder.append("'" + detailEntity.getFromkey() + "',");
+			iubuilder.append("'" + detailEntity.getOptions() + "',");
 			iubuilder.append("now())");
 //			String insertSql = this.checkInsertSql(iubuilder.toString());
 			id = dbHandle.insertAndGetId(iubuilder.toString());
@@ -122,7 +114,7 @@ public class SogouDetailClawer extends BaseDetailClawer<NewsEntity>{
 		if (!StringUtils.isBlank(imgurl) && iuRes) {
 			String path = TARGETINFO + "/" + IMAGEDIRNAME + "/" + detailEntity.getAreacode();
 			ImageClawer imgClawer = new ImageClawer(ImageType.EntityImage, imgurl, TARGETID, path, String.valueOf(id));
-			ImageClawer.ExecutorClaw(imgClawer);
+			imgClawer.run();
 		}
 		
 		ActionRes res = null;

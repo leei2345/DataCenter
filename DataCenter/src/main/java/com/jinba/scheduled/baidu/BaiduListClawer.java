@@ -23,6 +23,7 @@ import com.jinba.utils.CountDownLatchUtils;
 public class BaiduListClawer extends BaseListClawer<NewsEntity> implements Callable<List<NewsEntity>>{
 	
 	private static final int TARGETID = 3;//百度为3
+	private static final int OPTIONS = 128;
 	//##地区名称   $$替换当前第几条开始
 	//http://m.baidu.com/news?tn=bdapinewsearch&word=%E4%B8%AD%E5%85%B3%E6%9D%91&pn=0&rn=20&ct=1
 	private static String tempUrl = "http://m.baidu.com/news?tn=bdapinewsearch&word=##&pn=$$&rn=20&ct=1";
@@ -114,6 +115,7 @@ public class BaiduListClawer extends BaseListClawer<NewsEntity> implements Calla
 					}
 					String imgUrl = tempInfo.getString("imgUrl");
 					bean.setHeadimg(imgUrl);
+					bean.setOptions(OPTIONS);
 					box.add(bean);
 				}
 				Thread.sleep(1000);
@@ -134,8 +136,8 @@ public class BaiduListClawer extends BaseListClawer<NewsEntity> implements Calla
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
 		Map<Params, String> paramsMap = new HashMap<Params, String>();
-		paramsMap.put(Params.area, "沧州市");
-		paramsMap.put(Params.citycode, "1309");
+		paramsMap.put(Params.area, "天津市");
+		paramsMap.put(Params.citycode, "1201");
 		try {
 			List<NewsEntity> l = new BaiduListClawer(paramsMap, new CountDownLatchUtils(1)).listAction();
 			for (NewsEntity newsEntity : l) {

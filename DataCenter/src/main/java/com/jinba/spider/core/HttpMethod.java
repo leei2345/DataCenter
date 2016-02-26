@@ -261,6 +261,9 @@ public class HttpMethod {
 						locationHeader = response.getFirstHeader("Location").getValue();
 						break;
 					} catch (Exception e) {
+						HttpEntity entity = response.getEntity();
+						String res = IOUtils.toString(entity.getContent());
+						this.getHtml = res;
 						this.get.abort();
 						this.get.releaseConnection();
 						continue;

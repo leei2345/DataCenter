@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.catalina.util.URLEncoder;
 import org.apache.commons.lang3.RandomUtils;
@@ -34,12 +36,14 @@ import com.jinba.utils.LoggerUtil;
 public class SogouListClawer extends BaseListClawer<NewsEntity> implements Callable<List<NewsEntity>>{
 
 	private static final int TARGETID = 2;
+	private static final int OPTIONS = 256;
 	private static String tempUrl = "http://weixin.sogou.com/weixin?type=2&query=##&ie=utf8&sourceid=inttime_day&w=&sut=&sst0=&lkt=&page=$$";
 	private static final String FROMHOST = "weixin.sogou.com";
 	private static FastDateFormat sim = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss");
 	private static FastDateFormat dateFormat = FastDateFormat.getInstance("yyyy-MM-dd");
 	private String areaName;
 	private String areaCode;
+	private static Pattern pattern = Pattern.compile("var msg_link\\s*=\\s*\"(.*)\";");
 	
 	public SogouListClawer(Map<Params, String> paramsMap, CountDownLatchUtils cdl) {
 		super(TARGETID, cdl);
@@ -116,13 +120,19 @@ public class SogouListClawer extends BaseListClawer<NewsEntity> implements Calla
 				}
 				String fromUrl = element.select("div.txt-box > h4 > a").attr("abs:href").trim();
 				try {
-					Thread.sleep(RandomUtils.nextLong(1000, 4000));
+					Thread.sleep(RandomUtils.nextLong(1000, 3000));
 				} catch (InterruptedException e1) {
 					e1.printStackTrace();
 				}
 				HttpMethod entityMe = new HttpMethod(TARGETID, cookie, proxy);
 				String entityRes = entityMe.GetLocationUrl(fromUrl);
-				if (!StringUtils.isBlank(entityRes)) {
+				if (entityRes.length() > 300) {
+					Matcher matcher = pattern.matcher(entityRes);
+					if (matcher.find()) {
+						entityRes = matcher.group(1);
+					}
+				}
+				if (!StringUtils.isBlank(entityRes) && !entityRes.contains("antispider")) {
 					try {
 						URI uri = new URI(entityRes);
 						newsEntity.setFromurl(uri.toString());
@@ -132,6 +142,7 @@ public class SogouListClawer extends BaseListClawer<NewsEntity> implements Calla
 						continue;
 					}
 				} else {
+					LoggerUtil.ClawerInfoLog("[Sogou Cookie Queue Unavailable][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
 					continue;
 				}
 				String dateStr = element.select("div.txt-box > div.s-p").attr("t").trim();
@@ -153,6 +164,7 @@ public class SogouListClawer extends BaseListClawer<NewsEntity> implements Calla
 				newsEntity.setPosttime(today);
 				String source = element.select("div.s-p > a#weixin_account").attr("title").trim();
 				newsEntity.setSource(source);
+				newsEntity.setOptions(OPTIONS);
 				box.add(newsEntity);
 			}
 			SogouCookieTask.returnResource(m);
@@ -170,8 +182,8 @@ public class SogouListClawer extends BaseListClawer<NewsEntity> implements Calla
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
 		Map<Params, String> paramsMap = new HashMap<Params, String>();
-		paramsMap.put(Params.area, "东城区");
-		paramsMap.put(Params.citycode, "110101");
+		paramsMap.put(Params.area, "天津市");
+		paramsMap.put(Params.citycode, "1201");
 		try {
 			List<NewsEntity> l = new SogouListClawer(paramsMap, new CountDownLatchUtils(1)).listAction();
 			for (NewsEntity newsEntity : l) {

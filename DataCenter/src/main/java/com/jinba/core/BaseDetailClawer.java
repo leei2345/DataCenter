@@ -48,7 +48,7 @@ public abstract class BaseDetailClawer<T extends BaseEntity> extends BaseClawer 
 	public void detailAction () {
 		StopWatch watch = new StopWatch();
 		watch.start();
-		StringBuilder logBuilder = new StringBuilder("[DetailClaw][" + targetId + "][" + detailEntity.getFromkey() + "]");
+		StringBuilder logBuilder = new StringBuilder("[DetailClaw][" + targetId + "]");
 		try {
 			/**
 			 * 初始化传入参数
@@ -105,9 +105,9 @@ public abstract class BaseDetailClawer<T extends BaseEntity> extends BaseClawer 
 			watch.split();
 			long analysisTime = watch.getSplitTime();
 			if (ActionRes.ANALYSIS_SUCC.equals(analysisRes)) {
-				logBuilder.append("[Analysis Succ][" + analysisTime + "]");
+				logBuilder.append("[" + detailEntity.getFromkey() + "][Analysis Succ][" + analysisTime + "]");
 			} else {
-				logBuilder.append("[Analysis " + analysisRes + "][" + analysisTime + "]");
+				logBuilder.append("[" + detailEntity.getFromkey() + "][Analysis " + analysisRes + "][" + analysisTime + "]");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

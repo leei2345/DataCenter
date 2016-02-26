@@ -14,7 +14,14 @@ public class NewsEntity extends BaseEntity {
 	private String posttime;
 	private String content;
 	private String headimg;
+	private int options;
 	
+	public int getOptions() {
+		return options;
+	}
+	public void setOptions(int options) {
+		this.options = options;
+	}
 	public String getContent() {
 		return content;
 	}

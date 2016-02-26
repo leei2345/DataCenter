@@ -35,6 +35,7 @@ public class ImageClawer implements Runnable {
 	private String pathHead;
 	private String path;
 	private String imgName;
+	private String completeImgName;
 
 	static {
 		imgeFirstPath = ConfigUtils.getValue(IMAGEPATHCONF);
@@ -65,6 +66,10 @@ public class ImageClawer implements Runnable {
 		threadPool.execute(imageClawer);
 	}
 	
+	public String getCompleteImgName() {
+		return completeImgName;
+	}
+
 	public void run() {
 		if (StringUtils.isBlank(imageUrl)) {
 			LoggerUtil.ImageInfoLog("[ImageClaw][Queue Size " + queue.size() + "][" + targetId + "][" + path + "][" + imageUrl + "][Fail]");
@@ -101,6 +106,7 @@ public class ImageClawer implements Runnable {
 		if (!dir.exists()) {
 			dir.mkdirs();
 		}
+		this.completeImgName = imgName + "." + fileType;
 		OutputStream imageStream = null;
 		try {
 			imageStream = new FileOutputStream(filePath);

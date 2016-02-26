@@ -10,8 +10,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.impl.client.BasicCookieStore;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +24,7 @@ import org.springframework.stereotype.Component;
 public class SogouCookieTask implements Runnable {
 
 	private static final int TARGETID = 2;
-	private static final String URL = "http://weixin.sogou.com/weixin?type=2&query=%E4%B8%9C%E5%9F%8E%E5%8C%BA&ie=utf8&sourceid=inttime_day&w=&sut=&sst0=&lkt=&page=1";
+	private static final String URL = "http://weixin.sogou.com/weixin?type=2&query=%E4%B8%9C%E5%9F%8E%E5%8C%BA&ie=utf8&w=&sut=&sst0=&lkt=0%2C0%2C0";
 	private static final long timeStep = 3600000L;
 	private static LinkedBlockingQueue<SogouCookieEntity> cookieQueue = new LinkedBlockingQueue<SogouCookieEntity>();
 
@@ -41,11 +46,21 @@ public class SogouCookieTask implements Runnable {
 			long ctime = System.currentTimeMillis();
 			if (html.contains("东城区")) {
 				BasicCookieStore cookie = m.getCookieStore();
+				Document doc = Jsoup.parse(html, URL);
+				Elements nodes = doc.select("div.results > div[class=wx-rb wx-rb3]");
+				int size = nodes.size() - 1;
+				int index = RandomUtils.nextInt(1, size);
+				Element node = nodes.get(index);
+				String fromUrl = node.select("div.txt-box > h4 > a").attr("abs:href").trim();
+				HttpMethod innerM = new HttpMethod(TARGETID, cookie, proxy);
+				innerM.GetHtml(fromUrl, HttpResponseConfig.ResponseAsStream);
+				cookie = innerM.getCookieStore();
 				SogouCookieEntity cookieEntity = new SogouCookieEntity();
 				cookieEntity.setCookie(cookie);
 				cookieEntity.setProxy(proxy);
 				cookieEntity.setCtime(ctime);
 				cookieQueue.add(cookieEntity);
+				LoggerUtil.CookieInfoLog("[" + proxy.toHostString() + "][" + cookie.getCookies().toString() + "]");
 				LoggerUtil.CookieInfoLog("[Sogou Cookie Product][Added New Cookie][Queue Size Is " + cookieQueue.size() + "]");
 			}
 		}
@@ -85,7 +100,7 @@ public class SogouCookieTask implements Runnable {
 
 	public static void main(String[] args) {
 		@SuppressWarnings("resource")
-		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[] { "database.xml" });
+		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[] {"database.xml"});
 		application.start();
 		SogouCookieTask a = (SogouCookieTask) application.getBean("sogouCookieTask");
 		a.run();

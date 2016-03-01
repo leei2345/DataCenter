@@ -3,9 +3,11 @@ package com.jinba.spider.core;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -815,8 +817,12 @@ public class HttpMethod {
 	}
 	
 	
-	@SuppressWarnings("static-access")
 	public byte[][] GetImageByteArr(String url) {
+		return this.GetImageByteArr(url, null);
+	}
+	
+	@SuppressWarnings("static-access")
+	public byte[][] GetImageByteArr(String url, HttpHost host) {
 		byte[][] fileData = null;
 		byte[] imageDataArr = null;
 		byte[] imageTypeArr = null;
@@ -826,6 +832,11 @@ public class HttpMethod {
 		builderInner.setRedirectsEnabled(false);
 		builderInner.setConnectTimeout(30000);
 		builderInner.setSocketTimeout(20000);
+		if (host != null) {
+			setProxy = true;
+			builderInner.setProxy(host);
+			this.proxy = host;
+		}
 		String imageType = "txt";
 		for (int retryIndex = 1; retryIndex <= retryCount; retryIndex++) {
 			if (this.get == null) {
@@ -868,8 +879,10 @@ public class HttpMethod {
 						} else if (value.toLowerCase().contains("gif")) {
 							imageType = "jpg";
 						}
+					} else if (value.contains("stream")) {
+						imageType = "jpg";
 					}
-				}
+				} 
 				imageTypeArr = imageType.getBytes();
 				HttpEntity entity = response.getEntity();
 				InputStream is = entity.getContent();
@@ -980,6 +993,14 @@ public class HttpMethod {
 		return charset;
 	}
 	
-	public static void main(String[] args) {}
+	public static void main(String[] args) throws IOException {
+		HttpMethod m = new HttpMethod(4);
+		HttpHost host = new HttpHost("81.29.251.182", 8080);
+		byte[][] imgArr = m.GetImageByteArr("http://img2.hudongba.com/upload/_oss/userpartyimg/201602/04/21454573623710_party2.jpg", host);
+		OutputStream imgStream = new FileOutputStream("test." + new String(imgArr[1]));
+		imgStream.write(imgArr[0]);
+		imgStream.flush();
+		imgStream.close();
+	}
 	
 }

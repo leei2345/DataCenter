@@ -34,6 +34,9 @@ public class ProxyChecker implements Runnable {
 		String charset = target.getCharset();
 		try {
 			HttpHandler handler = new HttpHandler();
+			if (target.getTimeout() > 0) {
+				handler.SetTimeOut(target.getTimeout());
+			}
 			handler.InstallProxy(proxy);
 			handler.httpGet(url, charset);
 			String html = proxy.getHtml();

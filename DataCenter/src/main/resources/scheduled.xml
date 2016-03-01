@@ -32,9 +32,13 @@
 	
 	<bean id="baiduTask" class="com.jinba.scheduled.BaiduTask"></bean>
 	<bean id="sogouTask" class="com.jinba.scheduled.SogouTask"></bean>
+	
+	<bean id="HDB_HWYD_Task" class="com.jinba.scheduled.HDB_HWYD_Task"></bean>
+	
+	
 
-	<task:scheduler id="scheduler" pool-size="4"/>
-	<task:scheduler id="proxy_scheduler" pool-size="2"/>
+	<task:scheduler id="scheduler" pool-size="5"/>
+	<task:scheduler id="proxy_scheduler" pool-size="3"/>
 
 	<task:scheduled-tasks scheduler="scheduler">
 		<task:scheduled ref="dianPing_SHFW_SWL_Task" method="run" cron="0 0 0 6 * ?" />
@@ -56,13 +60,16 @@
 		<task:scheduled ref="dianPing_JD_CSGG_Task" method="run" cron="0 0 12 19 * ?" />
 		<task:scheduled ref="dianPing_JIUD_SXJJD_Task" method="run" cron="0 0 12 20 * ?" />
 		
- 		<task:scheduled ref="baiduTask" method="run" cron="0 10 12,13,16 * * ?" />
- 		<task:scheduled ref="sogouTask" method="run" cron="0 0 11,14,18 * * ?" />
+ 		<task:scheduled ref="baiduTask" method="run" cron="0 10 10,18 * * ?" />
+ 		<task:scheduled ref="sogouTask" method="run" cron="0 0 12 * * ?" />
+ 		
+ 		<task:scheduled ref="HDB_HWYD_Task" method="run" cron="0 0 9 * * ?" />
+ 		
 
 	</task:scheduled-tasks>
 	
 	<task:scheduled-tasks scheduler="proxy_scheduler">
-		<task:scheduled ref="proxyCheckTask" method="startCheck" cron="0 12 * * * ?" />
+		<task:scheduled ref="proxyCheckTask" method="startCheck" cron="0 0 * * * ?" />
 		<task:scheduled ref="SogouCookieTask" method="run" cron="0 20 7-20 * * ?" />
 	</task:scheduled-tasks>
 

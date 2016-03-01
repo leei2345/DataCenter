@@ -12,7 +12,14 @@ public class TargetEntity {
 	private String checkUrl;
 	private String anchor;
 	private String charset = "UTF-8";
+	private int timeout = 0;
 	
+	public int getTimeout() {
+		return timeout;
+	}
+	public void setTimeout(int timeout) {
+		this.timeout = timeout;
+	}
 	public String getCharset() {
 		return charset;
 	}

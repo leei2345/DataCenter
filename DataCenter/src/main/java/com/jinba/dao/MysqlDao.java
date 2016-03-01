@@ -91,7 +91,7 @@ public class MysqlDao  {
 		ResultSet rs = null;
 		Map<Integer, TargetEntity> res = new HashMap<Integer, TargetEntity>();
 		try {
-			String sql = "select id,identidy,check_url,anchor,charset from tb_target where switch=1";
+			String sql = "select id,identidy,check_url,anchor,charset,timeout from tb_target where switch=1";
 			conn = spiderSource.getConnection();
 			st = conn.prepareStatement(sql);
 			rs = st.executeQuery();
@@ -107,6 +107,8 @@ public class MysqlDao  {
 				t.setAnchor(anchor);
 				String charset = rs.getString("charset");
 				t.setCharset(charset);
+				int timeout = rs.getInt("timeout");
+				t.setTimeout(timeout);
 				res.put(id, t);
 			}
 		} catch (SQLException e) {

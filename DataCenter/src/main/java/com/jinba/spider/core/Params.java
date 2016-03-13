@@ -11,6 +11,7 @@ public enum Params {
 	analysistype,
 	parttype,
 	sourcecitycode,
+	gongzhonghao, /** 公众号 */
 	;
 	
 	

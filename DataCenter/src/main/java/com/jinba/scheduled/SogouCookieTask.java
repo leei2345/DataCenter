@@ -34,7 +34,7 @@ public class SogouCookieTask implements Runnable {
 	
 	public static void Refresh () {
 		LoggerUtil.CookieInfoLog("[Sogou Cookie Product][Start]");
-		String sql = "select host,port from tb_proxy_avail where target_id=2 and enable=1 order by u_time limit 1000";
+		String sql = "select host,port from tb_proxy_avail where target_id=2 and enable=1 order by u_time desc limit 1000";
 		List<Map<String, Object>> proxyList = MysqlDao.getInstance().select(sql);
 		for (Map<String, Object> map : proxyList) {
 			String host = (String) map.get("host");

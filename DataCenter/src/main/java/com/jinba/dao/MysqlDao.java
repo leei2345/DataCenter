@@ -456,6 +456,50 @@ public class MysqlDao  {
 		return res;
 	}
 	
+	public List<String[]> getGongzhonghaoList () {
+		DruidPooledConnection conn = null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		List<String[]> res = new ArrayList<String[]>();
+		try {
+			String sql = "SELECT gzhname,areacode FROM t_wxgzh";
+			conn = spiderSource.getConnection();
+			st = conn.prepareStatement(sql);
+			rs = st.executeQuery();
+			while (rs.next()) {
+				String areaCode = rs.getString("areacode");
+				String gongzhongName = rs.getString("gzhname");
+				String[] line = new String[]{areaCode,gongzhongName};
+				res.add(line);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			if (st != null) {
+				try {
+					st.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return res;
+	}
+	
 	@SuppressWarnings("resource")
 	public Map<AreaType, Map<String, String>> getAreaMap (String cityCode) {
 		DruidPooledConnection conn = null;

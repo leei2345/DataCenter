@@ -32,9 +32,20 @@
 	
 	<bean id="baiduTask" class="com.jinba.scheduled.BaiduTask"></bean>
 	<bean id="sogouTask" class="com.jinba.scheduled.SogouTask"></bean>
+	<bean id="gongzhonghaoTask" class="com.jinba.scheduled.GongzhonghaoTask"></bean>
 	
+	
+	<bean id="HDB_AXGY_Task" class="com.jinba.scheduled.HDB_AXGY_Task"></bean>
+	<bean id="HDB_CYTZ_Task" class="com.jinba.scheduled.HDB_CYTZ_Task"></bean>
 	<bean id="HDB_HWYD_Task" class="com.jinba.scheduled.HDB_HWYD_Task"></bean>
-	
+	<bean id="HDB_HYHY_Task" class="com.jinba.scheduled.HDB_HYHY_Task"></bean>
+	<bean id="HDB_JYXQ_Task" class="com.jinba.scheduled.HDB_JYXQ_Task"></bean>
+	<bean id="HDB_KCJY_Task" class="com.jinba.scheduled.HDB_KCJY_Task"></bean>
+	<bean id="HDB_MDHD_Task" class="com.jinba.scheduled.HDB_MDHD_Task"></bean>
+	<bean id="HDB_QZHD_Task" class="com.jinba.scheduled.HDB_QZHD_Task"></bean>
+	<bean id="HDB_WHYJ_Task" class="com.jinba.scheduled.HDB_WHYJ_Task"></bean>
+	<bean id="HDB_ZCGH_Task" class="com.jinba.scheduled.HDB_ZCGH_Task"></bean>
+	<bean id="HDB_ZHZL_Task" class="com.jinba.scheduled.HDB_ZHZL_Task"></bean>	
 	
 
 	<task:scheduler id="scheduler" pool-size="5"/>
@@ -61,10 +72,21 @@
 		<task:scheduled ref="dianPing_JIUD_SXJJD_Task" method="run" cron="0 0 12 20 * ?" />
 		
  		<task:scheduled ref="baiduTask" method="run" cron="0 10 10,18 * * ?" />
- 		<task:scheduled ref="sogouTask" method="run" cron="0 0 12 * * ?" />
+ 		<task:scheduled ref="sogouTask" method="run" cron="0 0 14 * * ?" />
+  		<task:scheduled ref="gongzhonghaoTask" method="run" cron="0 0 10 * * ?" />
  		
- 		<task:scheduled ref="HDB_HWYD_Task" method="run" cron="0 0 9 * * ?" />
  		
+		<task:scheduled ref="HDB_AXGY_Task" method="run" cron="0 0 9 * * ?" />
+		<task:scheduled ref="HDB_CYTZ_Task" method="run" cron="0 0 10 * * ?" />
+		<task:scheduled ref="HDB_HWYD_Task" method="run" cron="0 0 11 * * ?" />
+		<task:scheduled ref="HDB_HYHY_Task" method="run" cron="0 0 12 * * ?" />
+		<task:scheduled ref="HDB_JYXQ_Task" method="run" cron="0 0 13 * * ?" />
+		<task:scheduled ref="HDB_KCJY_Task" method="run" cron="0 0 14 * * ?" />
+		<task:scheduled ref="HDB_MDHD_Task" method="run" cron="0 0 15 * * ?" />
+		<task:scheduled ref="HDB_QZHD_Task" method="run" cron="0 0 16 * * ?" />
+		<task:scheduled ref="HDB_WHYJ_Task" method="run" cron="0 0 17 * * ?" />
+		<task:scheduled ref="HDB_ZCGH_Task" method="run" cron="0 0 18 * * ?" />
+		<task:scheduled ref="HDB_ZHZL_Task" method="run" cron="0 0 19 * * ?" /> 		
 
 	</task:scheduled-tasks>
 	

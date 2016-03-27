@@ -11,6 +11,8 @@ public class LoggerUtil {
 	private static Logger taskLogger = LoggerFactory.getLogger("taskLogger");
 	private static Logger imageLogger = LoggerFactory.getLogger("imageLogger");
 	private static Logger cookieLogger = LoggerFactory.getLogger("cookieLogger");
+	private static Logger damaLogger = LoggerFactory.getLogger("damaLogger");
+
 
 	public static void ClawerInfoLog (String log) {
 		clawerLogger.info(log);
@@ -38,6 +40,10 @@ public class LoggerUtil {
 	
 	public static void CookieInfoLog (String log) {
 		cookieLogger.info(log);
+	}
+	
+	public static void DamaInfoLog (String log) {
+		damaLogger.info(log);
 	}
 	
 }

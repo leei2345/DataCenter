@@ -58,9 +58,19 @@
         </encoder> 
     </appender>
     
-       <appender name="COOKIE_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">   
+    <appender name="COOKIE_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">   
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <FileNamePattern>${LOG_HOME}/cookie.%d{yyyy-MM-dd}.log</FileNamePattern> 
+            <MaxHistory>10</MaxHistory>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder"> 
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level%logger{50} - %msg%n</pattern>   
+        </encoder> 
+    </appender>
+    
+    <appender name="DAMA_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">   
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>${LOG_HOME}/dama.%d{yyyy-MM-dd}.log</FileNamePattern> 
             <MaxHistory>10</MaxHistory>
         </rollingPolicy>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder"> 
@@ -84,6 +94,9 @@
 		<appender-ref ref="IMAGE_LOG" />
 	</logger>
 	<logger name="cookieLogger" level="INFO" additivity="false">
+		<appender-ref ref="COOKIE_LOG" />
+	</logger>
+	<logger name="damaLogger" level="INFO" additivity="false">
 		<appender-ref ref="COOKIE_LOG" />
 	</logger>
     

@@ -112,7 +112,7 @@ public class SogouDetailClawer extends BaseDetailClawer<NewsEntity>{
 			areacode = detailEntity.getAreacode();
 		}
 		if (!StringUtils.isBlank(imgurl) && iuRes) {
-			String path = TARGETINFO + "/" + IMAGEDIRNAME + "/" + detailEntity.getAreacode();
+			String path = TARGETINFO + "/" + IMAGEDIRNAME + "/" + detailEntity.getAreacode() + "/";
 			ImageClawer imgClawer = new ImageClawer(ImageType.EntityImage, imgurl, TARGETID, path, String.valueOf(id));
 			imgClawer.run();
 		}

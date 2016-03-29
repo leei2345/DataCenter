@@ -3,7 +3,9 @@ package com.jinba.spider.proxy;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -70,6 +72,7 @@ public class HttpHandler {
 		try {
 			get = new GetMethod(url);
 			get.setFollowRedirects(false);
+			List<org.apache.commons.httpclient.Header> headerList = new ArrayList<org.apache.commons.httpclient.Header>();
 			if (RequestHeaderMap.size() == 0) {
 				for (Entry<String, String> headers : DefaultRequestHeaderMap.entrySet()) {
 					get.addRequestHeader(headers.getKey(), headers.getValue());
@@ -77,9 +80,11 @@ public class HttpHandler {
 			} else {
 				for (Entry<String, String> headers : RequestHeaderMap.entrySet()) {
 					get.addRequestHeader(headers.getKey(), headers.getValue());
+					headerList.add(new org.apache.commons.httpclient.Header(headers.getKey(), headers.getValue()));
 				}
 			}
 			get.getParams().setContentCharset(RequestCharset);
+			hc.getHostConfiguration().getParams().setParameter("http.default-headers", headerList);  
 			status = hc.executeMethod(get);
 			InputStream is = get.getResponseBodyAsStream();
 			BufferedReader reader = new BufferedReader(new InputStreamReader(is, charset));

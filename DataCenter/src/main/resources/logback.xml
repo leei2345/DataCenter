@@ -97,7 +97,7 @@
 		<appender-ref ref="COOKIE_LOG" />
 	</logger>
 	<logger name="damaLogger" level="INFO" additivity="false">
-		<appender-ref ref="COOKIE_LOG" />
+		<appender-ref ref="DAMA_LOG" />
 	</logger>
     
     <root level="INFO">

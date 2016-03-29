@@ -35,6 +35,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ConnectTimeoutException;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
@@ -112,6 +113,20 @@ public class HttpMethod {
 	
 	public HttpMethod(int identidy, BasicCookieStore cookieStore, HttpHost proxy) {
 		this.identidy = identidy;
+		this.proxy = proxy;
+		this.setProxy = true;
+		this.config.setAuthenticationEnabled(true);
+		this.config.setConnectTimeout(30000);
+		this.config.setSocketTimeout(30000);
+		this.config.setProxy(proxy);
+		this.clientBuilder = HttpClientBuilder.create();
+		this.clientBuilder.setMaxConnTotal(100);
+		this.clientBuilder.setMaxConnPerRoute(500);
+		this.cookieStore = cookieStore;
+		this.client = this.clientBuilder.setDefaultRequestConfig(this.config.build()).setDefaultCookieStore(cookieStore).build();
+	}
+	
+	public HttpMethod(BasicCookieStore cookieStore, HttpHost proxy) {
 		this.proxy = proxy;
 		this.setProxy = true;
 		this.config.setAuthenticationEnabled(true);
@@ -231,6 +246,10 @@ public class HttpMethod {
 				this.get = new HttpGet();
 			}
 			this.get.setConfig(config.build());
+			if (cookieStore != null && cookieStore.getCookies().size() > 0) {
+				String cookieStr = this.getCookieStr();
+				this.get.addHeader("Cookie", cookieStr);
+			}
 			if (retryIndex >= retryCount) {
 				this.get.abort();
 				this.get.releaseConnection();
@@ -389,18 +408,32 @@ public class HttpMethod {
 		boolean responseStream = false;
 		if (httpResponseConfig == null) {
 			getLocation = true;
+			config.setAuthenticationEnabled(true);
+			config.setRelativeRedirectsAllowed(false);
+			config.setCircularRedirectsAllowed(false);
+			config.setRedirectsEnabled(false);
+			clientBuilder = HttpClientBuilder.create();
+			clientBuilder.setMaxConnTotal(100);
+			clientBuilder.setMaxConnPerRoute(500);
+			this.client = clientBuilder.setDefaultRequestConfig(config.build()).setDefaultCookieStore(cookieStore).build();
 		} else {
 			responseStream = httpResponseConfig.isYesOrNo();
 		}
 		String locationHeader = "";
 		for (int retryIndex = 1; retryIndex <= retryCount; retryIndex++) {
-			this.post = new HttpPost();
+			if (this.post == null) {
+				this.post = new HttpPost();
+			}
+			if (cookieStore != null && cookieStore.getCookies().size() > 0) {
+				String cookieStr = this.getCookieStr();
+				this.post.addHeader("Cookie", cookieStr);
+			}
 			this.post.setConfig(config.build());
 			postHtml = "";
 			if (retryIndex >= retryCount) {
 				this.post.abort();
 				this.post.releaseConnection();
-				LoggerUtil.HttpDebugLog("[数据获取][url=" + url + "][body=" + body + "][status=" + this.postStatus + "][exception=" + this.postException + "]");
+				LoggerUtil.HttpInfoLog("[数据获取][url=" + url + "][status=" + this.getStatus + "][exception=" + this.getException + "]");
 				break;
 			}
 			if (identidy != 0 && !setProxy) {
@@ -410,11 +443,13 @@ public class HttpMethod {
 					this.config.setProxy(proxy);
 					this.post.setConfig(config.build());
 				}
+			} else {
+				retryCount = 1;
 			}
 			if (proxy == null) {
-				LoggerUtil.HttpInfoLog("[" + url + "][第" + retryIndex + "次抓取尝试]");
+				LoggerUtil.HttpInfoLog("[" + url + "][" + body + "][第" + retryIndex + "次抓取尝试]");
 			} else {
-				LoggerUtil.HttpInfoLog("[" + url + "][第" + retryIndex + "次抓取尝试][proxy " + proxy.toHostString() + "]");
+				LoggerUtil.HttpInfoLog("[" + url + "][" + body + "][第" + retryIndex + "次抓取尝试][proxy " + proxy.toHostString() + "]");
 			}
 			try {
 				URI uri = new URI(url);
@@ -433,24 +468,33 @@ public class HttpMethod {
 					HttpEntity inputStreamEntity = new InputStreamEntity(is);
 					this.post.setEntity(inputStreamEntity);
 				}
-				HttpResponse response = this.client.execute(this.post);
-				if (getLocation) {
-					locationHeader = response.getFirstHeader("Location") == null ? "":response.getFirstHeader("Location").getValue();
-					break;
-				}
+				HttpContext context = new BasicHttpContext();
+				CloseableHttpResponse response = this.client.execute(this.post, context);
 				this.postStatus = response.getStatusLine().getStatusCode();
+				if (getLocation) {
+					try {
+						locationHeader = response.getFirstHeader("Location").getValue();
+						break;
+					} catch (Exception e) {
+						HttpEntity entity = response.getEntity();
+						String res = IOUtils.toString(entity.getContent());
+						this.postHtml = res;
+						this.post.abort();
+						this.post.releaseConnection();
+						continue;
+					}
+				}
 				HttpEntity entity = response.getEntity();
 				ContentType contentType = ContentType.getOrDefault(entity);
 				entity = new BufferedHttpEntity(entity);
-				Charset charset = contentType.getCharset() != null?contentType.getCharset():getCharsetFromByte(EntityUtils.toByteArray(entity));
+				Charset charset = contentType.getCharset() != null ? contentType.getCharset() : getCharsetFromByte(EntityUtils.toByteArray(entity));
 				String responseCharset = "";
 				if (charset != null) {
 					responseCharset = charset.toString();
 				}
 				if (StringUtils.isBlank(responseCharset)) {
-					responseCharset = "UTF-8";
-				}
-				if (StringUtils.equals("GB2312", responseCharset)) {
+					responseCharset = DEFAULTCHARACTER;
+				} else if (StringUtils.equals(responseCharset.toLowerCase(), "gb2312")) {
 					responseCharset = "GBK";
 				}
 				if (responseStream) {
@@ -460,22 +504,25 @@ public class HttpMethod {
 						String isGzipStr = header.getValue().toLowerCase();
 						if (isGzipStr.contains("gzip")) {
 							isGzip = true;
-							break;
 						}
 					}
 					InputStream is = entity.getContent();
 					BufferedReader reader = null;
 					if (isGzip) {
 						GZIPInputStream gzipIs = new GZIPInputStream(is);
-						reader = new BufferedReader(new InputStreamReader(gzipIs,
-								responseCharset));
+						reader = new BufferedReader(new InputStreamReader(gzipIs, responseCharset));
 					} else {
-						reader = new BufferedReader(new InputStreamReader(is,
-								responseCharset));
+						reader = new BufferedReader(new InputStreamReader(is,	responseCharset));
 					}
-					String line;
+					String line = "";
 					while ((line = reader.readLine()) != null) {
 						this.postHtml += line;
+					}
+					if (is != null) {
+						is.close();
+					}
+					if (reader != null) {
+						reader.close();
 					}
 				} else {
 					this.postHtml = EntityUtils.toString(entity);
@@ -514,22 +561,24 @@ public class HttpMethod {
 				this.post.abort();
 				this.post.releaseConnection();
 			}
-			if ((this.postStatus == 200) && (!StringUtils.isBlank(this.postHtml))) {
+			if ((this.postStatus == 200) && (!StringUtils.isBlank(this.postHtml)) || (this.postStatus == 404) && (!StringUtils.isBlank(this.postHtml))) {
 				LoggerUtil.HttpDebugLog("[数据获取][url=" + url + "][body=" + body + "][html=" + this.postHtml + "]");
 				break;
 			} else {
-				this.postException = "response null";
+				this.postException = "response_null";
 				continue;
 			}
 		}
-		if ((this.getStatus == 302) && (StringUtils.isBlank(this.getHtml))) {
-			this.getHtml = locationHeader;
+		if ((this.postStatus == 302) && (StringUtils.isBlank(this.postHtml))) {
+			this.postHtml = locationHeader;
 		}
 		try {
 			this.client.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		clientBuilder = null;
+		config = null;
 		return this.postHtml;
 	}
 	
@@ -992,6 +1041,17 @@ public class HttpMethod {
 		}
 		return charset;
 	}
+	
+	public String getCookieStr () {
+		String cookieStr = "";
+		for (Cookie c : cookieStore.getCookies()) {
+			String name = c.getName();
+			String value = c.getValue();
+			cookieStr += name + "=" + value + "; ";
+		}
+		return cookieStr;
+	}
+	
 	
 	public static void main(String[] args) throws IOException {
 		HttpMethod m = new HttpMethod(4);

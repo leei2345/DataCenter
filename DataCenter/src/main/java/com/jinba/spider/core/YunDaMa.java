@@ -66,6 +66,10 @@ public class YunDaMa {
 		this.imageFile = imageFile;
 	}
 	
+	public YunDaMa () {
+		super();
+	}
+	
 	/**
 	 * 
 	 * @return ｛验证码，cid｝

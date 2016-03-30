@@ -148,9 +148,9 @@ public class SogouCookieTask implements Runnable {
 						cookieEntity.setCtime(ctime);
 						cookieQueue.add(cookieEntity);
 						
-						HttpMethod testMe = new HttpMethod(TARGETID, cookie, proxy);
-						String testHtml = testMe.GetHtml("http://weixin.sogou.com/weixin?type=2&query=%E4%B8%9C%E5%9F%8E%E5%8C%BA&ie=utf8&_sug_=n&_sug_type_=", HttpResponseConfig.ResponseAsStream);
-						System.out.println(testHtml);
+//						HttpMethod testMe = new HttpMethod(TARGETID, cookie, proxy);
+//						String testHtml = testMe.GetHtml("http://weixin.sogou.com/weixin?type=2&query=%E4%B8%9C%E5%9F%8E%E5%8C%BA&ie=utf8&_sug_=n&_sug_type_=", HttpResponseConfig.ResponseAsStream);
+//						System.out.println(testHtml);
 						
 						LoggerUtil.CookieInfoLog("[" + proxy.toHostString() + "][" + cookie.getCookies().toString() + "]");
 						LoggerUtil.CookieInfoLog("[Sogou Cookie Product][Check Authcode Got New Cookie][Queue Size Is " + cookieQueue.size() + "]");

@@ -5,25 +5,15 @@ import org.slf4j.LoggerFactory;
 
 public class LoggerUtil {
 	
-	private static Logger clawerLogger = LoggerFactory.getLogger("clawerLogger");
 	private static Logger httpLogger = LoggerFactory.getLogger("httpLogger");
 	private static Logger proxyLogger = LoggerFactory.getLogger("proxyLogger");
-	private static Logger taskLogger = LoggerFactory.getLogger("taskLogger");
 	private static Logger imageLogger = LoggerFactory.getLogger("imageLogger");
 	private static Logger cookieLogger = LoggerFactory.getLogger("cookieLogger");
 	private static Logger damaLogger = LoggerFactory.getLogger("damaLogger");
 
 
-	public static void ClawerInfoLog (String log) {
-		clawerLogger.info(log);
-	}
-	
 	public static void ImageInfoLog (String log) {
 		imageLogger.info(log);
-	}
-	
-	public static void TaskInfoLog (String log) {
-		taskLogger.info(log);
 	}
 	
 	public static void ProxyLog (String log) {

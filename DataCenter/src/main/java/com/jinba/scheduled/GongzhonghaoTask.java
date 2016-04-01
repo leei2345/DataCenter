@@ -13,6 +13,8 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -24,7 +26,6 @@ import com.jinba.scheduled.gongzhonghao.GongzhonghaoDetailClawer;
 import com.jinba.scheduled.gongzhonghao.GongzhonghaoListClawer;
 import com.jinba.spider.core.Params;
 import com.jinba.utils.CountDownLatchUtils;
-import com.jinba.utils.LoggerUtil;
 
 @Component
 public class GongzhonghaoTask implements Runnable {
@@ -36,13 +37,14 @@ public class GongzhonghaoTask implements Runnable {
 	private ExecutorService listThreadPool;
 	private ExecutorService detailThreadpool;
 	private BlockingQueue<Runnable> workQueue = new LinkedBlockingDeque<Runnable>();
+	private Logger logger = LoggerFactory.getLogger(GongzhonghaoListClawer.class);
 	
 	public void run() {
 		List<String[]> cityList = dao.getGongzhonghaoList();
 		int listSize = cityList.size();
 		CountDownLatchUtils listCdl = new CountDownLatchUtils(listSize);
 		List<Future<List<NewsEntity>>> resList = new ArrayList<Future<List<NewsEntity>>>();
-		LoggerUtil.TaskInfoLog("[" + this.getClass().getSimpleName() + "][Start][CitySize " + cityList.size() + "]");
+		logger.info("[" + this.getClass().getSimpleName() + "][Start][CitySize " + cityList.size() + "]");
 		listThreadPool = Executors.newFixedThreadPool(threadPoolSize);
 		detailThreadpool  = new ThreadPoolExecutor(threadPoolSize, threadPoolSize, 60000, TimeUnit.MILLISECONDS, workQueue);
 		for (String[] eachCity : cityList) {
@@ -68,10 +70,10 @@ public class GongzhonghaoTask implements Runnable {
 			for (NewsEntity newsEntity : detailList) {
 				GongzhonghaoDetailClawer detail = new GongzhonghaoDetailClawer(newsEntity);
 				detailThreadpool.execute(detail);
-				LoggerUtil.ClawerInfoLog("[" + this.getClass().getSimpleName() + "][Queue Size Is " + workQueue.size() + "]");
+				logger.info("[" + this.getClass().getSimpleName() + "][Queue Size Is " + workQueue.size() + "]");
 			}
 		}
-		LoggerUtil.TaskInfoLog("[" + this.getClass().getSimpleName() + "][Done]");
+		logger.info("[" + this.getClass().getSimpleName() + "][Done]");
 		listThreadPool.shutdownNow();
 		listThreadPool = null;
 		detailThreadpool.shutdownNow();

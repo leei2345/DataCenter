@@ -32,7 +32,6 @@ import com.jinba.spider.core.HttpResponseConfig;
 import com.jinba.spider.core.Method;
 import com.jinba.spider.core.Params;
 import com.jinba.utils.CountDownLatchUtils;
-import com.jinba.utils.LoggerUtil;
 
 public class GongzhonghaoListClawer extends BaseListClawer<NewsEntity> implements Callable<List<NewsEntity>>{
 
@@ -83,9 +82,9 @@ public class GongzhonghaoListClawer extends BaseListClawer<NewsEntity> implement
 			String html = inner.GetHtml(url, HttpResponseConfig.ResponseAsStream);
 //			String html = inner.GetHtml(url, HttpResponseConfig.ResponseAsStream);
 			if (!StringUtils.isBlank(html) && !html.contains("您的访问过于频繁")) {
-				LoggerUtil.ClawerInfoLog("[Sogou Cookie Queue Available][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
+				logger.info("[Sogou Cookie Queue Available][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
 			} else {
-				LoggerUtil.ClawerInfoLog("[Sogou Cookie Queue Unavailable][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
+				logger.info("[Sogou Cookie Queue Unavailable][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
 				m = SogouCookieTask.getResource();
 				proxy = m.getProxy();
 				cookie = m.getCookie();
@@ -159,13 +158,13 @@ public class GongzhonghaoListClawer extends BaseListClawer<NewsEntity> implement
 					try {
 						URI uri = new URI(entityRes);
 						newsEntity.setFromurl(uri.toString());
-						LoggerUtil.ClawerInfoLog("[Sogou Cookie Queue Available][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
+						logger.info("[Sogou Cookie Queue Available][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
 					} catch (Exception e) {
-						LoggerUtil.ClawerInfoLog("[Sogou Cookie Queue Unavailable][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
+						logger.info("[Sogou Cookie Queue Unavailable][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
 						continue;
 					}
 				} else {
-					LoggerUtil.ClawerInfoLog("[Sogou Cookie Queue Unavailable][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
+					logger.info("[Sogou Cookie Queue Unavailable][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
 					continue;
 				}
 				String dateStr = element.select("lastmodified").text().trim();

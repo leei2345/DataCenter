@@ -2,7 +2,6 @@ package com.jinba.pojo;
 
 import java.math.BigDecimal;
 
-import org.apache.commons.lang3.StringUtils;
 
 public class PartyEntity extends BaseEntity {
 
@@ -61,13 +60,13 @@ public class PartyEntity extends BaseEntity {
 		return title;
 	}
 	public void setTitle(String title) {
-		this.title = StringUtils.isBlank(title)?"":title.replace("'", "\\'");
+		this.title = title;
 	}
 	public String getIntro() {
 		return intro;
 	}
 	public void setIntro(String intro) {
-		this.intro = StringUtils.isBlank(intro)?"":intro.replace("'", "\\'");
+		this.intro = intro;
 	}
 	public String getPosttime() {
 		return posttime;
@@ -97,7 +96,7 @@ public class PartyEntity extends BaseEntity {
 		return partytime;
 	}
 	public void setPartytime(String partytime) {
-		this.partytime = StringUtils.isBlank(partytime)?"":partytime.replace("'", "\\'");
+		this.partytime = partytime;
 	}
 	public String getAreacode() {
 		return areacode;
@@ -109,7 +108,7 @@ public class PartyEntity extends BaseEntity {
 		return place;
 	}
 	public void setPlace(String place) {
-		this.place = StringUtils.isBlank(place)?"":place.replace("'", "\\'");
+		this.place = place;
 	}
 	public String getAttendee() {
 		return attendee;
@@ -133,13 +132,13 @@ public class PartyEntity extends BaseEntity {
 		return feedesc;
 	}
 	public void setFeedesc(String feedesc) {
-		this.feedesc = StringUtils.isBlank(feedesc)?"":feedesc.replace("'", "\\'");
+		this.feedesc = feedesc;
 	}
 	public String getOrganizer() {
 		return organizer;
 	}
 	public void setOrganizer(String organizer) {
-		this.organizer = StringUtils.isBlank(organizer)?"":organizer.replace("'", "\\'");
+		this.organizer = organizer;
 	}
 	public String getContact() {
 		return contact;

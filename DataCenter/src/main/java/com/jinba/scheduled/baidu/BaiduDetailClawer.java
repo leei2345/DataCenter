@@ -11,6 +11,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 import com.jinba.core.BaseDetailClawer;
 import com.jinba.core.DBHandle;
 import com.jinba.pojo.ImageType;
@@ -128,21 +130,22 @@ public class BaiduDetailClawer extends BaseDetailClawer<NewsEntity> {
 			String updateSql = this.checkUpdateSql(iubuilder.toString());
 			iuRes = dbHandle.update(updateSql);
 		} else {
-			iubuilder.append("insert into t_news (areacode,title,content,headimg,source,newstime,posttime,fromhost,fromurl,fromkey,options,updatetime) values (");
-			iubuilder.append("'" + detailEntity.getAreacode() + "',");
-			iubuilder.append("'" + detailEntity.getTitle() + "',");
-			iubuilder.append("'" + detailEntity.getContent() + "',");
-			iubuilder.append("'" + detailEntity.getHeadimg()+ "',");
-			iubuilder.append("'" + detailEntity.getSource().replace(",", "，") + "',");
-			iubuilder.append("'" + detailEntity.getNewstime() + "',");
-			iubuilder.append("'" + detailEntity.getPosttime() + "',");
-			iubuilder.append("'" + detailEntity.getFromhost() + "',");
-			iubuilder.append("'" + detailEntity.getFromurl() + "',");
-			iubuilder.append("'" + detailEntity.getFromkey() + "',");
-			iubuilder.append("'" + detailEntity.getOptions() + "',");
-			iubuilder.append("now())");
-//			String insertSql = this.checkInsertSql(iubuilder.toString());
-			id = dbHandle.insertAndGetId(iubuilder.toString());
+			Table<String, Object, Boolean> inertParamsMap = HashBasedTable.create();
+			inertParamsMap.put("areacode", detailEntity.getAreacode(), true);
+			inertParamsMap.put("title", detailEntity.getTitle(), true);
+			inertParamsMap.put("content", detailEntity.getContent(), true);
+			inertParamsMap.put("headimg", detailEntity.getHeadimg(), true);
+			inertParamsMap.put("source", detailEntity.getSource(), true);
+			inertParamsMap.put("newstime", detailEntity.getNewstime(), true);
+			inertParamsMap.put("posttime", detailEntity.getPosttime(), true);
+			inertParamsMap.put("fromhost", detailEntity.getFromhost(), true);
+			inertParamsMap.put("fromurl", detailEntity.getFromurl(), true);
+			inertParamsMap.put("fromkey", detailEntity.getFromkey(), true);
+			inertParamsMap.put("options", detailEntity.getOptions(), true);
+			inertParamsMap.put("updatetime", "now()", false);
+
+			String insertSql = this.checkInsertSql("t_news", inertParamsMap);
+			id = dbHandle.insertAndGetId(insertSql);
 			if (id > 0) {
 				iuRes = true;
 			}

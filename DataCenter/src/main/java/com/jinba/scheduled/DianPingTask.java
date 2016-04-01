@@ -8,6 +8,8 @@ import java.util.concurrent.Executors;
 
 import javax.annotation.Resource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Component;
@@ -17,7 +19,6 @@ import com.jinba.pojo.AnalysisType;
 import com.jinba.scheduled.dianping.DianPingListClawer;
 import com.jinba.spider.core.Params;
 import com.jinba.utils.CountDownLatchUtils;
-import com.jinba.utils.LoggerUtil;
 
 @Component
 public class DianPingTask implements Runnable {
@@ -30,6 +31,7 @@ public class DianPingTask implements Runnable {
 	@Value("${dpclaw.thread.pool}")
 	private int threadPoolSize = 30;
 	private ExecutorService listThreadPool;
+	private Logger logger = LoggerFactory.getLogger(DianPingListClawer.class);
 	
 	public DianPingTask (String tempUrl, int xiaoquType, AnalysisType analysisType) {
 		this.tempUrl = tempUrl;
@@ -44,7 +46,7 @@ public class DianPingTask implements Runnable {
 		List<String> cityList = dao.getAreaList(2,3);
 		int listSize = cityList.size();
 		CountDownLatchUtils listCdl = new CountDownLatchUtils(listSize);
-		LoggerUtil.TaskInfoLog("[" + this.getClass().getSimpleName() + "][Start][CitySize " + cityList.size() + "]");
+		logger.info("[" + this.getClass().getSimpleName() + "][Start][CitySize " + cityList.size() + "]");
 		listThreadPool = Executors.newFixedThreadPool(threadPoolSize/10);
 		for (String eachCity : cityList) {
 			String[] cityInfo = eachCity.split("_");
@@ -62,7 +64,7 @@ public class DianPingTask implements Runnable {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		LoggerUtil.TaskInfoLog("[" + this.getClass().getSimpleName() + "][Done]");
+		logger.info("[" + this.getClass().getSimpleName() + "][Done]");
 		listThreadPool.shutdownNow();
 		listThreadPool = null;
 	}

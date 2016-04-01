@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -11,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.impl.client.BasicCookieStore;
 
+import com.google.common.collect.Table;
 import com.jinba.spider.core.HttpMethod;
 import com.jinba.spider.core.HttpRequestConfig;
 import com.jinba.spider.core.HttpResponseConfig;
@@ -165,5 +167,40 @@ public abstract class BaseClawer {
 		}
 		return isql;
 	}
+	
+	public String checkInsertSql (String tableName, Table<String, Object, Boolean> paramsMap) {
+		StringBuilder builder = new StringBuilder("insert into " + tableName + " (");
+		String keys = "";
+		String values = "";
+		Map<String, Map<Object, Boolean>> tableMap = paramsMap.rowMap();
+		for (Entry<String, Map<Object, Boolean>> outEntry : tableMap.entrySet()) {
+			Map<Object, Boolean> innerMap = outEntry.getValue();
+			String key = outEntry.getKey();
+			Entry<Object, Boolean> innerEntry = innerMap.entrySet().iterator().next();
+			Object value = innerEntry.getKey();
+			if (value instanceof String) {
+				String valueStr = (String)value;
+				if (!StringUtils.isBlank(valueStr) && !StringUtils.equals(valueStr.toLowerCase(), "null")) {
+					boolean condiction = innerEntry.getValue();
+					if (condiction) {
+						keys += "," + key;
+						values += ",'" + valueStr.replace("'", "\\'") + "'";
+					} else {
+						keys += "," + key;
+						values += "," + valueStr.replace("'", "\\'");
+					}
+				}
+			} else {
+				keys += "," + key;
+				values += "," + value;
+			}
+		}
+		keys = new String(keys.substring(1));
+		values = new String(values.substring(1));
+		builder.append(keys + ") values (");
+		builder.append(values + ")");
+		return builder.toString();
+	}
+	
 	
 }

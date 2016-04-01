@@ -4,11 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.time.StopWatch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSON;
 import com.jinba.pojo.BaseEntity;
 import com.jinba.utils.CountDownLatchUtils;
-import com.jinba.utils.LoggerUtil;
 
 /**
  * 
@@ -19,10 +20,12 @@ import com.jinba.utils.LoggerUtil;
 public abstract class BaseListClawer<T extends BaseEntity> extends BaseClawer {
 
 	private CountDownLatchUtils cdl;
+	protected Logger logger;
 	
 	public BaseListClawer (int targetId, CountDownLatchUtils cdl) {
 		super(targetId);
 		this.cdl = cdl;
+		this.logger = LoggerFactory.getLogger(this.getClass());
 	}
 	
 	/**
@@ -66,7 +69,7 @@ public abstract class BaseListClawer<T extends BaseEntity> extends BaseClawer {
 			logBuilder.append("[List Error][" + e.getMessage() + "]");
 		} finally {
 			cdl.countDown();
-			LoggerUtil.TaskInfoLog(logBuilder.toString() + "[" + cdl.getCount() + "/" + cdl.getAmount() + "]");
+			logger.info(logBuilder.toString() + "[" + cdl.getCount() + "/" + cdl.getAmount() + "]");
 		}
 		return box;
 	}

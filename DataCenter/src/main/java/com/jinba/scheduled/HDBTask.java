@@ -14,6 +14,8 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +25,6 @@ import com.jinba.scheduled.hdb.HdbCityMap;
 import com.jinba.scheduled.hdb.HdbListClawer;
 import com.jinba.spider.core.Params;
 import com.jinba.utils.CountDownLatchUtils;
-import com.jinba.utils.LoggerUtil;
 
 @Component
 public class HDBTask implements Runnable {
@@ -35,6 +36,7 @@ public class HDBTask implements Runnable {
 	private BlockingQueue<Runnable> workQueue = new LinkedBlockingDeque<Runnable>();
 	private String tempUrl;
 	private String partyType;
+	private Logger logger = LoggerFactory.getLogger(HdbListClawer.class);
 	
 	public HDBTask () {}
 	
@@ -53,7 +55,7 @@ public class HDBTask implements Runnable {
 		int listSize = cityList.size();
 		CountDownLatchUtils listCdl = new CountDownLatchUtils(listSize);
 		List<Future<List<PartyEntity>>> resList = new ArrayList<Future<List<PartyEntity>>>();
-		LoggerUtil.TaskInfoLog("[" + this.getClass().getSimpleName() + "][Start][CitySize " + cityList.size() + "]");
+		logger.info("[" + this.getClass().getSimpleName() + "][Start][CitySize " + cityList.size() + "]");
 		listThreadPool = Executors.newFixedThreadPool(threadPoolSize);
 		detailThreadpool  = new ThreadPoolExecutor(threadPoolSize, threadPoolSize, 60000, TimeUnit.MILLISECONDS, workQueue);
 		for (String eachCity : cityList) {
@@ -78,10 +80,10 @@ public class HDBTask implements Runnable {
 			for (PartyEntity partyEntity : detailList) {
 				HDBDetailClawer detail = new HDBDetailClawer(partyEntity);
 				detailThreadpool.execute(detail);
-				LoggerUtil.ClawerInfoLog("[" + this.getClass().getSimpleName() + "][Queue Size Is " + workQueue.size() + "]");
+				logger.info("[" + this.getClass().getSimpleName() + "][Queue Size Is " + workQueue.size() + "]");
 			}
 		}
-		LoggerUtil.TaskInfoLog("[" + this.getClass().getSimpleName() + "][Done]");
+		logger.info("[" + this.getClass().getSimpleName() + "][Done]");
 		listThreadPool.shutdownNow();
 		listThreadPool = null;
 	}

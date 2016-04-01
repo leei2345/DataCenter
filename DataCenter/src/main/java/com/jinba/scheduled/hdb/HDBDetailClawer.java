@@ -17,6 +17,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 import com.jinba.core.BaseDetailClawer;
 import com.jinba.core.DBHandle;
 import com.jinba.pojo.ImageType;
@@ -244,33 +246,36 @@ public class HDBDetailClawer extends BaseDetailClawer<PartyEntity> {
 			String updateSql = this.checkUpdateSql(iubuilder.toString());
 			iuRes = dbHandle.update(updateSql);
 		} else {
-			iubuilder.append("insert into t_party (areacode,partytype,title,intro,headimg,posttime,deadline,begintime,"
-					+ "endtime,partytime,longitude,latitude,place,userlimit,fee,feedesc,organizer,partystatus,fromhost,fromurl,"
-					+ "fromkey,updatetime) values (");
-			iubuilder.append("'" + detailEntity.getAreacode() + "',");
-			iubuilder.append("'" + detailEntity.getParttype() + "',");
-			iubuilder.append("'" + detailEntity.getTitle() + "',");
-			iubuilder.append("'" + detailEntity.getIntro() + "',");
-			iubuilder.append("'" + detailEntity.getHeadimg()+ "',");
-			iubuilder.append("'" + detailEntity.getPosttime() + "',");
-			iubuilder.append("'" + detailEntity.getDeadline() + "',");
-			iubuilder.append("'" + detailEntity.getBegintime() + "',");
-			iubuilder.append("'" + detailEntity.getEndtime() + "',");
-			iubuilder.append("'" + detailEntity.getPartytime() + "',");
-			iubuilder.append("'" + detailEntity.getLongitude() + "',");
-			iubuilder.append("'" + detailEntity.getLatitude() + "',");
-			iubuilder.append("'" + detailEntity.getPlace() + "',");
-			iubuilder.append(detailEntity.getUserlimit() + ",");
-			iubuilder.append(detailEntity.getFee() + ",");
-			iubuilder.append("'" + detailEntity.getFeedesc() + "',");
-			iubuilder.append("'" + detailEntity.getOrganizer() + "',");
-			iubuilder.append("'" + detailEntity.getPartystatus() + "',");
-			iubuilder.append("'" + detailEntity.getFromhost() + "',");
-			iubuilder.append("'" + detailEntity.getFromurl() + "',");
-			iubuilder.append("'" + detailEntity.getFromkey() + "',");
-			iubuilder.append("now())");
-//			String insertSql = this.checkInsertSql(iubuilder.toString());
-			id = dbHandle.insertAndGetId(iubuilder.toString());
+			Table<String, Object, Boolean> inertParamsMap = HashBasedTable.create();
+			inertParamsMap.put("areacode", detailEntity.getAreacode(), false);
+			inertParamsMap.put("partytype", detailEntity.getParttype(), false);
+			inertParamsMap.put("title", detailEntity.getTitle(), false);
+			inertParamsMap.put("intro", detailEntity.getIntro(), false);
+			inertParamsMap.put("areacode",	detailEntity.getAreacode(), true);
+			inertParamsMap.put("partytype",	detailEntity.getParttype(), true);
+			inertParamsMap.put("title",	detailEntity.getTitle(), true);
+			inertParamsMap.put("intro",	detailEntity.getIntro(), true);
+			inertParamsMap.put("headimg",	detailEntity.getHeadimg(), true);
+			inertParamsMap.put("posttime",	detailEntity.getPosttime(), true);
+			inertParamsMap.put("deadline",	detailEntity.getDeadline(), true);
+			inertParamsMap.put("begintime",	detailEntity.getBegintime(), true);
+			inertParamsMap.put("endtime",	detailEntity.getEndtime(), true);
+			inertParamsMap.put("partytime",	detailEntity.getPartytime(), true);
+			inertParamsMap.put("longitude",	detailEntity.getLongitude(), true);
+			inertParamsMap.put("latitude",	detailEntity.getLatitude(), true);
+			inertParamsMap.put("place",	detailEntity.getPlace(), true);
+			inertParamsMap.put("userlimit",	detailEntity.getUserlimit(), true);
+			inertParamsMap.put("fee",	detailEntity.getFee(), true);
+			inertParamsMap.put("feedesc",	detailEntity.getFeedesc(), true);
+			inertParamsMap.put("organizer",	detailEntity.getOrganizer(), true);
+			inertParamsMap.put("partystatus",	detailEntity.getPartystatus(), true);
+			inertParamsMap.put("fromhost",	detailEntity.getFromhost(), true);
+			inertParamsMap.put("fromurl",	detailEntity.getFromurl(), true);
+			inertParamsMap.put("fromkey",	detailEntity.getFromkey(), true);
+			inertParamsMap.put("updatetime", "now()", false);
+			
+			String insertSql = this.checkInsertSql("t_party", inertParamsMap);
+			id = dbHandle.insertAndGetId(insertSql);
 			if (id > 0) {
 				iuRes = true;
 			}
@@ -306,7 +311,19 @@ public class HDBDetailClawer extends BaseDetailClawer<PartyEntity> {
 		String json = "{\"areacode\":\"110105\",\"attendee\":null,\"begintime\":null,\"contact\":null,\"deadline\":null,\"endtime\":null,\"fee\":null,\"feedesc\":null,\"fromhost\":\"www.hdb.com\",\"fromkey\":\"hdb_wr8uu-PcFind\",\"fromurl\":\"http://www.hdb.com/party/zruuu-PcFind.html?hdb_source=find&hdb_model=hot&hdb_position=1_5\",\"headimg\":\"http://img.small.hudongba.com/upload/_oss/userpartyimg/201602/04/21454573623710_party2.jpg@!info-first-image\",\"intro\":null,\"latitude\":0,\"longitude\":0,\"organizer\":\"\",\"parttype\":\"E\",\"partystatus\":null,\"partytime\":null,\"place\":null,\"posttime\":null,\"title\":\"#中国城市星座跑联赛#双鱼座VS水瓶座\",\"userlimit\":0}";
 		PartyEntity x = JSON.parseObject(json, PartyEntity.class);
 		BaseDetailClawer<PartyEntity> b = new HDBDetailClawer(x, new CountDownLatchUtils(1));
-		b.detailAction();
+		
+		
+		Table<String, Object, Boolean> inertParamsMap = HashBasedTable.create();
+		inertParamsMap.put("areacode", "", false);
+		inertParamsMap.put("partytype", "sdsd", false);
+		inertParamsMap.put("title", 1, false);
+		inertParamsMap.put("fromkey", "ssd's'dsd", true);
+		inertParamsMap.put("updatetime", "now()", false);
+		
+		System.out.println(b.checkInsertSql("dsd", inertParamsMap));
+		
+		
+//		b.detailAction();
 	}
 
 

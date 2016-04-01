@@ -87,7 +87,7 @@ public class SogouCookieTask implements Runnable {
 				HttpMethod spiderMe = new HttpMethod(TARGETID, cookie, proxy);
 				html = spiderMe.GetHtml(spiderUrl, HttpResponseConfig.ResponseAsStream);
 				Document doc = Jsoup.parse(html, URL);
-				String imgUrl = doc.select("p.p4 > span.s1 > img").attr("src").trim();
+				String imgUrl = doc.select("p.p4 > span.s1 > a > img").attr("src").trim();
 				imgUrl = weixinAntSpiderUrlHeader + imgUrl;
 				m = new HttpMethod(TARGETID, cookie, proxy);
 				byte[][] imgData = m.GetImageByteArr(imgUrl);

@@ -8,12 +8,13 @@ import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.markdown4j.Markdown4jProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jinba.dao.MysqlDao;
 import com.jinba.pojo.BaseEntity;
 import com.jinba.spider.core.ImageParser;
 import com.jinba.utils.CountDownLatchUtils;
-import com.jinba.utils.LoggerUtil;
 import com.overzealous.remark.Remark;
 
 
@@ -30,11 +31,13 @@ public abstract class BaseDetailClawer<T extends BaseEntity> extends BaseClawer 
 	protected CountDownLatchUtils cdl;
 	private Remark remark = new Remark();
 	private Markdown4jProcessor processor = new Markdown4jProcessor();
+	protected Logger logger;
 	
 	public BaseDetailClawer(int targetId, T detailEntity, CountDownLatchUtils cdl) {
 		super(targetId);
 		this.detailEntity = detailEntity;
 		this.cdl = cdl;
+		this.logger = LoggerFactory.getLogger(this.getClass());
 	}
 	
 	protected abstract String getDetailHtml ();
@@ -48,7 +51,7 @@ public abstract class BaseDetailClawer<T extends BaseEntity> extends BaseClawer 
 	public void detailAction () {
 		StopWatch watch = new StopWatch();
 		watch.start();
-		StringBuilder logBuilder = new StringBuilder("[DetailClaw][" + targetId + "]");
+		StringBuilder logBuilder = new StringBuilder("[DetailClaw][" + this.getClass().getSimpleName() + "]");
 		try {
 			/**
 			 * 初始化传入参数
@@ -116,7 +119,7 @@ public abstract class BaseDetailClawer<T extends BaseEntity> extends BaseClawer 
 			cdl.countDown();
 			this.detailEntity = null;
 			this.http = null;
-			LoggerUtil.ClawerInfoLog(logBuilder.toString() + "[" + cdl.getCount() + "/" + cdl.getAmount() + "][Done]");
+			logger.info(logBuilder.toString() + "[" + cdl.getCount() + "/" + cdl.getAmount() + "][Done]");
 		}
 	}
 

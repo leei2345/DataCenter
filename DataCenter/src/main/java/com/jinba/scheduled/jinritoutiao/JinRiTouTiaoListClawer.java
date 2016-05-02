@@ -139,6 +139,7 @@ public class JinRiTouTiaoListClawer extends BaseListClawer<NewsEntity> implement
 	}
 	
 	public static void main(String[] args) throws ParseException {
+		@SuppressWarnings("resource")
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
 		Map<Params, String> paramsMap = new HashMap<Params, String>();

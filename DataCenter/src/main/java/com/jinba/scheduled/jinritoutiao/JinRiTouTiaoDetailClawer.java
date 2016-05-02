@@ -1,11 +1,7 @@
 package com.jinba.scheduled.jinritoutiao;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
-
-import javax.sound.midi.SysexMessage;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
@@ -15,17 +11,13 @@ import org.jsoup.select.Elements;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.jinba.core.BaseDetailClawer;
 import com.jinba.core.DBHandle;
-import com.jinba.core.BaseClawer.ActionRes;
 import com.jinba.pojo.ImageType;
 import com.jinba.pojo.NewsEntity;
 import com.jinba.spider.core.ImageClawer;
-import com.jinba.spider.core.ImageParser;
 import com.jinba.utils.CountDownLatchUtils;
 
 /**
@@ -38,8 +30,6 @@ public class JinRiTouTiaoDetailClawer extends BaseDetailClawer<NewsEntity>{
 	private static final int TARGETID = 4;
 	private static final String TARGETINFO = "toutiao";
 	private static final String IMAGEDIRNAME = "news";
-	private static final String URLHEAD = "";
-	private static final String BASEURL = "http://toutiao.com";
 	
 	public JinRiTouTiaoDetailClawer(NewsEntity detailEntity, CountDownLatchUtils cdl) {
 		super(TARGETID, detailEntity, cdl);
@@ -60,7 +50,7 @@ public class JinRiTouTiaoDetailClawer extends BaseDetailClawer<NewsEntity>{
 		if (StringUtils.isBlank(url)) {
 			return null;
 		}
-		String fullUrl = URLHEAD + url;
+		String fullUrl = url;
 		String html = httpGet(fullUrl);
 		return html;
 	}

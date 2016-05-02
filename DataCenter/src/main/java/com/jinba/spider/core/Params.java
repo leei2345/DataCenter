@@ -12,6 +12,7 @@ public enum Params {
 	parttype,
 	sourcecitycode,
 	gongzhonghao, /** 公众号 */
+	timestemp,
 	;
 	
 	

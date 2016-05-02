@@ -1,4 +1,4 @@
-package com.jinba.scheduled.hdb;
+package com.jinba.scheduled.qqparty;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -79,8 +79,6 @@ public class HDBDetailClawer extends BaseDetailClawer<PartyEntity> {
 			return ActionRes.ANALYSIS_FAIL;
 		}
 		String contentHtml = contentObject.getString("_fileContnet");
-		contentHtml = contentHtml.replace("data-src='http://cdn.hudongba.com/images3/yin.gif'", "");
-		System.out.println(contentHtml);
 		Document doc = Jsoup.parse(html);
 		Document contentDoc = Jsoup.parse(contentHtml);
 		Elements contentNodes = contentDoc.select("span");
@@ -310,22 +308,22 @@ public class HDBDetailClawer extends BaseDetailClawer<PartyEntity> {
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
 		/** 非酒店 */
-		String json = "{\"areacode\":\"110105\",\"attendee\":\"\",\"begintime\":\"\",\"contact\":\"\",\"deadline\":\"\",\"endtime\":null,\"fee\":0,\"feedesc\":\"\",\"fromhost\":\"www.hdb.com\",\"fromkey\":\"hdb_0hq5u-PcFind\",\"fromurl\":\"http://www.hdb.com/party/0hq5u-PcFind.html?hdb_pos=find\",\"headimg\":\"http://img.small.hudongba.com/upload/_oss/userpartyimg/201604/08/61460112429135_party6.jpg@!info-first-image\",\"intro\":\"\",\"latitude\":0,\"longitude\":0,\"organizer\":\"北京漫步者户外\",\"parttype\":\"E\",\"partystatus\":\"\",\"partytime\":\"\",\"place\":\"\",\"posttime\":\"\",\"title\":\"梦幻水世界@最美后河峡谷徒步穿越（第2季） 适合新人\",\"userlimit\":0}";
+		String json = "{\"areacode\":\"110105\",\"attendee\":null,\"begintime\":null,\"contact\":null,\"deadline\":null,\"endtime\":null,\"fee\":null,\"feedesc\":null,\"fromhost\":\"www.hdb.com\",\"fromkey\":\"hdb_wr8uu-PcFind\",\"fromurl\":\"http://www.hdb.com/party/zruuu-PcFind.html?hdb_source=find&hdb_model=hot&hdb_position=1_5\",\"headimg\":\"http://img.small.hudongba.com/upload/_oss/userpartyimg/201602/04/21454573623710_party2.jpg@!info-first-image\",\"intro\":null,\"latitude\":0,\"longitude\":0,\"organizer\":\"\",\"parttype\":\"E\",\"partystatus\":null,\"partytime\":null,\"place\":null,\"posttime\":null,\"title\":\"#中国城市星座跑联赛#双鱼座VS水瓶座\",\"userlimit\":0}";
 		PartyEntity x = JSON.parseObject(json, PartyEntity.class);
 		BaseDetailClawer<PartyEntity> b = new HDBDetailClawer(x, new CountDownLatchUtils(1));
 		
 		
-//		Table<String, Object, Boolean> inertParamsMap = HashBasedTable.create();
-//		inertParamsMap.put("areacode", "", false);
-//		inertParamsMap.put("partytype", "sdsd", false);
-//		inertParamsMap.put("title", 1, false);
-//		inertParamsMap.put("fromkey", "ssd's'dsd", true);
-//		inertParamsMap.put("updatetime", "now()", false);
-//		
-//		System.out.println(b.checkInsertSql("dsd", inertParamsMap));
+		Table<String, Object, Boolean> inertParamsMap = HashBasedTable.create();
+		inertParamsMap.put("areacode", "", false);
+		inertParamsMap.put("partytype", "sdsd", false);
+		inertParamsMap.put("title", 1, false);
+		inertParamsMap.put("fromkey", "ssd's'dsd", true);
+		inertParamsMap.put("updatetime", "now()", false);
+		
+		System.out.println(b.checkInsertSql("dsd", inertParamsMap));
 		
 		
-		b.detailAction();
+//		b.detailAction();
 	}
 
 

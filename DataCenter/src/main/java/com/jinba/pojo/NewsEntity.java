@@ -7,13 +7,13 @@ public class NewsEntity extends BaseEntity {
 	 */
 	private static final long serialVersionUID = 1104803001676163186L;
 	
-	private String areacode;
-	private String title;
-	private String source;
-	private String newstime;
-	private String posttime;
-	private String content;
-	private String headimg;
+	private String areacode = "";
+	private String title = "";
+	private String source = "";
+	private String newstime = "";
+	private String posttime = "";
+	private String content = "";
+	private String headimg = "";
 	private int options;
 	
 	public int getOptions() {

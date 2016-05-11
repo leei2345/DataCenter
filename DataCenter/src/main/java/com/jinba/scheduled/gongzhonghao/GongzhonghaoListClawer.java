@@ -17,10 +17,9 @@ import org.apache.http.HttpHost;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.jinba.core.BaseListClawer;
 import com.jinba.dao.MysqlDao;
@@ -43,8 +42,7 @@ public class GongzhonghaoListClawer extends BaseListClawer<NewsEntity> implement
 	private static FastDateFormat dateFormat = FastDateFormat.getInstance("yyyy-MM-dd");
 	private String gongzhonghao;
 	private String areaCode;
-	private static Pattern pattern = Pattern.compile("var msg_link\\s*=\\s*\"(.*)\";");
-	private static Pattern urlPattern = Pattern.compile("openid=(.*)");
+	private static Pattern msgPattern = Pattern.compile("var msgList\\s*=\\s*'(.*)';");
 	
 	public GongzhonghaoListClawer(Map<Params, String> paramsMap, CountDownLatchUtils cdl) {
 		super(TARGETID, cdl);
@@ -71,7 +69,7 @@ public class GongzhonghaoListClawer extends BaseListClawer<NewsEntity> implement
 			next = false;
 			String url = tempUrl.replace("$$", gongzhonghaoEncode);
 	 		HttpMethod inner = new HttpMethod(targetId, cookie, proxy);
-//	 		HttpMethod inner = new HttpMethod(targetId);
+//	 		HttpMethod inner = new HttpMethod();
 	 		inner.AddHeader(Method.Get, "Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
 	 		inner.AddHeader(Method.Get, "Accept-Encoding", "gzip,deflate,sdch");
 	 		inner.AddHeader(Method.Get, "Accept-Language", "zh-CN,zh;q=0.8");
@@ -80,7 +78,6 @@ public class GongzhonghaoListClawer extends BaseListClawer<NewsEntity> implement
 	 		inner.AddHeader(Method.Get, "Host", "weixin.sogou.com");
 	 		inner.AddHeader(Method.Get, "User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1736.2 Safari/537.36");
 			String html = inner.GetHtml(url, HttpResponseConfig.ResponseAsStream);
-//			String html = inner.GetHtml(url, HttpResponseConfig.ResponseAsStream);
 			if (!StringUtils.isBlank(html) && !html.contains("您的访问过于频繁")) {
 				logger.info("[Sogou Cookie Queue Available][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
 			} else {
@@ -94,69 +91,75 @@ public class GongzhonghaoListClawer extends BaseListClawer<NewsEntity> implement
 			}
 			Document doc = Jsoup.parse(html, url);
 			String pageInfo = doc.select("div[class=wx-rb bg-blue wx-rb_v1 _item]").attr("abs:href").trim();
-			Matcher urlMatcher = urlPattern.matcher(pageInfo);
-			String openid = "";
-			if (urlMatcher.find()) {
-				openid = urlMatcher.group(1);
-			} else {
+			if (StringUtils.isBlank(pageInfo)) {
 				break;
 			}
-	 		String pageUrl = "http://weixin.sogou.com/gzhjs?openid=" + openid + "&cb=sogou.weixin_gzhcb&page=1&gzhArtKeyWord=&tsn=0&t=" + (System.currentTimeMillis() - 5000) + "&_=" + System.currentTimeMillis();
 			inner = new HttpMethod(targetId, cookie, proxy);
-	 		String listHtml = inner.GetHtml(pageUrl, HttpResponseConfig.ResponseAsStream);
-	 		listHtml = listHtml.replace("sogou.weixin_gzhcb(", "").replaceAll("\\)$", "");
-	 		String xmlContent = "";
-	 		try {
-		 		listHtml = listHtml.replace("<![CDATA[", "").replace("]]>", "");
-		 		xmlContent = JSONObject.parseObject(listHtml).getString("items");
-	 		} catch (Exception e) {
+	 		String listHtml = inner.GetHtml(pageInfo, HttpResponseConfig.ResponseAsStream);
+//	 		listHtml = listHtml.replace("sogou.weixin_gzhcb(", "").replaceAll("\\)$", "");
+//	 		String xmlContent = "";
+//	 		System.out.println(listHtml);
+//	 		try {
+//		 		listHtml = listHtml.replace("<![CDATA[", "").replace("]]>", "");
+//		 		xmlContent = JSONObject.parseObject(listHtml).getString("items");
+//	 		} catch (Exception e) {
+//	 			break;
+//	 		}
+//	 		doc = Jsoup.parse(xmlContent);
+	 		String msgJsonObjectStr = "";
+	 		Matcher msgMatcher = msgPattern.matcher(listHtml);
+	 		if (msgMatcher.find()) {
+	 			msgJsonObjectStr = msgMatcher.group(1);
+	 		} else {
 	 			break;
 	 		}
-	 		doc = Jsoup.parse(xmlContent);
-			Elements nodes = doc.select("item");
-			for (Element element : nodes) {
+	 		msgJsonObjectStr = msgJsonObjectStr.replace("&quot;", "\"");
+	 		JSONObject msgObject = JSONObject.parseObject(msgJsonObjectStr);
+			JSONArray nodes = msgObject.getJSONArray("list");
+			for (int index = 0; index < nodes.size(); index++) {
+				JSONObject msgNode = nodes.getJSONObject(index).getJSONObject("app_msg_ext_info");
 				NewsEntity newsEntity = new NewsEntity();
 				newsEntity.setAreacode(areaCode);
 				newsEntity.setFromhost(FROMHOST);
 				try {
-					String title = element.select("title").first().text().trim();
+					String title = msgNode.getString("title").trim();
 					newsEntity.setTitle(title);
 				} catch (Exception e) {
 					continue;
 				}
 				try {
-					String content = element.select("content").first().text().trim();
+					String content = msgNode.getString("digest").trim();
 					newsEntity.setContent(content);
 				} catch (Exception e) {
 					continue;
 				}
-				String headimgurl = element.select("imglink").text().trim();
+				String headimgurl = msgNode.getString("cover").trim();
 				newsEntity.setHeadimg(headimgurl);
-				String fromKey = element.select("docid").text().trim();
+				String fromKey = msgNode.getString("fileid").trim();
 				newsEntity.setFromkey(fromKey);
 				String selectSql = "select newsid from t_news where fromhost='" + FROMHOST + "' and fromkey='" +fromKey + "'";;
 				List<Map<String, Object>> selectRes = MysqlDao.getInstance().select(selectSql);
 				if (selectRes != null && selectRes.size() > 0) {
 					continue;
 				}
-				String fromUrl = element.select("url").text().trim();
-				fromUrl = "http://weixin.sogou.com/" + fromUrl;
+				String fromUrl = msgNode.getString("content_url").trim();
+				fromUrl = "http://mp.weixin.qq.com" + fromUrl.replace("\\", "").replace("amp;amp;", "");
 				try {
 					Thread.sleep(RandomUtils.nextLong(1000, 3000));
 				} catch (InterruptedException e1) {
 					e1.printStackTrace();
 				}
-				HttpMethod entityMe = new HttpMethod(TARGETID, cookie, proxy);
-				String entityRes = entityMe.GetLocationUrl(fromUrl);
-				if (entityRes.length() > 300) {
-					Matcher matcher = pattern.matcher(entityRes);
-					if (matcher.find()) {
-						entityRes = matcher.group(1);
-					}
-				}
-				if (!StringUtils.isBlank(entityRes) && !entityRes.contains("antispider")) {
+//				HttpMethod entityMe = new HttpMethod(TARGETID, cookie, proxy);
+//				String entityRes = entityMe.GetLocationUrl(fromUrl);
+//				if (entityRes.length() > 300) {
+//					Matcher matcher = pattern.matcher(entityRes);
+//					if (matcher.find()) {
+//						entityRes = matcher.group(1);
+//					}
+//				}
+				if (!StringUtils.isBlank(fromUrl) && !fromUrl.contains("antispider")) {
 					try {
-						URI uri = new URI(entityRes);
+						URI uri = new URI(fromUrl);
 						newsEntity.setFromurl(uri.toString());
 						logger.info("[Sogou Cookie Queue Available][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
 					} catch (Exception e) {
@@ -167,7 +170,8 @@ public class GongzhonghaoListClawer extends BaseListClawer<NewsEntity> implement
 					logger.info("[Sogou Cookie Queue Unavailable][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
 					continue;
 				}
-				String dateStr = element.select("lastmodified").text().trim();
+				JSONObject dateObj = nodes.getJSONObject(index).getJSONObject("comm_msg_info");
+				String dateStr = dateObj.getString("datetime").trim();
 				long time = 0l;
 				try {
 					time = Long.parseLong(dateStr);
@@ -204,7 +208,7 @@ public class GongzhonghaoListClawer extends BaseListClawer<NewsEntity> implement
 		application.start();
 		Map<Params, String> paramsMap = new HashMap<Params, String>();
 		paramsMap.put(Params.gongzhonghao, "北青社区报上地版");
-		paramsMap.put(Params.citycode, "11010805");
+		paramsMap.put(Params.citycode, "11010201");
 		try {
 			List<NewsEntity> l = new GongzhonghaoListClawer(paramsMap, new CountDownLatchUtils(1)).listAction();
 			for (NewsEntity newsEntity : l) {

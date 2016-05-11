@@ -17,9 +17,9 @@ public class PartyEntity extends BaseEntity {
 	private String posttime = "";
 	private String deadline = "";
 	private String begintime = "";
-	private String endtime;
+	private String endtime = "";
 	private String partytime = "";
-	private String areacode;
+	private String areacode = "";
 	private BigDecimal latitude = new BigDecimal("0");
 	private BigDecimal longitude = new BigDecimal("0");
 	private String place = "";
@@ -154,8 +154,8 @@ public class PartyEntity extends BaseEntity {
 	}
 	
 	public static void main(String[] args) {
-		String a = "sdsdnjk'dfdf";
-		System.out.println(a.replace("'", "\\'"));
+		PartyEntity p = new PartyEntity();
+		System.out.println(p.getAreacode());
 	}
 	
 }

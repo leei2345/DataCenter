@@ -12,11 +12,11 @@ public class BaseEntity implements Serializable {
 	 */
 	private static final long serialVersionUID = -3607603058575907237L;
 	/** 信息来源URL */
-	private String fromurl;
+	private String fromurl = "";
 	/** 信息来源主键 */
-	private String fromkey;
+	private String fromkey = "";
 	/** 信息来源主机 */
-	private String fromhost;
+	private String fromhost = "";
 
 	public String getFromhost() {
 		return fromhost;

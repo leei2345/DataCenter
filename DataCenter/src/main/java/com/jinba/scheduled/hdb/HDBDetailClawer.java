@@ -80,7 +80,6 @@ public class HDBDetailClawer extends BaseDetailClawer<PartyEntity> {
 		}
 		String contentHtml = contentObject.getString("_fileContnet");
 		contentHtml = contentHtml.replace("data-src='http://cdn.hudongba.com/images3/yin.gif'", "");
-		System.out.println(contentHtml);
 		Document doc = Jsoup.parse(html);
 		Document contentDoc = Jsoup.parse(contentHtml);
 		Elements contentNodes = contentDoc.select("span");

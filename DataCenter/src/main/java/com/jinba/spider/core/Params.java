@@ -13,6 +13,7 @@ public enum Params {
 	sourcecitycode,
 	gongzhonghao, /** 公众号 */
 	timestemp,
+	xiaoquid,
 	;
 	
 	

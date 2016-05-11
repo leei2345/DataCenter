@@ -42,6 +42,7 @@ public class GongzhonghaoListClawer extends BaseListClawer<NewsEntity> implement
 	private static FastDateFormat dateFormat = FastDateFormat.getInstance("yyyy-MM-dd");
 	private String gongzhonghao;
 	private String areaCode;
+	private int xiaoquid;
 	private static Pattern msgPattern = Pattern.compile("var msgList\\s*=\\s*'(.*)';");
 	
 	public GongzhonghaoListClawer(Map<Params, String> paramsMap, CountDownLatchUtils cdl) {
@@ -49,6 +50,8 @@ public class GongzhonghaoListClawer extends BaseListClawer<NewsEntity> implement
 		this.paramsMap = paramsMap;
 		gongzhonghao = paramsMap.get(Params.gongzhonghao);
 		areaCode = paramsMap.get(Params.citycode);
+		String xiaoquidStr = paramsMap.get(Params.xiaoquid);
+		xiaoquid = Integer.parseInt(xiaoquidStr);
 	}
 
 	@Override
@@ -121,6 +124,7 @@ public class GongzhonghaoListClawer extends BaseListClawer<NewsEntity> implement
 				NewsEntity newsEntity = new NewsEntity();
 				newsEntity.setAreacode(areaCode);
 				newsEntity.setFromhost(FROMHOST);
+				newsEntity.setXiaoquid(xiaoquid);
 				try {
 					String title = msgNode.getString("title").trim();
 					newsEntity.setTitle(title);

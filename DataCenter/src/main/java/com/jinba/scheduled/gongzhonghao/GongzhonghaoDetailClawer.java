@@ -87,6 +87,7 @@ public class GongzhonghaoDetailClawer extends BaseDetailClawer<NewsEntity>{
 			iubuilder.append("fromhost='" + detailEntity.getFromhost() + "',");
 			iubuilder.append("fromurl='" + detailEntity.getFromurl() + "',");
 			iubuilder.append("options='" + detailEntity.getOptions() + "',");
+			iubuilder.append("xiaoquid=" + detailEntity.getXiaoquid() + ",");
 			iubuilder.append("updatetime=now() ");
 			iubuilder.append("where fromkey='" + detailEntity.getFromkey() + "'");
 			String updateSql = this.checkUpdateSql(iubuilder.toString());
@@ -104,6 +105,7 @@ public class GongzhonghaoDetailClawer extends BaseDetailClawer<NewsEntity>{
 			inertParamsMap.put("fromurl", detailEntity.getFromurl(), true);
 			inertParamsMap.put("fromkey", detailEntity.getFromkey(), true);
 			inertParamsMap.put("options", detailEntity.getOptions(), true);
+			inertParamsMap.put("xiaoquid", detailEntity.getXiaoquid(), false);
 			inertParamsMap.put("updatetime", "now()", false);
 
 			String insertSql = this.checkInsertSql("t_news", inertParamsMap);

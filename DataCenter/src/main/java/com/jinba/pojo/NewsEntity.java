@@ -15,7 +15,14 @@ public class NewsEntity extends BaseEntity {
 	private String content = "";
 	private String headimg = "";
 	private int options;
+	private int xiaoquid = 0;
 	
+	public int getXiaoquid() {
+		return xiaoquid;
+	}
+	public void setXiaoquid(int xiaoquid) {
+		this.xiaoquid = xiaoquid;
+	}
 	public int getOptions() {
 		return options;
 	}

@@ -462,14 +462,15 @@ public class MysqlDao  {
 		ResultSet rs = null;
 		List<String[]> res = new ArrayList<String[]>();
 		try {
-			String sql = "SELECT gzhname,areacode FROM t_wxgzh";
+			String sql = "SELECT gzhname,areacode,xiaoquid FROM t_wxgzh";
 			conn = spiderSource.getConnection();
 			st = conn.prepareStatement(sql);
 			rs = st.executeQuery();
 			while (rs.next()) {
 				String areaCode = rs.getString("areacode");
 				String gongzhongName = rs.getString("gzhname");
-				String[] line = new String[]{areaCode,gongzhongName};
+				int xiaoquid = rs.getInt("xiaoquid");
+				String[] line = new String[]{areaCode,gongzhongName,String.valueOf(xiaoquid)};
 				res.add(line);
 			}
 		} catch (SQLException e) {

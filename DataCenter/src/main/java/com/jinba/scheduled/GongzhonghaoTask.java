@@ -50,9 +50,11 @@ public class GongzhonghaoTask implements Runnable {
 		for (String[] eachCity : cityList) {
 			String gzhName = eachCity[1];
 			String areaCode = eachCity[0];
+			String xiaoquId = eachCity[2];
 			Map<Params, String> paramsMap = new HashMap<Params, String>();
 			paramsMap.put(Params.gongzhonghao, gzhName);
 			paramsMap.put(Params.citycode, areaCode);
+			paramsMap.put(Params.xiaoquid, xiaoquId);
 			GongzhonghaoListClawer listClawer = new GongzhonghaoListClawer(paramsMap, listCdl);
 			resList.add(listThreadPool.submit(listClawer));
 		}

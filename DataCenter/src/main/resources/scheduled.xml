@@ -73,7 +73,7 @@
 		
  		<task:scheduled ref="baiduTask" method="run" cron="0 10 10,18 * * ?" />
  		<task:scheduled ref="sogouTask" method="run" cron="0 0 14 * * ?" />
-  		<task:scheduled ref="gongzhonghaoTask" method="run" cron="0 0 10 * * ?" />
+  		<task:scheduled ref="gongzhonghaoTask" method="run" cron="0 0 11 * * ?" />
  		
  		
 		<task:scheduled ref="HDB_AXGY_Task" method="run" cron="0 0 9 * * ?" />

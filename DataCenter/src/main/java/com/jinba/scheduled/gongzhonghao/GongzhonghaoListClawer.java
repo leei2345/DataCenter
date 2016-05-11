@@ -65,14 +65,14 @@ public class GongzhonghaoListClawer extends BaseListClawer<NewsEntity> implement
 		String gongzhonghaoEncode = new URLEncoder().encode(gongzhonghao);
 		boolean next = true;
 		do {
-			SogouCookieEntity m = SogouCookieTask.getResource();
-//			SogouCookieEntity m = new SogouCookieEntity();
+//			SogouCookieEntity m = SogouCookieTask.getResource();
+			SogouCookieEntity m = new SogouCookieEntity();
 			HttpHost proxy = m.getProxy();
 			BasicCookieStore cookie = m.getCookie();
 			next = false;
 			String url = tempUrl.replace("$$", gongzhonghaoEncode);
-	 		HttpMethod inner = new HttpMethod(targetId, cookie, proxy);
-//	 		HttpMethod inner = new HttpMethod();
+//	 		HttpMethod inner = new HttpMethod(targetId, cookie, proxy);
+	 		HttpMethod inner = new HttpMethod();
 	 		inner.AddHeader(Method.Get, "Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
 	 		inner.AddHeader(Method.Get, "Accept-Encoding", "gzip,deflate,sdch");
 	 		inner.AddHeader(Method.Get, "Accept-Language", "zh-CN,zh;q=0.8");
@@ -99,16 +99,6 @@ public class GongzhonghaoListClawer extends BaseListClawer<NewsEntity> implement
 			}
 			inner = new HttpMethod(targetId, cookie, proxy);
 	 		String listHtml = inner.GetHtml(pageInfo, HttpResponseConfig.ResponseAsStream);
-//	 		listHtml = listHtml.replace("sogou.weixin_gzhcb(", "").replaceAll("\\)$", "");
-//	 		String xmlContent = "";
-//	 		System.out.println(listHtml);
-//	 		try {
-//		 		listHtml = listHtml.replace("<![CDATA[", "").replace("]]>", "");
-//		 		xmlContent = JSONObject.parseObject(listHtml).getString("items");
-//	 		} catch (Exception e) {
-//	 			break;
-//	 		}
-//	 		doc = Jsoup.parse(xmlContent);
 	 		String msgJsonObjectStr = "";
 	 		Matcher msgMatcher = msgPattern.matcher(listHtml);
 	 		if (msgMatcher.find()) {
@@ -119,52 +109,124 @@ public class GongzhonghaoListClawer extends BaseListClawer<NewsEntity> implement
 	 		msgJsonObjectStr = msgJsonObjectStr.replace("&quot;", "\"");
 	 		JSONObject msgObject = JSONObject.parseObject(msgJsonObjectStr);
 			JSONArray nodes = msgObject.getJSONArray("list");
-			for (int index = 0; index < nodes.size(); index++) {
-				JSONObject msgNode = nodes.getJSONObject(index).getJSONObject("app_msg_ext_info");
-				NewsEntity newsEntity = new NewsEntity();
-				newsEntity.setAreacode(areaCode);
-				newsEntity.setFromhost(FROMHOST);
-				newsEntity.setXiaoquid(xiaoquid);
+			if (nodes.size() == 0) {
+				break;
+			}
+			JSONObject todayObject = nodes.getJSONObject(0);
+			JSONObject dateObj = todayObject.getJSONObject("comm_msg_info");
+			String dateStr = dateObj.getString("datetime").trim();
+			long time = 0l;
+			try {
+				time = Long.parseLong(dateStr);
+			} catch (Exception e) {
+				break;
+			}
+			Date postDate = new Date(time*1000);
+			String postDateStr = dateFormat.format(postDate);
+			JSONObject msgNode = todayObject.getJSONObject("app_msg_ext_info");
+			NewsEntity newsEntity = new NewsEntity();
+			newsEntity.setAreacode(areaCode);
+			newsEntity.setFromhost(FROMHOST);
+			newsEntity.setXiaoquid(xiaoquid);
+			try {
+				String title = msgNode.getString("title").trim();
+				newsEntity.setTitle(title);
+			} catch (Exception e) {
+				break;
+			}
+			try {
+				String content = msgNode.getString("digest").trim();
+				newsEntity.setContent(content);
+			} catch (Exception e) {
+				break;
+			}
+			String headimgurl = msgNode.getString("cover").trim();
+			newsEntity.setHeadimg(headimgurl);
+			String fromKey = msgNode.getString("fileid").trim();
+			newsEntity.setFromkey(fromKey);
+			String selectSql = "select newsid from t_news where fromhost='" + FROMHOST + "' and fromkey='" +fromKey + "'";;
+			List<Map<String, Object>> selectRes = MysqlDao.getInstance().select(selectSql);
+			if (selectRes != null && selectRes.size() > 0) {
+				break;
+			}
+			String fromUrl = msgNode.getString("content_url").trim();
+			fromUrl = "http://mp.weixin.qq.com" + fromUrl.replace("\\", "").replace("amp;amp;", "");
+			if (!StringUtils.isBlank(fromUrl) && !fromUrl.contains("antispider")) {
 				try {
-					String title = msgNode.getString("title").trim();
-					newsEntity.setTitle(title);
+					URI uri = new URI(fromUrl);
+					newsEntity.setFromurl(uri.toString());
+					logger.info("[Sogou Cookie Queue Available][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
+				} catch (Exception e) {
+					logger.info("[Sogou Cookie Queue Unavailable][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
+					break;
+				}
+			} else {
+				logger.info("[Sogou Cookie Queue Unavailable][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
+				break;
+			}
+			
+			
+			
+			
+			
+			String today = dateFormat.format(new Date(System.currentTimeMillis() - 86400000));
+			
+			
+			
+			
+			
+			
+			
+			
+			if (today.equals(postDateStr)) {
+				next = true;
+			} else {
+				break;
+			}
+			newsEntity.setNewstime(sim.format(postDate));
+			newsEntity.setPosttime(today);
+			newsEntity.setSource(gongzhonghao);
+			newsEntity.setOptions(OPTIONS);
+			box.add(newsEntity);
+			JSONArray multiArray = msgNode.getJSONArray("multi_app_msg_item_list");
+			for (int index = 0; index < multiArray.size(); index++) {
+				JSONObject innerObj = multiArray.getJSONObject(index);
+				NewsEntity innerEntity = new NewsEntity();
+				innerEntity.setAreacode(areaCode);
+				innerEntity.setFromhost(FROMHOST);
+				innerEntity.setXiaoquid(xiaoquid);
+				try {
+					String title = innerObj.getString("title").trim();
+					innerEntity.setTitle(title);
 				} catch (Exception e) {
 					continue;
 				}
 				try {
-					String content = msgNode.getString("digest").trim();
-					newsEntity.setContent(content);
+					String content = innerObj.getString("digest").trim();
+					innerEntity.setContent(content);
 				} catch (Exception e) {
 					continue;
 				}
-				String headimgurl = msgNode.getString("cover").trim();
-				newsEntity.setHeadimg(headimgurl);
-				String fromKey = msgNode.getString("fileid").trim();
-				newsEntity.setFromkey(fromKey);
-				String selectSql = "select newsid from t_news where fromhost='" + FROMHOST + "' and fromkey='" +fromKey + "'";;
-				List<Map<String, Object>> selectRes = MysqlDao.getInstance().select(selectSql);
-				if (selectRes != null && selectRes.size() > 0) {
+				String innerheadimgurl = innerObj.getString("cover").trim();
+				innerEntity.setHeadimg(innerheadimgurl);
+				String innerfromKey = innerObj.getString("fileid").trim();
+				innerEntity.setFromkey(innerfromKey);
+				String innerselectSql = "select newsid from t_news where fromhost='" + FROMHOST + "' and fromkey='" +innerfromKey + "'";;
+				List<Map<String, Object>> innerselectRes = MysqlDao.getInstance().select(innerselectSql);
+				if (innerselectRes != null && innerselectRes.size() > 0) {
 					continue;
 				}
-				String fromUrl = msgNode.getString("content_url").trim();
-				fromUrl = "http://mp.weixin.qq.com" + fromUrl.replace("\\", "").replace("amp;amp;", "");
+				String innerfromUrl = innerObj.getString("content_url").trim();
+				innerfromUrl = "http://mp.weixin.qq.com" + innerfromUrl.replace("\\", "").replace("amp;amp;", "");
 				try {
-					Thread.sleep(RandomUtils.nextLong(1000, 3000));
+					Thread.sleep(RandomUtils.nextLong(1000, 2000));
 				} catch (InterruptedException e1) {
 					e1.printStackTrace();
 				}
-//				HttpMethod entityMe = new HttpMethod(TARGETID, cookie, proxy);
-//				String entityRes = entityMe.GetLocationUrl(fromUrl);
-//				if (entityRes.length() > 300) {
-//					Matcher matcher = pattern.matcher(entityRes);
-//					if (matcher.find()) {
-//						entityRes = matcher.group(1);
-//					}
-//				}
-				if (!StringUtils.isBlank(fromUrl) && !fromUrl.contains("antispider")) {
+				if (!StringUtils.isBlank(innerfromUrl) && !innerfromUrl.contains("antispider")) {
 					try {
-						URI uri = new URI(fromUrl);
-						newsEntity.setFromurl(uri.toString());
+						URI uri = new URI(innerfromUrl);
+						innerEntity.setFromurl(uri.toString());
 						logger.info("[Sogou Cookie Queue Available][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
 					} catch (Exception e) {
 						logger.info("[Sogou Cookie Queue Unavailable][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
@@ -174,27 +236,11 @@ public class GongzhonghaoListClawer extends BaseListClawer<NewsEntity> implement
 					logger.info("[Sogou Cookie Queue Unavailable][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
 					continue;
 				}
-				JSONObject dateObj = nodes.getJSONObject(index).getJSONObject("comm_msg_info");
-				String dateStr = dateObj.getString("datetime").trim();
-				long time = 0l;
-				try {
-					time = Long.parseLong(dateStr);
-				} catch (Exception e) {
-					continue;
-				}
-				Date postDate = new Date(time*1000);
-				String postDateStr = dateFormat.format(postDate);
-				String today = dateFormat.format(new Date());
-				if (today.equals(postDateStr)) {
-					next = true;
-				} else {
-					continue;
-				}
-				newsEntity.setNewstime(sim.format(postDate));
-				newsEntity.setPosttime(today);
-				newsEntity.setSource(gongzhonghao);
-				newsEntity.setOptions(OPTIONS);
-				box.add(newsEntity);
+				innerEntity.setNewstime(sim.format(postDate));
+				innerEntity.setPosttime(today);
+				innerEntity.setSource(gongzhonghao);
+				innerEntity.setOptions(OPTIONS);
+				box.add(innerEntity);
 			}
 			SogouCookieTask.returnResource(m);
 			pageIndex++;
@@ -211,8 +257,9 @@ public class GongzhonghaoListClawer extends BaseListClawer<NewsEntity> implement
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
 		Map<Params, String> paramsMap = new HashMap<Params, String>();
-		paramsMap.put(Params.gongzhonghao, "北青社区报上地版");
-		paramsMap.put(Params.citycode, "11010201");
+		paramsMap.put(Params.gongzhonghao, "回龙观社区网");
+		paramsMap.put(Params.citycode, "11011407");
+		paramsMap.put(Params.xiaoquid, "0");
 		try {
 			List<NewsEntity> l = new GongzhonghaoListClawer(paramsMap, new CountDownLatchUtils(1)).listAction();
 			for (NewsEntity newsEntity : l) {

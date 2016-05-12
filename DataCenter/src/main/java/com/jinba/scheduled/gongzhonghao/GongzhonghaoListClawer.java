@@ -65,14 +65,14 @@ public class GongzhonghaoListClawer extends BaseListClawer<NewsEntity> implement
 		String gongzhonghaoEncode = new URLEncoder().encode(gongzhonghao);
 		boolean next = true;
 		do {
-//			SogouCookieEntity m = SogouCookieTask.getResource();
-			SogouCookieEntity m = new SogouCookieEntity();
+			SogouCookieEntity m = SogouCookieTask.getResource();
+//			SogouCookieEntity m = new SogouCookieEntity();
 			HttpHost proxy = m.getProxy();
 			BasicCookieStore cookie = m.getCookie();
 			next = false;
 			String url = tempUrl.replace("$$", gongzhonghaoEncode);
-//	 		HttpMethod inner = new HttpMethod(targetId, cookie, proxy);
-	 		HttpMethod inner = new HttpMethod();
+	 		HttpMethod inner = new HttpMethod(targetId, cookie, proxy);
+//	 		HttpMethod inner = new HttpMethod();
 	 		inner.AddHeader(Method.Get, "Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
 	 		inner.AddHeader(Method.Get, "Accept-Encoding", "gzip,deflate,sdch");
 	 		inner.AddHeader(Method.Get, "Accept-Language", "zh-CN,zh;q=0.8");

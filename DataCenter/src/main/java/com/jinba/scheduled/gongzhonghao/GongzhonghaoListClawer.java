@@ -165,18 +165,7 @@ public class GongzhonghaoListClawer extends BaseListClawer<NewsEntity> implement
 				break;
 			}
 			
-			
-			
-			
-			
-			String today = dateFormat.format(new Date(System.currentTimeMillis() - 86400000));
-			
-			
-			
-			
-			
-			
-			
+			String today = dateFormat.format(new Date());
 			
 			if (today.equals(postDateStr)) {
 				next = true;

@@ -47,22 +47,6 @@ public class GongzhonghaoDetailClawer extends BaseDetailClawer<NewsEntity>{
 
 	@Override
 	protected ActionRes analysistDetail(String html, DBHandle dbHandle) {
-//		if (StringUtils.isBlank(html)) {
-//			return ActionRes.ANALYSIS_HTML_NULL;
-//		}
-//		String content = "";
-//		Document doc  = Jsoup.parse(html);
-//		Elements pNodes = doc.select("div.rich_media_content >p");
-//		for (int index = 0; index < pNodes.size(); index++) {
-//			Element pNode = pNodes.get(index);
-//			String pHtml = pNode.html();
-//			String path = TARGETINFO + "/" + IMAGEDIRNAME + "/" + detailEntity.getAreacode();
-//			String pContent = this.markdownContent(pHtml, path, BASEURL);
-//			content += pContent;
-//		}
-//		if (!StringUtils.isBlank(content)) {
-//			detailEntity.setContent(content);
-//		}
 		String selectSql = "select newsid from t_news where fromhost='" + detailEntity.getFromhost() + "' and fromkey='" + detailEntity.getFromkey() + "'";;
 		List<Map<String, Object>> selectRes = dbHandle.select(selectSql);
 		StringBuilder iubuilder = new StringBuilder();

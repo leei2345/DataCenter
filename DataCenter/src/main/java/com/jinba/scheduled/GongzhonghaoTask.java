@@ -33,7 +33,7 @@ public class GongzhonghaoTask implements Runnable {
 	@Autowired
 	private MysqlDao dao;
 	@Value("${gzhclaw.thread.pool}")
-	private int threadPoolSize = 3;
+	private int threadPoolSize = 10;
 	private ExecutorService listThreadPool;
 	private ExecutorService detailThreadpool;
 	private BlockingQueue<Runnable> workQueue = new LinkedBlockingDeque<Runnable>();
@@ -41,6 +41,7 @@ public class GongzhonghaoTask implements Runnable {
 	
 	public void run() {
 		List<String[]> cityList = dao.getGongzhonghaoList();
+		
 		int listSize = cityList.size();
 		CountDownLatchUtils listCdl = new CountDownLatchUtils(listSize);
 		List<Future<List<NewsEntity>>> resList = new ArrayList<Future<List<NewsEntity>>>();
@@ -75,9 +76,14 @@ public class GongzhonghaoTask implements Runnable {
 				logger.info("[" + this.getClass().getSimpleName() + "][Queue Size Is " + workQueue.size() + "]");
 			}
 		}
-		logger.info("[" + this.getClass().getSimpleName() + "][Done]");
 		listThreadPool.shutdownNow();
 		listThreadPool = null;
+		try {
+			Thread.sleep(60000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		logger.info("[" + this.getClass().getSimpleName() + "][Done]");
 		detailThreadpool.shutdownNow();
 		detailThreadpool = null;
 	}
@@ -86,15 +92,13 @@ public class GongzhonghaoTask implements Runnable {
 		@SuppressWarnings("resource")
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
-		SogouCookieTask cookieTask = (SogouCookieTask) application.getBean("sogouCookieTask");
+		GongzhonghaoTask cookieTask = (GongzhonghaoTask) application.getBean("gongzhonghaoTask");
 		cookieTask.run();
 		try {
 			Thread.sleep(10000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		GongzhonghaoTask a = (GongzhonghaoTask) application.getBean("sogouTask");
-		a.run();
 	}
 
 }

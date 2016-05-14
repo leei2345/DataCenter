@@ -31,6 +31,7 @@ import com.jinba.spider.core.HttpResponseConfig;
 import com.jinba.spider.core.Method;
 import com.jinba.spider.core.Params;
 import com.jinba.utils.CountDownLatchUtils;
+import com.jinba.utils.MD5;
 
 public class SogouListClawer extends BaseListClawer<NewsEntity> implements Callable<List<NewsEntity>>{
 
@@ -96,9 +97,12 @@ public class SogouListClawer extends BaseListClawer<NewsEntity> implements Calla
 				NewsEntity newsEntity = new NewsEntity();
 				newsEntity.setAreacode(areaCode);
 				newsEntity.setFromhost(FROMHOST);
+				String fromKey = null;
 				try {
 					String title = element.select("div.txt-box > h4 > a").first().text().trim();
 					newsEntity.setTitle(title);
+					fromKey = MD5.GetMD5Code(areaCode + title);
+					newsEntity.setFromkey(fromKey);
 				} catch (Exception e) {
 					continue;
 				}
@@ -110,8 +114,6 @@ public class SogouListClawer extends BaseListClawer<NewsEntity> implements Calla
 				}
 				String headimgurl = element.select("div.img_box2 > a > img").attr("src").trim();
 				newsEntity.setHeadimg(headimgurl);
-				String fromKey = element.attr("d").trim();
-				newsEntity.setFromkey(fromKey);
 				String selectSql = "select newsid from t_news where fromhost='" + FROMHOST + "' and fromkey='" +fromKey + "'";;
 				List<Map<String, Object>> selectRes = MysqlDao.getInstance().select(selectSql);
 				if (selectRes != null && selectRes.size() > 0) {

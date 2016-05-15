@@ -138,6 +138,7 @@ public class GongzhonghaoListClawer extends BaseListClawer<NewsEntity> implement
 					continue;
 				}
 				String headimgurl = msgNode.getString("cover").trim();
+				headimgurl = headimgurl.replace("\\/", "/");
 				newsEntity.setHeadimg(headimgurl);
 				String fromUrl = msgNode.getString("content_url").trim();
 				fromUrl = "http://mp.weixin.qq.com" + fromUrl.replace("\\", "").replace("amp;amp;", "");
@@ -181,6 +182,7 @@ public class GongzhonghaoListClawer extends BaseListClawer<NewsEntity> implement
 						continue;
 					}
 					String innerheadimgurl = innerObj.getString("cover").trim();
+					innerheadimgurl = innerheadimgurl.replace("\\/", "/");
 					innerEntity.setHeadimg(innerheadimgurl);
 					String innerfromUrl = innerObj.getString("content_url").trim();
 					innerfromUrl = "http://mp.weixin.qq.com" + innerfromUrl.replace("\\", "").replace("amp;amp;", "");

@@ -42,6 +42,9 @@ public class GongzhonghaoTask implements Runnable {
 	public void run() {
 		List<String[]> cityList = dao.getGongzhonghaoList();
 		
+//		cityList.clear();
+//		cityList.add(new String[]{"13108202","首尔甜城身边事","177125"});
+		
 		int listSize = cityList.size();
 		CountDownLatchUtils listCdl = new CountDownLatchUtils(listSize);
 		List<Future<List<NewsEntity>>> resList = new ArrayList<Future<List<NewsEntity>>>();
@@ -79,7 +82,7 @@ public class GongzhonghaoTask implements Runnable {
 		listThreadPool.shutdownNow();
 		listThreadPool = null;
 		try {
-			Thread.sleep(60000);
+			Thread.sleep(600000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

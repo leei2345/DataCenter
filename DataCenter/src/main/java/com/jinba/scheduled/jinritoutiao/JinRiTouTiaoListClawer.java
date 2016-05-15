@@ -16,7 +16,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.jinba.core.BaseListClawer;
 import com.jinba.pojo.NewsEntity;
@@ -30,7 +29,7 @@ public class JinRiTouTiaoListClawer extends BaseListClawer<NewsEntity> implement
 	private static final int TARGETID = 4;//今日头条为4
 	private static final int OPTIONS = 128;
 	//##地区名称   $$替换当前第几条开始
-	private static String TempUrl = "http://ic.snssdk.com/api/2/wap/search_content/?offset=$$&count=10&from=search_tab&keyword=##";
+	private static String TempUrl = "http://ic.snssdk.com/api/2/wap/search_content/?offset=$$&count=100&from=search_tab&keyword=##";
 	
 	private static final String FROMHOST = "ic.snssdk.com";
 	private static FastDateFormat sim = FastDateFormat.getInstance("yyyy-MM-dd HH:mm");
@@ -58,10 +57,11 @@ public class JinRiTouTiaoListClawer extends BaseListClawer<NewsEntity> implement
 		boolean next = true;
 		do {
 			next = false;
-			String url = TempUrl.replace("##", areaNameEn).replace("$$", String.valueOf(pageIndex * 10));
+			String url = TempUrl.replace("##", areaNameEn).replace("$$", String.valueOf(pageIndex * 100));
 			JSONObject infoObject = null;
 			try {
-				HttpMethod inner = new HttpMethod(targetId);
+//				HttpMethod inner = new HttpMethod(targetId);
+				HttpMethod inner = new HttpMethod();
 				String html = inner.GetHtml(url, HttpResponseConfig.ResponseAsStream);
 				if (StringUtils.isBlank(html)) {
 					break;
@@ -69,7 +69,6 @@ public class JinRiTouTiaoListClawer extends BaseListClawer<NewsEntity> implement
 				infoObject = JSONObject.parseObject(html);
 				String htmlAll = infoObject.getString("html");
 				Document doc = Jsoup.parse(htmlAll);
-				System.err.println(htmlAll);
 				Elements nodes = doc.select("section:not([track-event])");
 				for(Element element : nodes){
 					NewsEntity bean = new NewsEntity();
@@ -95,6 +94,8 @@ public class JinRiTouTiaoListClawer extends BaseListClawer<NewsEntity> implement
 							}else{
 								continue;
 							}
+						} else if (!next) {
+							next = true;
 						}
 					} catch (Exception e) {
 						logger.info(e.getMessage());
@@ -122,15 +123,13 @@ public class JinRiTouTiaoListClawer extends BaseListClawer<NewsEntity> implement
 					bean.setFromhost(FROMHOST);//信息来源
 					bean.setOptions(OPTIONS);
 					box.add(bean);
-					String aa = JSON.toJSONString(bean);
-					System.err.println("=======================" + aa);
 				}
 				pageIndex++;
 			} catch (Exception e) {
 				e.printStackTrace();
 				continue;
 			}
-		} while (next && pageIndex <= 30);
+		} while (next && pageIndex <= 3);
 	}
 	
 	public List<NewsEntity> call() throws Exception {

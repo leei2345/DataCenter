@@ -72,8 +72,8 @@
 		<task:scheduled ref="dianPing_JIUD_SXJJD_Task" method="run" cron="0 0 12 20 * ?" />
 		
  		<task:scheduled ref="baiduTask" method="run" cron="0 10 10,18 * * ?" />
- 		<task:scheduled ref="sogouTask" method="run" cron="0 0 14 * * ?" />
-  		<task:scheduled ref="gongzhonghaoTask" method="run" cron="0 0 11 * * ?" />
+ 		<task:scheduled ref="sogouTask" method="run" cron="0 0 14 0/2 * ?" />
+  		<task:scheduled ref="gongzhonghaoTask" method="run" cron="0 50 10 * * ?" />
  		
  		
 		<task:scheduled ref="HDB_AXGY_Task" method="run" cron="0 0 9 * * ?" />
@@ -92,7 +92,7 @@
 	
 	<task:scheduled-tasks scheduler="proxy_scheduler">
 		<task:scheduled ref="proxyCheckTask" method="startCheck" cron="0 0 * * * ?" />
-		<task:scheduled ref="SogouCookieTask" method="run" cron="0 20 8-20 * * ?" />
+		<task:scheduled ref="SogouCookieTask" method="run" cron="0 0 9-20 * * ?" />
 	</task:scheduled-tasks>
 
 

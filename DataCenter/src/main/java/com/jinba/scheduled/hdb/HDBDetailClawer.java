@@ -103,9 +103,9 @@ public class HDBDetailClawer extends BaseDetailClawer<PartyEntity> {
 				String path = TARGETINFO + "/" + IMAGEDIRNAME + "/" + detailEntity.getAreacode() + "/";
 				String imgName = this.detailEntity.getFromkey() + "_" + imageIndex;
 				ImageClawer imgClawer = new ImageClawer(ImageType.EntityImage, imgUrl, TARGETID, path, imgName);
-				imgClawer.addHeader("Host", "mg2.hudongba.com");
-				imgClawer.addHeader("Accept", "image/png,image/*;q=0.8,*/*;q=0.5");
-				imgClawer.addHeader("Accept-Encoding", "gzip, deflate");
+				imgClawer.addHeader("Host", "img2.hudongba.com");
+				imgClawer.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
+				imgClawer.addHeader("Accept-Encoding", "gzip,deflate,sdch");
 				imgClawer.addHeader("Referer", this.detailEntity.getFromurl());
 				imgClawer.run();
 				String completeImgName = imgClawer.getCompleteImgName();
@@ -309,7 +309,7 @@ public class HDBDetailClawer extends BaseDetailClawer<PartyEntity> {
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
 		/** 非酒店 */
-		String json = "{\"areacode\":\"110105\",\"attendee\":\"\",\"begintime\":\"\",\"contact\":\"\",\"deadline\":\"\",\"endtime\":null,\"fee\":0,\"feedesc\":\"\",\"fromhost\":\"www.hdb.com\",\"fromkey\":\"hdb_0hq5u-PcFind\",\"fromurl\":\"http://www.hdb.com/party/0hq5u-PcFind.html?hdb_pos=find\",\"headimg\":\"http://img.small.hudongba.com/upload/_oss/userpartyimg/201604/08/61460112429135_party6.jpg@!info-first-image\",\"intro\":\"\",\"latitude\":0,\"longitude\":0,\"organizer\":\"北京漫步者户外\",\"parttype\":\"E\",\"partystatus\":\"\",\"partytime\":\"\",\"place\":\"\",\"posttime\":\"\",\"title\":\"梦幻水世界@最美后河峡谷徒步穿越（第2季） 适合新人\",\"userlimit\":0}";
+		String json = "{\"areacode\":\"110105\",\"attendee\":\"\",\"begintime\":\"\",\"contact\":\"\",\"deadline\":\"\",\"endtime\":\"\",\"fee\":0,\"feedesc\":\"\",\"fromhost\":\"www.hdb.com\",\"fromkey\":\"hdb_x2b7u\",\"fromurl\":\"http://www.hdb.com/party/x2b7u.html\",\"headimg\":\"http://img.small.hudongba.com/upload/_oss/userpartyimg/201604/12/41460472829677_party4.jpg@!info-first-image\",\"intro\":\"\",\"latitude\":0,\"longitude\":0,\"organizer\":\"北京枫林户外俱乐部\",\"parttype\":\"E\",\"partystatus\":\"\",\"partytime\":\"\",\"place\":\"\",\"posttime\":\"\",\"title\":\"【枫林户外】呼伦贝尔、莫尔道嘎、临江、室韦、额尔古纳、满洲里6日游\",\"userlimit\":0}";
 		PartyEntity x = JSON.parseObject(json, PartyEntity.class);
 		BaseDetailClawer<PartyEntity> b = new HDBDetailClawer(x, new CountDownLatchUtils(1));
 		

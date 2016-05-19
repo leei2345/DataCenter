@@ -38,19 +38,18 @@ public class GongzhonghaoTask implements Runnable {
 	private ExecutorService detailThreadpool;
 	private BlockingQueue<Runnable> workQueue = new LinkedBlockingDeque<Runnable>();
 	private Logger logger = LoggerFactory.getLogger(GongzhonghaoListClawer.class);
+
+	public GongzhonghaoTask () {
+		listThreadPool = Executors.newFixedThreadPool(threadPoolSize);
+		detailThreadpool  = new ThreadPoolExecutor(threadPoolSize, threadPoolSize, 60000, TimeUnit.MILLISECONDS, workQueue);
+	}
 	
 	public void run() {
 		List<String[]> cityList = dao.getGongzhonghaoList();
-		
-//		cityList.clear();
-//		cityList.add(new String[]{"13108202","首尔甜城身边事","177125"});
-		
 		int listSize = cityList.size();
 		CountDownLatchUtils listCdl = new CountDownLatchUtils(listSize);
 		List<Future<List<NewsEntity>>> resList = new ArrayList<Future<List<NewsEntity>>>();
 		logger.info("[" + this.getClass().getSimpleName() + "][Start][CitySize " + cityList.size() + "]");
-		listThreadPool = Executors.newFixedThreadPool(threadPoolSize);
-		detailThreadpool  = new ThreadPoolExecutor(threadPoolSize, threadPoolSize, 60000, TimeUnit.MILLISECONDS, workQueue);
 		for (String[] eachCity : cityList) {
 			String gzhName = eachCity[1];
 			String areaCode = eachCity[0];
@@ -79,16 +78,7 @@ public class GongzhonghaoTask implements Runnable {
 				logger.info("[" + this.getClass().getSimpleName() + "][Queue Size Is " + workQueue.size() + "]");
 			}
 		}
-		listThreadPool.shutdownNow();
-		listThreadPool = null;
-		try {
-			Thread.sleep(600000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 		logger.info("[" + this.getClass().getSimpleName() + "][Done]");
-		detailThreadpool.shutdownNow();
-		detailThreadpool = null;
 	}
 	
 	public static void main(String[] args) {

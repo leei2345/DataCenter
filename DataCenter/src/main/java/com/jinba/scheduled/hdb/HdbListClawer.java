@@ -57,6 +57,7 @@ public class HdbListClawer extends BaseListClawer<PartyEntity> implements Callab
 			hasNext = false;
 			String url = eachPageUrl.replace("$$", String.valueOf(pageIndex));
 			HttpMethod method = new HttpMethod(TARGETID);
+//			HttpMethod method = new HttpMethod();
 			String html = method.GetHtml(url, HttpResponseConfig.ResponseAsStream);
 			Document doc = Jsoup.parse(html, url);
 			Elements nodes = doc.select("ul.find_main_ul > li.find_main_li");

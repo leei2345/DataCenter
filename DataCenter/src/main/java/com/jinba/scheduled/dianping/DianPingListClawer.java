@@ -133,8 +133,8 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
 		Map<Params, String> paramsMap = new HashMap<Params, String>();
-		paramsMap.put(Params.tempurl, "http://www.dianping.com/search/category/##/35/g2836p$$");
-		paramsMap.put(Params.area, "滨海县");
+		paramsMap.put(Params.tempurl, "http://www.dianping.com/search/category/##/75/g260p$$");
+		paramsMap.put(Params.area, "北京市");
 		paramsMap.put(Params.xiaoquType, "4");
 		paramsMap.put(Params.analysistype, AnalysisType.dp_educate.toString());
 		try {

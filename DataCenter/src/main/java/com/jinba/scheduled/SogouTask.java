@@ -49,7 +49,7 @@ public class SogouTask implements Runnable {
 		detailThreadpool  = new ThreadPoolExecutor(threadPoolSize, threadPoolSize, 60000, TimeUnit.MILLISECONDS, workQueue);
 		for (String eachCity : cityList) {
 			String[] cityInfo = eachCity.split("_");
-			String cityName = cityInfo[0];
+			String cityName = cityInfo[3];
 			String areaCode = cityInfo[1];
 			Map<Params, String> paramsMap = new HashMap<Params, String>();
 			paramsMap.put(Params.area, cityName);

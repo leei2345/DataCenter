@@ -414,18 +414,19 @@ public class MysqlDao  {
 		List<String> res = new ArrayList<String>();
 		try {
 			String areaLevelArr = Arrays.toString(areaLevel).replace("[", "").replace("]", "");
-			String sql = "select areacode,areaname,postcode from t_area where level in (" + areaLevelArr + ")";
+			String sql = "select areacode,keywords,areaname,postcode from t_area where level in (" + areaLevelArr + ")";
 			conn = spiderSource.getConnection();
 			st = conn.prepareStatement(sql);
 			rs = st.executeQuery();
 			while (rs.next()) {
 				String areaCode = rs.getString("areacode");
 				String areaName = rs.getString("areaname");
+				String keyWords = rs.getString("keywords");
 				String postCode = rs.getString("postcode");
 				if (StringUtils.equals("N/A", postCode)) {
 					postCode = "";
 				}
-				String line = areaName + "_" + areaCode + "_" + postCode;
+				String line = areaName + "_" + areaCode + "_" + postCode + "_" + keyWords;
 				res.add(line);
 			}
 		} catch (SQLException e) {

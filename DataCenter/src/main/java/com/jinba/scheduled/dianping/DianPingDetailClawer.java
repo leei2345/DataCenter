@@ -15,16 +15,14 @@ import org.jsoup.select.Elements;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.jinba.core.BaseDetailClawer;
 import com.jinba.core.DBHandle;
 import com.jinba.dao.MysqlDao;
 import com.jinba.pojo.AnalysisType;
 import com.jinba.pojo.ImageType;
+import com.jinba.pojo.Location;
 import com.jinba.pojo.XiaoQuEntity;
 import com.jinba.scheduled.AreaInfoMap;
-import com.jinba.spider.core.HttpMethod;
-import com.jinba.spider.core.HttpResponseConfig;
 import com.jinba.spider.core.ImageClawer;
 import com.jinba.spider.core.Params;
 import com.jinba.utils.CountDownLatchUtils;
@@ -41,6 +39,7 @@ public class DianPingDetailClawer extends BaseDetailClawer<XiaoQuEntity>{
 	private static final String IMAGEDIRNAME = "shop";
 	private String sourceKey;
 	private static Pattern phonePattern = Pattern.compile("电话\\s?(:|：){1}\\s?(\\d+-?\\d+)\\s*");
+	private static Pattern poiPattern = Pattern.compile(" poi:\\s+\"(.*?)\",");
 	
 	public DianPingDetailClawer(XiaoQuEntity detailEntity, CountDownLatchUtils cdl) {
 		super(TARGETID, detailEntity, cdl);
@@ -72,17 +71,11 @@ public class DianPingDetailClawer extends BaseDetailClawer<XiaoQuEntity>{
 
 	@Override
 	protected ActionRes analysistDetail(String html, DBHandle dbHandle) {
-		long timeStemp = System.currentTimeMillis();
-		String url = "http://www.dianping.com/ajax/json/shop/wizard/BasicHideInfoAjaxFP?_nr_force=" + timeStemp + "&shopId=" + sourceKey;
-		HttpMethod method = new HttpMethod(TARGETID);
-		String info = method.GetHtml(url, HttpResponseConfig.ResponseAsStream);
-		if (StringUtils.isBlank(info)) {
-			return ActionRes.ANALYSIS_FAIL;
-		}
 		Document doc = Jsoup.parse(html);
 		AnalysisType analysisType = detailEntity.getAnalysisType();
-		String phone = null;
+		String phone = "";
 		Elements areaNameNodes = null;
+		String address = "";
 		if (AnalysisType.dp_hotel.equals(analysisType)) {
 			String phoneStr = doc.select("div#hotel-intro > div.hotel-facilities > p >span").text().trim();
 			Matcher matcher = phonePattern.matcher(phoneStr);
@@ -95,32 +88,23 @@ public class DianPingDetailClawer extends BaseDetailClawer<XiaoQuEntity>{
 			phone = phone.replace("联系电话： ", "");
 			areaNameNodes = doc.select("div.breadcrumb > a");
 		} else if (AnalysisType.dp_educate.equals(analysisType)) {
-			phone = doc.select("div.brief-info > div.phone > span.item").text().trim();
+			address = doc.select("div.address").text().trim();
+			address = address.replace("地址：", "");
 			areaNameNodes = doc.select("div.breadcrumb > div.inner > a");
 		} else {
 			phone = doc.select("div.basic-info > p[class=expand-info tel] > span.item").text().trim();
 			areaNameNodes = doc.select("div.breadcrumb > a");
 		}
-		JSONObject infoObject = null;
-		try {
-			infoObject = JSONObject.parseObject(info);
-		} catch (Exception e) {
-			HttpMethod newmethod = new HttpMethod(TARGETID);
-			info = newmethod.GetHtml(url, HttpResponseConfig.ResponseAsStream);
-			try {
-				infoObject = JSONObject.parseObject(info);
-			} catch (Exception innere) {
-				return ActionRes.ANALYSIS_FAIL;
-			}
-		}
-		JSONObject shopInfoObject = infoObject.getJSONObject("msg").getJSONObject("shopInfo");
-		if (StringUtils.isBlank(phone)) {
-			phone = shopInfoObject.getString("phoneNo");
+		Matcher poiMatcher = poiPattern.matcher(html);
+		float glat = 0f;
+		float glng = 0f;
+		if (poiMatcher.find()) {
+			String poiInfo = poiMatcher.group(1);
+			Location l = DianPing.decodePOI(poiInfo);
+			glat = l.getLatitude();
+			glng = l.getLongitude();
 		}
 		this.detailEntity.setPhone(phone);
-		float glat = shopInfoObject.getFloat("glat");
-		float glng = shopInfoObject.getFloatValue("glng");
-		String address = shopInfoObject.getString("address");
 		this.detailEntity.setLongItude(new BigDecimal(String.valueOf(glng)));
 		this.detailEntity.setLatitude(new BigDecimal(String.valueOf(glat)));
 		String areaCode = null;
@@ -214,7 +198,7 @@ public class DianPingDetailClawer extends BaseDetailClawer<XiaoQuEntity>{
 		/** 购物 */
 //		String json = "{\"address\":null,\"analysisType\":\"dp_trade\",\"areacode\":null,\"cityInfo\":{\"cityname\":\"北京市\",\"citycode\":\"1101\"},\"createtime\":\"1970-01-01\",\"fromhost\":\"192.168.31.125\",\"fromkey\":\"dp_3671260\",\"fromurl\":\"http://www.dianping.com/shop/3671260\",\"headimg\":\"http://i2.s2.dpfile.com/pc/3c8d1955223a314afc2cd8252f243447(249x249)/thumb.jpg\",\"intro\":null,\"latitude\":0,\"longItude\":0,\"phone\":null,\"xiaoquType\":3,\"xiaoquname\":\"侨福芳草地购物中心\"}";
 		/** 教育 */
-		String json = "{\"address\":null,\"analysisType\":\"dp_educate\",\"areacode\":null,\"cityInfo\":{\"citycode\":\"1101\",\"cityname\":\"北京市\"},\"comments\":null,\"createtime\":\"1970-01-01\",\"fromhost\":\"www.dianping.com\",\"fromkey\":\"1914316\",\"fromurl\":\"http://www.dianping.com/shop/1914316\",\"headimg\":\"http://i3.s2.dpfile.com/pc/2a3a8da1e9fb8b98d41beb13a2390667(249x249)/thumb.jpg\",\"intro\":null,\"latitude\":0,\"longItude\":0,\"phone\":null,\"xiaoquType\":4,\"xiaoquname\":\"北京大学(校本部)\"}";
+		String json = "{\"address\":null,\"analysisType\":\"dp_educate\",\"areacode\":null,\"cityInfo\":{\"citycode\":\"1101\",\"cityname\":\"北京市\"},\"comments\":null,\"createtime\":\"1970-01-01\",\"fromhost\":\"www.dianping.com\",\"fromkey\":\"2369080\",\"fromurl\":\"http://www.dianping.com/shop/2369080\",\"headimg\":\"http://i3.s2.dpfile.com/pc/2a3a8da1e9fb8b98d41beb13a2390667(249x249)/thumb.jpg\",\"intro\":null,\"latitude\":0,\"longItude\":0,\"phone\":null,\"xiaoquType\":4,\"xiaoquname\":\"北京大学(校本部)\"}";
 		XiaoQuEntity x = JSON.parseObject(json, XiaoQuEntity.class);
 		BaseDetailClawer<XiaoQuEntity> b = new DianPingDetailClawer(x, new CountDownLatchUtils(1));
 		b.detailAction();

@@ -50,7 +50,7 @@ public class DianPingTask implements Runnable {
 		listThreadPool = Executors.newFixedThreadPool(threadPoolSize/10);
 		for (String eachCity : cityList) {
 			String[] cityInfo = eachCity.split("_");
-			String cityName = cityInfo[0];
+			String cityName = cityInfo[3];
 			Map<Params, String> paramsMap = new HashMap<Params, String>();
 			paramsMap.put(Params.area, cityName);
 			paramsMap.put(Params.tempurl, tempUrl);

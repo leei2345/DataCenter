@@ -50,10 +50,10 @@ public class BaiduTask implements Runnable {
 		detailThreadpool  = new ThreadPoolExecutor(threadPoolSize, threadPoolSize, 60000, TimeUnit.MILLISECONDS, workQueue);
 		for (String eachCity : cityList) {
 			String[] cityInfo = eachCity.split("_");
-			String cityName = cityInfo[0];
 			String areaCode = cityInfo[1];
+			String keyWords = cityInfo[3];
 			Map<Params, String> paramsMap = new HashMap<Params, String>();
-			paramsMap.put(Params.area, cityName);
+			paramsMap.put(Params.area, keyWords);
 			paramsMap.put(Params.citycode, areaCode);
 			BaiduListClawer listClawer = new BaiduListClawer(paramsMap, listCdl);
 			resList.add(listThreadPool.submit(listClawer));

@@ -10,6 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.catalina.util.URLEncoder;
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.http.HttpHost;
@@ -43,6 +44,7 @@ public class GongzhonghaoListClawer extends BaseListClawer<NewsEntity> implement
 	private String areaCode;
 	private int xiaoquid;
 	private static Pattern msgPattern = Pattern.compile("var msgList\\s*=\\s*'(.*)';");
+	private static Pattern pattern = Pattern.compile("var msg_link\\s*=\\s*\"(.*)\";");
 	
 	public GongzhonghaoListClawer(Map<Params, String> paramsMap, CountDownLatchUtils cdl) {
 		super(TARGETID, cdl);
@@ -142,9 +144,23 @@ public class GongzhonghaoListClawer extends BaseListClawer<NewsEntity> implement
 				newsEntity.setHeadimg(headimgurl);
 				String fromUrl = msgNode.getString("content_url").trim();
 				fromUrl = "http://mp.weixin.qq.com" + fromUrl.replace("\\", "").replace("amp;amp;", "");
-				if (!StringUtils.isBlank(fromUrl) && !fromUrl.contains("antispider")) {
+				try {
+					Thread.sleep(RandomUtils.nextLong(1000, 2000));
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+				}
+				HttpMethod entityMe = new HttpMethod(TARGETID, cookie, proxy);
+				String entityRes = entityMe.GetLocationUrl(fromUrl);
+				if (entityRes.length() > 300) {
+					Matcher matcher = pattern.matcher(entityRes);
+					if (matcher.find()) {
+						entityRes = matcher.group(1);
+					}
+				}
+				if (!StringUtils.isBlank(entityRes) && !entityRes.contains("antispider")) {
 					try {
-						URI uri = new URI(fromUrl);
+						entityRes = entityRes.replace("amp;", "");
+						URI uri = new URI(entityRes);
 						newsEntity.setFromurl(uri.toString());
 						logger.info("[Sogou Cookie Queue Available][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
 					} catch (Exception e) {
@@ -187,10 +203,29 @@ public class GongzhonghaoListClawer extends BaseListClawer<NewsEntity> implement
 					String innerfromUrl = innerObj.getString("content_url").trim();
 					innerfromUrl = "http://mp.weixin.qq.com" + innerfromUrl.replace("\\", "").replace("amp;amp;", "");
 					try {
-						URI uri = new URI(innerfromUrl);
-						innerEntity.setFromurl(uri.toString());
-						logger.info("[Sogou Cookie Queue Available][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
-					} catch (Exception e) {
+						Thread.sleep(RandomUtils.nextLong(1000, 2000));
+					} catch (InterruptedException e1) {
+						e1.printStackTrace();
+					}
+					HttpMethod innerEntityMe = new HttpMethod(TARGETID, cookie, proxy);
+					String innerEntityRes = innerEntityMe.GetLocationUrl(innerfromUrl);
+					if (innerEntityRes.length() > 300) {
+						Matcher matcher = pattern.matcher(innerEntityRes);
+						if (matcher.find()) {
+							innerEntityRes = matcher.group(1);
+						}
+					}
+					if (!StringUtils.isBlank(innerEntityRes) && !innerEntityRes.contains("antispider")) {
+						try {
+							innerEntityRes = innerEntityRes.replace("amp;", "");
+							URI uri = new URI(innerEntityRes);
+							innerEntity.setFromurl(uri.toString());
+							logger.info("[Sogou Cookie Queue Available][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
+						} catch (Exception e) {
+							logger.info("[Sogou Cookie Queue Unavailable][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
+							continue;
+						}
+					} else {
 						logger.info("[Sogou Cookie Queue Unavailable][Cookie Queue Size Is " + SogouCookieTask.getQueueSize() + "]");
 						continue;
 					}

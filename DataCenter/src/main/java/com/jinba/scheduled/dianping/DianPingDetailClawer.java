@@ -39,8 +39,7 @@ public class DianPingDetailClawer extends BaseDetailClawer<XiaoQuEntity>{
 	private static final String IMAGEDIRNAME = "shop";
 	private String sourceKey;
 	private static Pattern phonePattern = Pattern.compile("电话\\s?(:|：){1}\\s?(\\d+-?\\d+)\\s*");
-	private static Pattern poiPattern = Pattern.compile(" poi:\\s+\"(.*?)\",");
-	
+	private static Pattern poiPattern = Pattern.compile("poi:\\s+\"?'?([A-Z]+)\"?'?");
 	public DianPingDetailClawer(XiaoQuEntity detailEntity, CountDownLatchUtils cdl) {
 		super(TARGETID, detailEntity, cdl);
 	}
@@ -88,9 +87,15 @@ public class DianPingDetailClawer extends BaseDetailClawer<XiaoQuEntity>{
 			phone = phone.replace("联系电话： ", "");
 			areaNameNodes = doc.select("div.breadcrumb > a");
 		} else if (AnalysisType.dp_educate.equals(analysisType)) {
-			address = doc.select("div.address").text().trim();
-			address = address.replace("地址：", "");
 			areaNameNodes = doc.select("div.breadcrumb > div.inner > a");
+			if (areaNameNodes.size() == 0) {
+				areaNameNodes = doc.select("div.breadcrumb > b > a > span.bread-name");
+				address = doc.select("div.desc-list > dl.shopDeal-Info-address> dd.shop-info-content>span[itemprop=street-address]").text().trim();
+				phone = doc.select("div.desc-list > dl> dd.shop-info-content>strong[itemprop=tel]").text().trim();
+			} else {
+				address = doc.select("div.address").text().trim();
+			}
+			address = address.replace("地址：", "");
 		} else {
 			phone = doc.select("div.basic-info > p[class=expand-info tel] > span.item").text().trim();
 			areaNameNodes = doc.select("div.breadcrumb > a");
@@ -198,7 +203,7 @@ public class DianPingDetailClawer extends BaseDetailClawer<XiaoQuEntity>{
 		/** 购物 */
 //		String json = "{\"address\":null,\"analysisType\":\"dp_trade\",\"areacode\":null,\"cityInfo\":{\"cityname\":\"北京市\",\"citycode\":\"1101\"},\"createtime\":\"1970-01-01\",\"fromhost\":\"192.168.31.125\",\"fromkey\":\"dp_3671260\",\"fromurl\":\"http://www.dianping.com/shop/3671260\",\"headimg\":\"http://i2.s2.dpfile.com/pc/3c8d1955223a314afc2cd8252f243447(249x249)/thumb.jpg\",\"intro\":null,\"latitude\":0,\"longItude\":0,\"phone\":null,\"xiaoquType\":3,\"xiaoquname\":\"侨福芳草地购物中心\"}";
 		/** 教育 */
-		String json = "{\"address\":null,\"analysisType\":\"dp_educate\",\"areacode\":null,\"cityInfo\":{\"citycode\":\"1101\",\"cityname\":\"北京市\"},\"comments\":null,\"createtime\":\"1970-01-01\",\"fromhost\":\"www.dianping.com\",\"fromkey\":\"2369080\",\"fromurl\":\"http://www.dianping.com/shop/2369080\",\"headimg\":\"http://i3.s2.dpfile.com/pc/2a3a8da1e9fb8b98d41beb13a2390667(249x249)/thumb.jpg\",\"intro\":null,\"latitude\":0,\"longItude\":0,\"phone\":null,\"xiaoquType\":4,\"xiaoquname\":\"北京大学(校本部)\"}";
+		String json = "{\"address\":null,\"analysisType\":\"dp_educate\",\"areacode\":null,\"cityInfo\":{\"citycode\":\"1101\",\"cityname\":\"北京市\"},\"comments\":null,\"createtime\":\"1970-01-01\",\"fromhost\":\"www.dianping.com\",\"fromkey\":\"1914316\",\"fromurl\":\"http://www.dianping.com/shop/1914316\",\"headimg\":\"http://i3.s2.dpfile.com/pc/2a3a8da1e9fb8b98d41beb13a2390667(249x249)/thumb.jpg\",\"intro\":null,\"latitude\":0,\"longItude\":0,\"phone\":null,\"xiaoquType\":4,\"xiaoquname\":\"北京大学(校本部)\"}";
 		XiaoQuEntity x = JSON.parseObject(json, XiaoQuEntity.class);
 		BaseDetailClawer<XiaoQuEntity> b = new DianPingDetailClawer(x, new CountDownLatchUtils(1));
 		b.detailAction();

@@ -16,6 +16,8 @@ public class HdbCityMap {
 		cityMap.put("shenzhen", "4403");
 		cityMap.put("suzhou", "3205");
 		cityMap.put("changsha", "4301");
+		cityMap.put("hangzhou", "3301");
+		cityMap.put("chengdu", "5101");
 	}
 	
 	public static Set<String> getCityList () {

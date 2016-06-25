@@ -63,8 +63,8 @@ public class GongzhonghaoListClawer extends BaseListClawer<NewsEntity> implement
 	@Override
 	protected void analysisAction(List<NewsEntity> box) {
 		String gongzhonghaoEncode = new URLEncoder().encode(gongzhonghao);
-			SogouCookieEntity m = SogouCookieTask.getResource();
-//			SogouCookieEntity m = new SogouCookieEntity();
+//			SogouCookieEntity m = SogouCookieTask.getResource();
+			SogouCookieEntity m = new SogouCookieEntity();
 			HttpHost proxy = m.getProxy();
 			BasicCookieStore cookie = m.getCookie();
 			String url = tempUrl.replace("$$", gongzhonghaoEncode);
@@ -249,9 +249,9 @@ public class GongzhonghaoListClawer extends BaseListClawer<NewsEntity> implement
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
 		Map<Params, String> paramsMap = new HashMap<Params, String>();
-		paramsMap.put(Params.gongzhonghao, "首尔甜城身边事");
-		paramsMap.put(Params.citycode, "13108202");
-		paramsMap.put(Params.xiaoquid, "177125");
+		paramsMap.put(Params.gongzhonghao, "清华大学附属中学上地学校");
+		paramsMap.put(Params.citycode, "11010803");
+		paramsMap.put(Params.xiaoquid, "14092");
 		try {
 			List<NewsEntity> l = new GongzhonghaoListClawer(paramsMap, new CountDownLatchUtils(1)).listAction();
 			for (NewsEntity newsEntity : l) {

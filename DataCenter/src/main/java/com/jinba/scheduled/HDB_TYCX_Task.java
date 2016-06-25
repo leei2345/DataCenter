@@ -4,17 +4,17 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Component;
 
 /**
- * 行业会议
+ * 体验与促销
  * @author zhangxiaolei
  *
  */
 @Component
-public class HDB_HYHY_Task extends HDBTask {
+public class HDB_TYCX_Task extends HDBTask {
 
-	private static final String TEMPURL = "http://www.hdb.com/find/@@-flpt-sjbx-p$$/";
-	private static final String PARTYTYPE = "I";
+	private static final String TEMPURL = "http://www.hdb.com/find/@@-fl4j-sjbx-p$$/";
+	private static final String PARTYTYPE = "F";
 	
-	public HDB_HYHY_Task () {
+	public HDB_TYCX_Task () {
 		super(TEMPURL, PARTYTYPE);
 	}
 	

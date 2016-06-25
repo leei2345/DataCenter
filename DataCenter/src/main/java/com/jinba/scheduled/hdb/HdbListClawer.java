@@ -80,7 +80,7 @@ public class HdbListClawer extends BaseListClawer<PartyEntity> implements Callab
 				} else {
 					x.setAreacode(ownAreaCode);
 				}
-				String sourceUrl = node.select("div.find_main_div > div.find_main_title> a").attr("href").trim();
+				String sourceUrl = node.select("div.find_main_div > div.find_main_title> a").attr("abs:href").trim();
 				if (StringUtils.isBlank(sourceUrl)) {
 					continue;
 				}
@@ -123,7 +123,7 @@ public class HdbListClawer extends BaseListClawer<PartyEntity> implements Callab
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
 		Map<Params, String> paramsMap = new HashMap<Params, String>();
-		paramsMap.put(Params.tempurl, "http://www.hdb.com/find/@@-flmu-sjbx-p$$/");
+		paramsMap.put(Params.tempurl, "http://www.hdb.com/find/@@-flrj-sjbx-p$$/");
 		paramsMap.put(Params.area, "beijing");
 		paramsMap.put(Params.parttype, "E");
 		try {

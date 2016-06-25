@@ -45,11 +45,15 @@ public class SogouCookieTask implements Runnable {
 	private static String reportMaRequestBody = "c=$$&r=%2Fweixin%3Ftype%3D2%26query%3D%E4%B8%9C%E5%9F%8E%E5%8C%BA%26ie%3Dutf8%26w%3D%26sut%3D%26sst0%3D%26lkt%3D0%2C0%2C0&v=5";
 	
 	public void run() {
-		Refresh();
+		Refresh(null);
 	}
 	
-	public static void Refresh () {
-		LoggerUtil.CookieInfoLog("[Sogou Cookie Product][Start]");
+	public static void Refresh (String source) {
+		if (source == null) {
+			LoggerUtil.CookieInfoLog("[Sogou Cookie Product][Start]");
+		} else {
+			LoggerUtil.CookieInfoLog("[Sogou Cookie Product][Start][" + source + "]");
+		}
 		String sql = "select host,port from tb_proxy_avail where target_id=2 and enable=1 order by u_time desc limit 1000";
 		List<Map<String, Object>> proxyList = MysqlDao.getInstance().select(sql);
 		for (Map<String, Object> map : proxyList) {
@@ -172,7 +176,7 @@ public class SogouCookieTask implements Runnable {
 			cookie = (SogouCookieEntity) cookieQueue.poll();
 			if (cookie == null) {
 				synchronized (SogouCookieTask.class) {
-					Refresh();
+					Refresh("demand");
 					break;
 				}
 			}

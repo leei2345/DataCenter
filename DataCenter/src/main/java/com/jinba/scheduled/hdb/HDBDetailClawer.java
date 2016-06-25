@@ -69,20 +69,17 @@ public class HDBDetailClawer extends BaseDetailClawer<PartyEntity> {
 		if (StringUtils.isBlank(html)) {
 			return ActionRes.ANALYSIS_HTML_NULL;
 		}
+		html = html.replace("data-src='http://cdn.hudongba.com/images3/yin.gif'", "");
 		Matcher m = contentP.matcher(html);
 		JSONObject contentObject = null;
 		if (m.find()) {
 			String contentJson = m.group(1);
-			contentJson = contentJson.replace("data-src=\\'http://img1.hudongba.com/images3/yin.gif\\'", "");
 			contentObject = JSONObject.parseObject(contentJson);
 		} else {
 			return ActionRes.ANALYSIS_FAIL;
 		}
-		String contentHtml = contentObject.getString("_fileContnet");
-		contentHtml = contentHtml.replace("data-src='http://cdn.hudongba.com/images3/yin.gif'", "");
 		Document doc = Jsoup.parse(html);
-		Document contentDoc = Jsoup.parse(contentHtml);
-		Elements contentNodes = contentDoc.select("span");
+		Elements contentNodes = doc.select("div#dt_content>span");
 		int imageIndex = 1;
 		String content = "";
 		for (int index = 0; index < contentNodes.size(); index++) {
@@ -93,7 +90,7 @@ public class HDBDetailClawer extends BaseDetailClawer<PartyEntity> {
 			} catch (Exception e) {
 			}
 			if (imageNode == null) {
-				String text = node.text().trim();
+				String text = node.html().trim();
 				if (!StringUtils.isBlank(text)) {
 					text = this.markdownText(text);
 					content += text;
@@ -309,7 +306,7 @@ public class HDBDetailClawer extends BaseDetailClawer<PartyEntity> {
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
 		/** 非酒店 */
-		String json = "{\"areacode\":\"110105\",\"attendee\":\"\",\"begintime\":\"\",\"contact\":\"\",\"deadline\":\"\",\"endtime\":\"\",\"fee\":0,\"feedesc\":\"\",\"fromhost\":\"www.hdb.com\",\"fromkey\":\"hdb_x2b7u\",\"fromurl\":\"http://www.hdb.com/party/x2b7u.html\",\"headimg\":\"http://img.small.hudongba.com/upload/_oss/userpartyimg/201604/12/41460472829677_party4.jpg@!info-first-image\",\"intro\":\"\",\"latitude\":0,\"longitude\":0,\"organizer\":\"北京枫林户外俱乐部\",\"parttype\":\"E\",\"partystatus\":\"\",\"partytime\":\"\",\"place\":\"\",\"posttime\":\"\",\"title\":\"【枫林户外】呼伦贝尔、莫尔道嘎、临江、室韦、额尔古纳、满洲里6日游\",\"userlimit\":0}";
+		String json = "{\"areacode\":\"110128\",\"attendee\":\"\",\"begintime\":\"\",\"contact\":\"\",\"deadline\":\"\",\"endtime\":\"\",\"fee\":0,\"feedesc\":\"\",\"fromhost\":\"www.hdb.com\",\"fromkey\":\"hdb_ynpou\",\"fromurl\":\"http://www.hdb.com/party/ynpou.html\",\"headimg\":\"http://img.small.hudongba.com/upload/_oss/userpartyimg/201606/24/21466759835292_party2.jpg@!info-first-image\",\"intro\":\"\",\"latitude\":0,\"longitude\":0,\"organizer\":\"力点拓展\",\"parttype\":\"E\",\"partystatus\":\"\",\"partytime\":\"\",\"place\":\"\",\"posttime\":\"\",\"title\":\"生存为王-拓展夏令营等你来挑战！\",\"userlimit\":0}";
 		PartyEntity x = JSON.parseObject(json, PartyEntity.class);
 		BaseDetailClawer<PartyEntity> b = new HDBDetailClawer(x, new CountDownLatchUtils(1));
 		

@@ -3,13 +3,18 @@ package com.jinba.scheduled;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Component;
 
+/**
+ * IT与互联网
+ * @author zhangxiaolei
+ *
+ */
 @Component
-public class HDB_JYXQ_Task extends HDBTask {
+public class HDB_ITHLW_Task extends HDBTask {
 
-	private static final String TEMPURL = "http://www.hdb.com/find/@@-fl3-sjbx-p$$/";
-	private static final String PARTYTYPE = "D";
+	private static final String TEMPURL = "http://www.hdb.com/find/@@-fl9r-sjbx-p$$/";
+	private static final String PARTYTYPE = "J";
 	
-	public HDB_JYXQ_Task () {
+	public HDB_ITHLW_Task () {
 		super(TEMPURL, PARTYTYPE);
 	}
 	
@@ -18,7 +23,7 @@ public class HDB_JYXQ_Task extends HDBTask {
 		@SuppressWarnings("resource")
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
-		HDBTask d = (HDBTask) application.getBean("HDB_JYXQ_Task");
+		HDBTask d = (HDBTask) application.getBean("HDB_HWYD_Task");
 		d.run();
 	}
 

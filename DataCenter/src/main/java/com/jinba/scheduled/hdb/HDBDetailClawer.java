@@ -74,6 +74,7 @@ public class HDBDetailClawer extends BaseDetailClawer<PartyEntity> {
 		JSONObject contentObject = null;
 		if (m.find()) {
 			String contentJson = m.group(1);
+			contentJson = contentJson.replaceAll("//[\u4E00-\u9FA5]+", "");
 			contentObject = JSONObject.parseObject(contentJson);
 		} else {
 			return ActionRes.ANALYSIS_FAIL;
@@ -306,7 +307,7 @@ public class HDBDetailClawer extends BaseDetailClawer<PartyEntity> {
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
 		/** 非酒店 */
-		String json = "{\"areacode\":\"110128\",\"attendee\":\"\",\"begintime\":\"\",\"contact\":\"\",\"deadline\":\"\",\"endtime\":\"\",\"fee\":0,\"feedesc\":\"\",\"fromhost\":\"www.hdb.com\",\"fromkey\":\"hdb_ynpou\",\"fromurl\":\"http://www.hdb.com/party/ynpou.html\",\"headimg\":\"http://img.small.hudongba.com/upload/_oss/userpartyimg/201606/24/21466759835292_party2.jpg@!info-first-image\",\"intro\":\"\",\"latitude\":0,\"longitude\":0,\"organizer\":\"力点拓展\",\"parttype\":\"E\",\"partystatus\":\"\",\"partytime\":\"\",\"place\":\"\",\"posttime\":\"\",\"title\":\"生存为王-拓展夏令营等你来挑战！\",\"userlimit\":0}";
+		String json = "{\"areacode\":\"110108\",\"attendee\":\"\",\"begintime\":\"\",\"contact\":\"\",\"deadline\":\"\",\"endtime\":\"\",\"fee\":0,\"feedesc\":\"\",\"fromhost\":\"www.hdb.com\",\"fromkey\":\"hdb_uwrlu\",\"fromurl\":\"http://www.hdb.com/party/uwrlu.html\",\"headimg\":\"http://img.small.hudongba.com/upload/_oss/userpartyimg/201606/15/61465990918006_party6.png@!info-first-image\",\"intro\":\"\",\"latitude\":0,\"longitude\":0,\"organizer\":\"互助网\",\"parttype\":\"E\",\"partystatus\":\"\",\"partytime\":\"\",\"place\":\"\",\"posttime\":\"\",\"title\":\"白云峡谷捧河湾，溯溪捉虾拾贝，戏水狂欢\",\"userlimit\":0}";
 		PartyEntity x = JSON.parseObject(json, PartyEntity.class);
 		BaseDetailClawer<PartyEntity> b = new HDBDetailClawer(x, new CountDownLatchUtils(1));
 		

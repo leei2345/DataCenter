@@ -63,8 +63,8 @@ public class GongzhonghaoListClawer extends BaseListClawer<NewsEntity> implement
 	@Override
 	protected void analysisAction(List<NewsEntity> box) {
 		String gongzhonghaoEncode = new URLEncoder().encode(gongzhonghao);
-//			SogouCookieEntity m = SogouCookieTask.getResource();
-			SogouCookieEntity m = new SogouCookieEntity();
+			SogouCookieEntity m = SogouCookieTask.getResource();
+//			SogouCookieEntity m = new SogouCookieEntity();
 			HttpHost proxy = m.getProxy();
 			BasicCookieStore cookie = m.getCookie();
 			String url = tempUrl.replace("$$", gongzhonghaoEncode);

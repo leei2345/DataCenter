@@ -12,6 +12,7 @@ import org.jsoup.select.Elements;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.jinba.core.BaseListClawer;
+import com.jinba.dao.MysqlDao;
 import com.jinba.pojo.AnalysisType;
 import com.jinba.pojo.XiaoQuEntity;
 import com.jinba.scheduled.DianPingWorker;
@@ -139,6 +140,11 @@ public class DianPingListClawer extends BaseListClawer<XiaoQuEntity> implements 
 					}
 					x.setFromurl(sourceUrl);
 					String fromKey = sourceUrl.replaceAll("\\D+", "");
+					String sql = "select xiaoquid from t_xiaoqu where fromhost='" + FROMHOST + "' and fromkey='" + fromKey + "'";
+					List<Map<String, Object>> res = MysqlDao.getInstance().select(sql);
+					if (res.size() > 0) {
+						continue;
+					}
 					x.setFromkey(fromKey);
 					box.add(x);
 				}

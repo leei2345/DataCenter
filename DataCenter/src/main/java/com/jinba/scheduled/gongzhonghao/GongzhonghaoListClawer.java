@@ -155,6 +155,7 @@ public class GongzhonghaoListClawer extends BaseListClawer<NewsEntity> implement
 					Matcher matcher = pattern.matcher(entityRes);
 					if (matcher.find()) {
 						entityRes = matcher.group(1);
+						entityRes = entityRes.replace("&amp;", "&");
 					}
 				}
 				if (!StringUtils.isBlank(entityRes) && !entityRes.contains("antispider")) {
@@ -249,7 +250,7 @@ public class GongzhonghaoListClawer extends BaseListClawer<NewsEntity> implement
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
 		Map<Params, String> paramsMap = new HashMap<Params, String>();
-		paramsMap.put(Params.gongzhonghao, "清华大学附属中学上地学校");
+		paramsMap.put(Params.gongzhonghao, "通州小兵");
 		paramsMap.put(Params.citycode, "11010803");
 		paramsMap.put(Params.xiaoquid, "14092");
 		try {

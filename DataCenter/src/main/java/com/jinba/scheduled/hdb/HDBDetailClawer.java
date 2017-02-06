@@ -16,6 +16,7 @@ import org.jsoup.select.Elements;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
@@ -34,12 +35,13 @@ import com.jinba.utils.CountDownLatchUtils;
  */
 public class HDBDetailClawer extends BaseDetailClawer<PartyEntity> {
 
+	//TODO 4
 	private static final int TARGETID = 4;
 	private static final String TARGETINFO = "hdb";
 	private static final String IMAGEDIRNAME = "party";
 	private static FastDateFormat sim = FastDateFormat.getInstance("yyyy-MM-dd 00:00:00");
 	private static Pattern pattern = Pattern.compile("Lot=(\\d+\\.\\d+)\\&Lat=(\\d+\\.\\d+)");
-	private static Pattern contentP = Pattern.compile("<script>var _info=(.*);\\(function\\(\\)\\{");
+	private static Pattern contentP = Pattern.compile("<script>\\s+.*?var _info\\s*=\\s*(.*);\\s+var appInfo=.*</script>");
 	
 	public HDBDetailClawer(PartyEntity detailEntity, CountDownLatchUtils cdl) {
 		super(TARGETID, detailEntity, cdl);
@@ -74,7 +76,9 @@ public class HDBDetailClawer extends BaseDetailClawer<PartyEntity> {
 		JSONObject contentObject = null;
 		if (m.find()) {
 			String contentJson = m.group(1);
-			contentJson = contentJson.replaceAll("//[\u4E00-\u9FA5]+", "");
+			contentJson = contentJson.replaceAll(",//.*?\\s+", ", ");
+			contentJson = contentJson.replace("无店铺为0", "").replace("未报名  1待支付 2已报名", "");
+			contentJson = contentJson.replace("\\\"", "\"").replace("'", "");
 			contentObject = JSONObject.parseObject(contentJson);
 		} else {
 			return ActionRes.ANALYSIS_FAIL;
@@ -118,16 +122,14 @@ public class HDBDetailClawer extends BaseDetailClawer<PartyEntity> {
 		if (StringUtils.isBlank(content)) {
 			return ActionRes.ANALYSIS_FAIL;
 		}
-		String partyStatus = "A";
-		String statusStr = contentObject.getString("_state");
-		if (StringUtils.equals("4", statusStr) || StringUtils.equals("5", statusStr)) {
-			partyStatus = "B";
+		String partyStatus = "B";
+		String statusStr = contentObject.getString("_infoState");
+		if (StringUtils.equals("0", statusStr)) {
+			partyStatus = "A";
 		}
 		this.detailEntity.setPartystatus(partyStatus);
 		this.detailEntity.setIntro(content);
-		String dateInfo = doc.select("div.detail_Time_t > p").text().replace(" ", "").trim();
-		dateInfo = dateInfo.replaceAll("\\(.*\\)", "").replace("/", "-");
-		String postTime = doc.select("div.yhName > p.fbTime").text().trim();
+		String postTime = contentObject.getString("_pubDate");
 		Date postTimeDate = Convert.parseDate(postTime);
 		if (postTimeDate == null) {
 			return ActionRes.ANALYSIS_FAIL;
@@ -136,45 +138,31 @@ public class HDBDetailClawer extends BaseDetailClawer<PartyEntity> {
 		this.detailEntity.setPosttime(postTime);
 		String startDate = "";
 		String endDate = "";
-		if (StringUtils.isBlank(dateInfo)) {
-			String deadLine = doc.select("div.detail_Time_b > p").text().trim();
-			deadLine = deadLine.replace("报名截止", "").trim();
-			Date deadLineDate = Convert.parseDate(deadLine);
-			if (deadLineDate != null) {
-				endDate = sim.format(deadLineDate);
-			}
-			startDate = postTime;
-		} else {
-			dateInfo = dateInfo.replace("开始", "").trim();
-			this.detailEntity.setPartytime(dateInfo);
-			String[] dateInfoArr = dateInfo.split("至");
-			if (dateInfoArr.length == 1) {
-				String start = dateInfoArr[0].trim();
-				Date dateStart = Convert.parseDate(start);
-				if (dateStart != null) {
-					startDate = sim.format(dateStart);
-				}
-			} else if (dateInfoArr.length == 2) {
-				String start = dateInfoArr[0].trim();
-				String end = dateInfoArr[1].trim();
-				Date dateStart = Convert.parseDate(start);
-				if (dateStart != null) {
-					startDate = sim.format(dateStart);
-				}
-				Date dateEnd = Convert.parseDate(end);
-				if (dateEnd != null) {
-					endDate = sim.format(dateEnd);
-				}
-			}
+		String dateInfo = doc.select(".detail_Time_t>p").text();
+		String[] dateInfoArr = dateInfo.split("~");
+		if (dateInfoArr.length == 2) {
+			startDate = dateInfoArr[0].trim();
+			Date start = Convert.parseDate(startDate);
+			startDate = sim.format(start);
+			endDate = dateInfoArr[1].trim();
+			Date end = Convert.parseDate(endDate);
+			endDate = sim.format(end);
 		}
-		this.detailEntity.setDeadline(endDate);
 		this.detailEntity.setBegintime(startDate);
 		this.detailEntity.setEndtime(endDate);
-		String place = doc.select("div.detail_Attr p[class~=addressP]").text().trim();
+		String deadLineDateStr = doc.select(".detail_Time_b>span").text();
+		deadLineDateStr = deadLineDateStr.replace("报名截止", "");
+		String deadLine = "";
+		if (StringUtils.isNoneBlank(deadLineDateStr)) {
+			Date deadLineDate = Convert.parseDate(deadLineDateStr);
+			deadLine = sim.format(deadLineDate);
+		}
+		this.detailEntity.setDeadline(deadLine);
+		String place = doc.select("div.detail_Attr a.detail_attr_blue").text().trim();
 		if (!StringUtils.isBlank(place)) {
 			this.detailEntity.setPlace(place);
 		}
-		String laloData = doc.select("div.detail_Attr > a").attr("href").trim();
+		String laloData = doc.select("div.detail_Attr a.detail_attr_blue").attr("href").trim();
 		if (!StringUtils.isBlank(laloData)) {
 			Matcher matcher = pattern.matcher(laloData);
 			if (matcher.find()) {
@@ -186,22 +174,21 @@ public class HDBDetailClawer extends BaseDetailClawer<PartyEntity> {
 				this.detailEntity.setLongitude(lob);
 			}
 		}
-		String userLimitStr = doc.select("div.detail_Joinnum_b > p > span").text().trim();
+		String userLimitStr = contentObject.getString("_personLimit");
 		if (!StringUtils.isBlank(userLimitStr) && userLimitStr.matches("\\d+")) {
 			int userlimit = Integer.parseInt(userLimitStr);
 			this.detailEntity.setUserlimit(userlimit);
 		}
-		String feeStr = doc.select("ul[class=ticket tc_c_feiLi] > li:eq(0)").attr("payitemprice").trim();
-		if (!StringUtils.isBlank(feeStr) && feeStr.matches("\\d+")) {
+		JSONArray priceArr = contentObject.getJSONArray("_payItemListJson");
+		if (priceArr !=null && priceArr.size() > 0) {
+			String feeStr = priceArr.getJSONObject(0).getString("price");
 			BigDecimal fee = new BigDecimal(feeStr);
 			this.detailEntity.setFee(fee);
+			String feeInfo = priceArr.getJSONObject(0).getString("name");
+			if (!StringUtils.isBlank(feeInfo)) {
+				this.detailEntity.setFeedesc(feeInfo);
+			}
 		}
-		String feeInfo = doc.select("ul[class=ticket tc_c_feiLi] > li:eq(0) > div.ticket_all > div.ticket_des").text().trim();
-		feeInfo = feeInfo.replace("请点击这里", "").replace(",", "");
-		if (!StringUtils.isBlank(feeInfo)) {
-			this.detailEntity.setFeedesc(feeInfo);
-		}
-		
 		String selectSql = "select partyid from t_party where fromkey='" + detailEntity.getFromkey() + "'";;
 		List<Map<String, Object>> selectRes = dbHandle.select(selectSql);
 		StringBuilder iubuilder = new StringBuilder();
@@ -307,7 +294,7 @@ public class HDBDetailClawer extends BaseDetailClawer<PartyEntity> {
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
 		/** 非酒店 */
-		String json = "{\"areacode\":\"110108\",\"attendee\":\"\",\"begintime\":\"\",\"contact\":\"\",\"deadline\":\"\",\"endtime\":\"\",\"fee\":0,\"feedesc\":\"\",\"fromhost\":\"www.hdb.com\",\"fromkey\":\"hdb_uwrlu\",\"fromurl\":\"http://www.hdb.com/party/uwrlu.html\",\"headimg\":\"http://img.small.hudongba.com/upload/_oss/userpartyimg/201606/15/61465990918006_party6.png@!info-first-image\",\"intro\":\"\",\"latitude\":0,\"longitude\":0,\"organizer\":\"互助网\",\"parttype\":\"E\",\"partystatus\":\"\",\"partytime\":\"\",\"place\":\"\",\"posttime\":\"\",\"title\":\"白云峡谷捧河湾，溯溪捉虾拾贝，戏水狂欢\",\"userlimit\":0}";
+		String json = "{\"areacode\":\"110108\",\"attendee\":\"\",\"begintime\":\"\",\"contact\":\"\",\"deadline\":\"\",\"endtime\":\"\",\"fee\":0,\"feedesc\":\"\",\"fromhost\":\"www.hdb.com\",\"fromkey\":\"hdb_uwrlu\",\"fromurl\":\"http://www.hdb.com/party/uyfdu.html?hdb_pos=find_rec\",\"headimg\":\"http://img.small.hudongba.com/upload/_oss/userpartyimg/201606/15/61465990918006_party6.png@!info-first-image\",\"intro\":\"\",\"latitude\":0,\"longitude\":0,\"organizer\":\"互助网\",\"parttype\":\"E\",\"partystatus\":\"\",\"partytime\":\"\",\"place\":\"\",\"posttime\":\"\",\"title\":\"白云峡谷捧河湾，溯溪捉虾拾贝，戏水狂欢\",\"userlimit\":0}";
 		PartyEntity x = JSON.parseObject(json, PartyEntity.class);
 		BaseDetailClawer<PartyEntity> b = new HDBDetailClawer(x, new CountDownLatchUtils(1));
 		

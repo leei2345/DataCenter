@@ -131,6 +131,7 @@ public class SogouListClawer extends BaseListClawer<NewsEntity> implements Calla
 					Matcher matcher = pattern.matcher(entityRes);
 					if (matcher.find()) {
 						entityRes = matcher.group(1);
+						entityRes = entityRes.replace("&amp;", "&");
 					}
 				}
 				if (!StringUtils.isBlank(entityRes) && !entityRes.contains("antispider")) {

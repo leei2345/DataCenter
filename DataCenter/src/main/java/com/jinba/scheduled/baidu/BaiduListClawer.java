@@ -64,7 +64,7 @@ public class BaiduListClawer extends BaseListClawer<NewsEntity> implements Calla
 			}
 			JSONObject infoObject = null;
 			try {
-				infoObject = JSONObject.parseObject(html);
+				infoObject = JSONObject.parseObject(html).getJSONObject("data");
 				JSONArray listAll = infoObject.getJSONArray("list");
 				for(int i = 0; i < listAll.size(); i++){
 					JSONObject tempInfo = listAll.getJSONObject(i);

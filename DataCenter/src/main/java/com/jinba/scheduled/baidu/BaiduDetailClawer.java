@@ -178,7 +178,7 @@ public class BaiduDetailClawer extends BaseDetailClawer<NewsEntity> {
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
 		/** 非酒店 */
-		String json = "{\"areacode\":\"1201\",\"content\":null,\"fromhost\":\"m.baidu.com\",\"fromkey\":null,\"fromurl\":\"http://jiangsu.china.com.cn/html/2016/tjnews_0220/4187075.html\",\"headimg\":\"http://t11.baidu.com/it/u=1251853024,3408334538&fm=82&s=2E1245854EBB088C24B43D33030070C2&w=121&h=81&img.JPEG\",\"newstime\":\"2016-02-20 02:28:48\",\"options\":128,\"posttime\":\"2016-02-20 13:03:29\",\"source\":\"中国网江苏频道\",\"title\":\"曾雪麟追悼会深圳举行 天津足协携泰达深情送别\"}";
+		String json = "{\"areacode\":\"1201\",\"content\":\"\",\"fromhost\":\"m.baidu.com\",\"fromkey\":\"\",\"fromurl\":\"http://cpc.people.com.cn/n1/2017/0325/c117005-29168539.html\",\"headimg\":\"\",\"newstime\":\"2017-03-25 10:52:00\",\"options\":128,\"posttime\":\"2017-03-25 17:20:00\",\"source\":\"中国共产党新闻网\",\"title\":\"天津市领导干部学习贯彻党的十八届六中全会精神专题研讨班开班 ...\",\"xiaoquid\":0}";
 		NewsEntity x = JSON.parseObject(json, NewsEntity.class);
 		BaseDetailClawer<NewsEntity> b = new BaiduDetailClawer(x, new CountDownLatchUtils(1));
 		b.detailAction();

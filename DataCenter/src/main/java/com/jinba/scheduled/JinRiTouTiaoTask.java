@@ -73,6 +73,7 @@ public class JinRiTouTiaoTask implements Runnable {
 	}
 	
 	public static void main(String[] args) {
+		@SuppressWarnings("resource")
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
 		JinRiTouTiaoTask a = (JinRiTouTiaoTask) application.getBean("JinRiTouTiaoTask");

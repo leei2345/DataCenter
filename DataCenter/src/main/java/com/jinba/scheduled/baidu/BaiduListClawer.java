@@ -26,7 +26,7 @@ public class BaiduListClawer extends BaseListClawer<NewsEntity> implements Calla
 	private static final int OPTIONS = 128;
 	//##地区名称   $$替换当前第几条开始
 	//http://m.baidu.com/news?tn=bdapinewsearch&word=%E4%B8%AD%E5%85%B3%E6%9D%91&pn=0&rn=20&ct=1
-	private static String tempUrl = "http://m.baidu.com/news?tn=bdapinewsearch&word=##&pn=$$&rn=20&ct=1";
+	private static String tempUrl = "http://m.news.baidu.com/news?tn=bdapinewsearch&word=##&pn=$$&rn=20&ct=1";
 	
 	private static final String FROMHOST = "m.baidu.com";
 	private static FastDateFormat sim = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss");

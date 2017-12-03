@@ -17,7 +17,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import com.jinba.core.BaseListClawer;
 import com.jinba.dao.MysqlDao;
 import com.jinba.pojo.PartyEntity;
-import com.jinba.scheduled.AreaInfoMap;
+import com.jinba.scheduled.hdb.AreaInfoMap;
 import com.jinba.spider.core.HttpMethod;
 import com.jinba.spider.core.HttpResponseConfig;
 import com.jinba.spider.core.Params;

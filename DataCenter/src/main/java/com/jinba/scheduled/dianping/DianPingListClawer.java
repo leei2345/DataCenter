@@ -15,7 +15,7 @@ import com.jinba.core.BaseListClawer;
 import com.jinba.dao.MysqlDao;
 import com.jinba.pojo.AnalysisType;
 import com.jinba.pojo.XiaoQuEntity;
-import com.jinba.scheduled.DianPingWorker;
+import com.jinba.scheduled.dianping.task.DianPingWorker;
 import com.jinba.spider.core.HttpMethod;
 import com.jinba.spider.core.HttpResponseConfig;
 import com.jinba.spider.core.Params;

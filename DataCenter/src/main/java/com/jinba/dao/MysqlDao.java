@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -36,7 +38,8 @@ public class MysqlDao  {
 	
 	private static MysqlDao instance;
 	
-	public MysqlDao () {
+	@PostConstruct
+	public void staticMysqlDao () {
 		instance = this;
 	}
 	

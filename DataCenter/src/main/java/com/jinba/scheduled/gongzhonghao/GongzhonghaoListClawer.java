@@ -24,7 +24,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.jinba.core.BaseListClawer;
 import com.jinba.pojo.NewsEntity;
 import com.jinba.pojo.SogouCookieEntity;
-import com.jinba.scheduled.SogouCookieTask;
+import com.jinba.scheduled.sogou.task.SogouCookieTask;
 import com.jinba.spider.core.HttpMethod;
 import com.jinba.spider.core.HttpResponseConfig;
 import com.jinba.spider.core.Method;

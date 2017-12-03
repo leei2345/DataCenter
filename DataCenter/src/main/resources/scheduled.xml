@@ -10,7 +10,8 @@
         http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.1.xsd">
 
 	<bean id="proxyCheckTask" class="com.jinba.scheduled.ProxyCheckTask"></bean>
-	<bean id="SogouCookieTask" class="com.jinba.scheduled.SogouCookieTask"></bean>
+	
+<!-- 	<bean id="SogouCookieTask" class="com.jinba.scheduled.SogouCookieTask"></bean>
 	
 	<bean id="dianPing_GW_ZHSC_Task" class="com.jinba.scheduled.DianPing_GW_ZHSC_Task"></bean>
 	<bean id="dianPing_JD_CSGG_Task" class="com.jinba.scheduled.DianPing_JD_CSGG_Task"></bean>
@@ -45,13 +46,14 @@
 	<bean id="HDB_TYCX_Task" class="com.jinba.scheduled.HDB_TYCX_Task"></bean>
 	<bean id="HDB_WYSG_Task" class="com.jinba.scheduled.HDB_WYSG_Task"></bean>
 	<bean id="HDB_YDJS_Task" class="com.jinba.scheduled.HDB_YDJS_Task"></bean>
-	<bean id="HDB_ZYPX_Task" class="com.jinba.scheduled.HDB_ZYPX_Task"></bean>
+	<bean id="HDB_ZYPX_Task" class="com.jinba.scheduled.HDB_ZYPX_Task"></bean> -->
 	
 
-	<task:scheduler id="scheduler" pool-size="5"/>
-	<task:scheduler id="proxy_scheduler" pool-size="3"/>
+<!-- 	<task:scheduler id="scheduler" pool-size="5"/>
+ -->	
+ 	<task:scheduler id="proxy_scheduler" pool-size="3"/>
 
-	<task:scheduled-tasks scheduler="scheduler">
+	<!-- <task:scheduled-tasks scheduler="scheduler">
 		<task:scheduled ref="dianPing_SHFW_SWL_Task" method="run" cron="0 0 0 6 * ?" />
 		<task:scheduled ref="dianPing_JD_ZRFG_Task" method="run" cron="0 0 0 7 * ?" />
 		<task:scheduled ref="dianPing_SHFW_YY_Task" method="run" cron="0 0 0 8 * ?" />
@@ -87,12 +89,12 @@
 		<task:scheduled ref="HDB_YDJS_Task" method="run" cron="0 0 18 * * ?" />
 		<task:scheduled ref="HDB_ZYPX_Task" method="run" cron="0 0 19 * * ?" /> 		
 
-	</task:scheduled-tasks>
+	</task:scheduled-tasks> -->
 	
 	<task:scheduled-tasks scheduler="proxy_scheduler">
 		<task:scheduled ref="proxyCheckTask" method="startCheck" cron="0 0 * * * ?" />
-		<task:scheduled ref="SogouCookieTask" method="run" cron="0 0 9-20 * * ?" />
-	</task:scheduled-tasks>
+<!-- 		<task:scheduled ref="SogouCookieTask" method="run" cron="0 0 9-20 * * ?" />
+ -->	</task:scheduled-tasks>
 
 
 </beans>

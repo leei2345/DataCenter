@@ -14,6 +14,10 @@ public enum Params {
 	gongzhonghao, /** 公众号 */
 	timestemp,
 	xiaoquid,
+	
+	subject,
+	classify,
+	
 	;
 	
 	

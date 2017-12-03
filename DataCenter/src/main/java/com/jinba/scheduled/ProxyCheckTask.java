@@ -29,7 +29,7 @@ import com.jinba.utils.LoggerUtil;
 public class ProxyCheckTask implements Runnable {
 	
 	@Value("${check.thread.pool}")
-	private int threadPoolSize = 30;
+	private int threadPoolSize = 2;
 	private ExecutorService threadPool;
 	@Resource
 	private MysqlDao dao;

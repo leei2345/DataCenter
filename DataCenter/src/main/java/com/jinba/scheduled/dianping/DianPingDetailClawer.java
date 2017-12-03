@@ -22,7 +22,7 @@ import com.jinba.pojo.AnalysisType;
 import com.jinba.pojo.ImageType;
 import com.jinba.pojo.Location;
 import com.jinba.pojo.XiaoQuEntity;
-import com.jinba.scheduled.AreaInfoMap;
+import com.jinba.scheduled.hdb.AreaInfoMap;
 import com.jinba.spider.core.ImageClawer;
 import com.jinba.spider.core.Params;
 import com.jinba.utils.CountDownLatchUtils;

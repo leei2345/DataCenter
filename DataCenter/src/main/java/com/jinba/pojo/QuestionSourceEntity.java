@@ -7,6 +7,7 @@ public class QuestionSourceEntity extends BaseEntity {
 	 */
 	private static final long serialVersionUID = 8744240954176967047L;
 
+	private Long id;
 	private Integer subjectId;
 	private Long classifyId;
 	private String sourceUrl;
@@ -17,6 +18,13 @@ public class QuestionSourceEntity extends BaseEntity {
 	private String explain;
 	private String sourceHtml;
 	
+	
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
 	public String getGrade() {
 		return grade;
 	}

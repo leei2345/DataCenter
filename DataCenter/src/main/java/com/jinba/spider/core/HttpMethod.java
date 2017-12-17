@@ -86,7 +86,7 @@ public class HttpMethod {
 	public HttpMethod(int identidy) {
 		this.identidy = identidy;
 		this.config.setAuthenticationEnabled(true);
-		this.config.setConnectTimeout(30000);
+		this.config.setConnectTimeout(50000);
 		this.config.setSocketTimeout(10000);
 		this.clientBuilder = HttpClientBuilder.create();
 		this.clientBuilder.setMaxConnTotal(100);

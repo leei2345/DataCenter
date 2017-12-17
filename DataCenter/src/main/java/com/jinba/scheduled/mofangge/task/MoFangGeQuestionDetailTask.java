@@ -27,7 +27,7 @@ public class MoFangGeQuestionDetailTask {
 
 	@Autowired
 	private MysqlDao dao;
-	private int threadPoolSize = 30;
+	private int threadPoolSize = 8;
 	private ExecutorService detailThreadpool;
 	private Logger logger = LoggerFactory.getLogger(MoFangGeQuestionDetailTask.class);
 	private static final String selectSqlBySubjectId = "select id,source_url from tb_question_source where subject_id=%d and source_html is null";
@@ -59,7 +59,7 @@ public class MoFangGeQuestionDetailTask {
 		@SuppressWarnings("resource")
 		ClassPathXmlApplicationContext application = new ClassPathXmlApplicationContext(new String[]{"database.xml"});
 		application.start();
-		MoFangGeQuestionDetailTask a = (MoFangGeQuestionDetailTask) application.getBean("moFangGeQuestionListTask");
+		MoFangGeQuestionDetailTask a = (MoFangGeQuestionDetailTask) application.getBean("moFangGeQuestionDetailTask");
 		a.run();
 	}
 	

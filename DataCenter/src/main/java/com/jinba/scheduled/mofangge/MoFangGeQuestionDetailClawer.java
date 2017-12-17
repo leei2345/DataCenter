@@ -47,7 +47,7 @@ public class MoFangGeQuestionDetailClawer extends BaseDetailClawer<QuestionSourc
 			return ActionRes.ANALYSIS_HTML_NULL;
 		}
 		long id = detailEntity.getId();
-		html = html.replace("'", "\'");
+		html = html.replace("'", "\\\'").replace("\"", "\\\"");
 		String updateSql = String.format(updateSqlTemp, html, id);
 		boolean iuRes = dbHandle.update(updateSql);
 		ActionRes res = null;

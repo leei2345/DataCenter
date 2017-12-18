@@ -30,7 +30,7 @@ public class MoFangGeQuestionDetailTask {
 	private int threadPoolSize = 8;
 	private ExecutorService detailThreadpool;
 	private Logger logger = LoggerFactory.getLogger(MoFangGeQuestionDetailTask.class);
-	private static final String selectSqlBySubjectId = "select id,source_url from tb_question_source where subject_id=%d and source_html is null";
+	private static final String selectSqlBySubjectId = "select id,source_url from tb_question_source where subject_id=%d and source_html is null limit %d, 200";
 	
 	public void run() {
 		detailThreadpool = Executors.newFixedThreadPool(threadPoolSize);
@@ -40,14 +40,15 @@ public class MoFangGeQuestionDetailTask {
 			logger.info("[Start][subject " + subjectId + "]");
 			String sql = String.format(selectSqlBySubjectId, subjectId);
 			List<Map<String, Object>> selectRes = dao.select(sql);
-			CountDownLatchUtils cdl = new CountDownLatchUtils(selectRes.size());
-			for (Map<String, Object> map : selectRes) {
+			int size = selectRes.size();
+			for (int index = 0; index < size; index ++) {
+				Map<String, Object> map = selectRes.get(index);
 				long id = (long) map.get("id");
 				String sourceUrl = (String) map.get("source_url");
 				QuestionSourceEntity entity = new QuestionSourceEntity();
 				entity.setSourceUrl(sourceUrl);
 				entity.setId(id);
-				MoFangGeQuestionDetailClawer clawer = new MoFangGeQuestionDetailClawer(entity, cdl);
+				MoFangGeQuestionDetailClawer clawer = new MoFangGeQuestionDetailClawer(entity, new CountDownLatchUtils(size - index));
 				detailThreadpool.execute(clawer);
 			}
 			logger.info("subject " + subjectId + "][Done]");
